@@ -1,0 +1,5 @@
+export const globals = {
+	PROFILE_IMG_WIDTH: 150,
+	NAVBAR_HEIGHT: 60,
+	TOAST_DEFAULT_OPACITY: 0.85
+};
