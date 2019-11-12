@@ -24,6 +24,7 @@ import ChangeEmailSettingsScreen from './src/components/screens/Settings/ChangeE
 import PostVideoScreen from './src/components/screens/PostVideoScreen';
 import { navigationStyles } from './src/assets/styles';
 import { colors } from './src/config/constants';
+import SingleVideoScreen from './src/components/screens/SingleVideoScreen';
 
 export default class App extends Component {
 	render() {
@@ -67,10 +68,32 @@ const ProfileStack = createStackNavigator(
 		},
 		ChangeEmailSettings: {
 			screen: ChangeEmailSettingsScreen
+		},
+		SingleVideoPlayer: {
+			screen: SingleVideoScreen
 		}
 	},
 	{
 		initialRouteName: 'Profile',
+		defaultNavigationOptions: {
+			headerTitleStyle: navigationStyles.header
+		}
+	}
+);
+
+const SearchStack = createStackNavigator(
+	{
+		Search: {
+			screen: SearchScreen,
+			navigationOptions: { header: null }
+		},
+		SingleVideoPlayer: {
+			screen: SingleVideoScreen,
+			navigationOptions: { header: null }
+		}
+	},
+	{
+		initialRouteName: 'Search',
 		defaultNavigationOptions: {
 			headerTitleStyle: navigationStyles.header
 		}
@@ -88,7 +111,7 @@ const CameraStack = createStackNavigator(
 		Profile: {
 			screen: ProfileScreen,
 			navigationOptions: { header: null }
-		},
+		}
 	},
 	{
 		initialRouteName: 'Camera',
@@ -102,6 +125,12 @@ ProfileStack.navigationOptions = ({ navigation }) => {
 	return { tabBarVisible: true };
 };
 
+//To Hide the bottom tab navigation in all screens except the first one
+SearchStack.navigationOptions = ({ navigation }) => {
+	if (navigation.state.index > 0) return { tabBarVisible: false };
+	return { tabBarVisible: true };
+};
+
 const bottomTabNavigator = createBottomTabNavigator(
 	{
 		Home: {
@@ -111,7 +140,7 @@ const bottomTabNavigator = createBottomTabNavigator(
 			}
 		},
 		Search: {
-			screen: SearchScreen,
+			screen: SearchStack,
 			navigationOptions: {
 				tabBarIcon: ({ tintColor }) => <FeatherIcon name="search" size={25} color={tintColor} />
 			}

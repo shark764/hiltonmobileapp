@@ -89,9 +89,12 @@ class CommentsScreen extends Component {
 
 	render() {
 		const { comments, currentComment, heightBounceValue, loading } = this.state;
-		const { loggedUser } = this.props;
+		const { loggedUser, isSingleVideo } = this.props;
 
 		if (loading) return null;
+
+		let newMarginBottom = {};
+		if (isSingleVideo) newMarginBottom = { marginBottom: 15 };
 
 		return (
 			<Animated.View style={[styles.mainContainer, { height: heightBounceValue }]}>
@@ -103,22 +106,26 @@ class CommentsScreen extends Component {
 				</View>
 
 				<ScrollView
-					nestedScrollEnabled
+					//nestedScrollEnabled
 					ref={s => {
 						this.commentsScroll = s;
 					}}
+					horizontal={isSingleVideo}
 				>
-					<FlatList
-						style={styles.commentsList}
-						data={comments}
-						renderItem={this.renderComment}
-						keyExtractor={item => item.id.toString()}
-						initialNumToRender={5}
-					/>
+					<View>
+						<FlatList
+							style={styles.commentsList}
+							data={comments}
+							renderItem={this.renderComment}
+							keyExtractor={item => item.id.toString()}
+							initialNumToRender={5}
+							nestedScrollEnabled
+							numColumns={1}
+						/>
+					</View>
 				</ScrollView>
-
 				{loggedUser && (
-					<View style={styles.addCommentContainer}>
+					<View style={[styles.addCommentContainer, newMarginBottom]}>
 						<Image
 							source={{
 								uri: loggedUser.img
@@ -183,7 +190,4 @@ class CommentsScreen extends Component {
 
 const mapStateToProps = ({ videos, auth }) => ({ comments: videos.comments, loggedUser: auth.loggedUser });
 
-export default connect(
-	mapStateToProps,
-	{ getVideoComments }
-)(CommentsScreen);
+export default connect(mapStateToProps, { getVideoComments })(CommentsScreen);

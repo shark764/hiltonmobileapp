@@ -49,7 +49,7 @@ export default class VideoElement extends PureComponent {
 	};
 
 	render() {
-		const { video, height, play, onPauseVideo, onResumeVideo } = this.props;
+		const { video, height, play, onPauseVideo, onResumeVideo, isSingleVideo } = this.props;
 		const { laughed, showComments, loaded } = this.state;
 
 		const elementsViewHeight = showComments ? screenHeight - globals.NAVBAR_HEIGHT : videoElementsHeight;
@@ -90,6 +90,7 @@ export default class VideoElement extends PureComponent {
 								show={showComments}
 								onShowHideCommentsPress={this.onShowHideCommentsPress}
 								videoId={video.id}
+								isSingleVideo={isSingleVideo}
 							/>
 						</View>
 					</KeyboardAvoidingView>
