@@ -119,7 +119,7 @@ const CameraStack = createStackNavigator(
 		},
 		Profile: {
 			screen: ProfileScreen,
-			navigationOptions: { header: null }
+			navigationOptions: { header: null, tabBarVisible: true }
 		}
 	},
 	{
@@ -142,6 +142,11 @@ SearchStack.navigationOptions = ({ navigation }) => {
 	return { tabBarVisible: true };
 };
 
+CameraStack.navigationOptions = ({ navigation }) => {
+	if (navigation.state.index!=2) return { tabBarVisible: false };
+	return { tabBarVisible: true };
+};
+
 const bottomTabNavigator = createBottomTabNavigator(
 	{
 		Home: {
@@ -159,8 +164,8 @@ const bottomTabNavigator = createBottomTabNavigator(
 		Camera: {
 			screen: CameraStack,
 			navigationOptions: {
-				tabBarIcon: ({ tintColor }) => <FeatherIcon name="plus-circle" size={25} color={tintColor} />,
-				tabBarVisible: false
+				tabBarIcon: ({ tintColor }) => <FeatherIcon name="plus-circle" size={25} color={tintColor} />
+				//tabBarVisible: false
 			}
 		},
 		Boost: {

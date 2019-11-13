@@ -10,13 +10,11 @@ import AntIcon from 'react-native-vector-icons/AntDesign';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import CameraRoll from "@react-native-community/cameraroll";//https://medium.com/react-native-training/mastering-the-camera-roll-in-react-native-13b3b1963a2d
 import * as Progress from 'react-native-progress';
-import { Header } from 'react-navigation-stack';
 import { fonts,colors } from '../../config/constants'
 import { cameraStyle } from '../../assets/styles/cameraStyle';
 //the ones bellow are just for testing purpose
 import fs from "react-native-fs";
 import { decode } from "base64-arraybuffer";
-import { WebIdentityCredentials } from 'aws-sdk';
 
 const { height, width } = Dimensions.get('window');
 
@@ -30,19 +28,19 @@ const checkAndroidPermission = async () => {
   }
 };
 
-const aws = require('aws-sdk');
+//const aws = require('aws-sdk');
 //https://stackoverflow.com/questions/56682109/react-native-through-upload-image-on-s3-bucket-using-aws-sdk
-const AWS_KEY_ID = "AKIA6AVSWAXFK2AWBAFH";
-const AWS_SECRET_KEY = "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";
-const AWS_S3_BUCKET = "s3-hilton-videos-test";
-const AWS_REGION = "us-west-2"
-
+//const AWS_KEY_ID = "AKIA6AVSWAXFK2AWBAFH";
+//const AWS_SECRET_KEY = "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";
+//const AWS_S3_BUCKET = "s3-hilton-videos-test";
+//const AWS_REGION = "us-west-2"
+/*
 aws.config.update({
   accessKeyId: AWS_KEY_ID,
   secretAccessKey: AWS_SECRET_KEY
 });
-
-const s3 = new aws.S3();
+*/
+//const s3 = new aws.S3();
 export default class CameraScreen extends Component {
         state = {
           recording: false,
@@ -55,6 +53,12 @@ export default class CameraScreen extends Component {
           cameraType : 'back',
           mirrorMode : false
         };
+
+componentDidMount(){
+  this.setState({progress: 0,
+    isSavingVideo:false,
+    continue: false})
+}
 
   goBack(){
     console.log("go back.....");
@@ -98,7 +102,7 @@ export default class CameraScreen extends Component {
         let video = uri_elements[uri_elements.length -1];
         let base64 = await fs.readFile(uri, "base64");               
         let videoObject = decode(base64);
-
+      /*
         let params = {
                       Bucket: AWS_S3_BUCKET,
                       Body : videoObject,//video object
@@ -106,6 +110,7 @@ export default class CameraScreen extends Component {
                       ContentType: type,
                       ContentDisposition: 'attachment'
                     };
+      */
 		//s3.getSignedUrl('putObject', params);
 		/*
     s3.upload(params, 
@@ -185,11 +190,14 @@ resumeRecording() {
       if(is_any_video){
         console.log("Compiling Video....");
         this.setState({processing:true})
+        this.setState({continue:true,processing:false})
+        /*
         let counter = 0;
         let ID = setInterval(()=>counter++,50)
         setTimeout(()=>{clearInterval(ID)
-                        this.setState({continue:true,processing:false
-                        })},2000)
+                        this.setState({continue:true,processing:false})
+                      },2000)
+                      */
       }
       
   }
@@ -216,7 +224,7 @@ resumeRecording() {
 
   continueToPost(){
     if(this.state.continue)
-      this.props.navigation.replace('PostVideo');
+      this.props.navigation.push('PostVideo');
     else
       console.log("nothing to save or post");
   }
@@ -264,7 +272,6 @@ resumeRecording() {
                 </View>
 
                 <View style={{flexDirection: "row",
-                              //alignSelf:'center',
                               justifyContent: 'space-between',
                               paddingHorizontal:35,
                               
@@ -275,29 +282,26 @@ resumeRecording() {
 
                 <View>
                   <AntIcon name="retweet" style={cameraStyle.goBack} onPress={()=> this.flipCamera()} />
-                  <Text style={{fontSize:10,fontFamily:fonts.OPENSANS_REGULAR,color:'white',alignSelf:'center'}} >Flip</Text>
+                  <Text style={cameraStyle.textIcon} >Flip</Text>
                 </View>
 
             </View>
 
           </View>
-          <View style={{flexDirection:'row',
-          //justifyContent: 'space-between'
-        }}>
+          <View style={{flexDirection:'row'}}>
               <View style={{
                 justifyContent:'flex-end',
-                //paddingBottom:60,
                 paddingLeft:25,
                 paddingBottom:(width*0.2)
                 }}>
                   <View >
                     <Ionicon name="md-photos" style={[cameraStyle.goBack,{alignSelf:'center'}]} onPress={()=> this.getVideosRoll()} />
-                  <Text style={{fontSize:10,fontFamily:fonts.OPENSANS_REGULAR,color:'white',alignSelf:'center'}} >Upload</Text>
+                  <Text style={cameraStyle.textIcon}>Upload</Text>
                 </View>
             </View>
 
             <TouchableWithoutFeedback onPressIn={()=>this.startRecording()}//this.animateProgress()
-                                        onPressOut={()=>this.stopRecording()}//this.stopProgress()}
+                                      onPressOut={()=>this.stopRecording()}//this.stopProgress()}
                                         >
                   
                     <View style={{alignSelf:'center',
@@ -325,27 +329,21 @@ resumeRecording() {
                 <TouchableOpacity>
                   <View style={{paddingBottom:15}}>
                     <FeatherIcon name="refresh-ccw" style={cameraStyle.goBack} onPress={()=> this.redoVideo()} />
-                    <Text style={{fontSize:10,fontFamily:fonts.OPENSANS_LIGHT,color:'white',alignSelf:'center'}} >Redo</Text>
+                    <Text style={cameraStyle.textIcon} >Redo</Text>
                   </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity>
                 <View style={{paddingBottom:15}}>
                     <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.compileVideo()} />
-                  <Text style={{fontSize:10,fontFamily:fonts.OPENSANS_LIGHT,color:'white',alignSelf:'center'}} >Compile</Text>
+                  <Text style={cameraStyle.textIcon} >Compile</Text>
                 </View>
                 </TouchableOpacity>
 
                 <View style={{flexDirection:'column'}}>
                 <TouchableOpacity
                   onPress={()=>this.props.navigation.replace('PostVideo')}
-                  style={{backgroundColor:colors.MAIN,
-                          flex: 0,
-                          borderRadius: 75,
-                          alignSelf: 'center',
-                          padding: 10,
-                        }}
-                >
+                  style={cameraStyle.circleButton}>
                     <View>
                       <FeatherIcon name="check" style={{
                                                         fontFamily:fonts.OPENSANS_LIGHT,
@@ -355,7 +353,7 @@ resumeRecording() {
                                                       onPress={()=> this.continueToPost()} />
                     </View>
                 </TouchableOpacity>
-                <Text style={{fontSize:10,fontFamily:fonts.OPENSANS_LIGHT,color:'white',alignSelf:'center'}} >Done</Text>
+                <Text style={cameraStyle.textIcon} >Done</Text>
                 </View>
 
               </View>
