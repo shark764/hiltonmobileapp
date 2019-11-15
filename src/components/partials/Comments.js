@@ -17,7 +17,7 @@ import { heartAnimation } from '../../assets/animations/index';
 import { globals } from '../../config/constants';
 import { commentsStyles as styles } from '../../assets/styles';
 import { connect } from 'react-redux';
-import { getVideoComments } from '../../redux/actions/videoActions';
+import { getVideoComments, postVideoComment } from '../../redux/actions/videoActions';
 import { getShowHideStyle } from '../../utils/helpers';
 
 const screenHeight = Math.round(Dimensions.get('window').height);
@@ -58,20 +58,22 @@ class CommentsScreen extends Component {
 		this.setState({ currentComment: text });
 	};
 
-	onSubmitMessage = () => {
+	onSubmitMessage = async () => {
 		const { comments, currentComment } = this.state;
-		const { loggedUser } = this.props;
+		const { loggedUser, videoId } = this.props;
 
 		if (!currentComment) return;
 
-		const comment = {
-			id: Date.now(),
-			comment: currentComment,
-			user: loggedUser,
-			likes: 0
-		};
-		comments.unshift(comment);
+		// const comment = {
+		// 	id: Date.now(),
+		// 	comment: currentComment,
+		// 	user: loggedUser,
+		// 	likes: 0
+		// };
+		// comments.unshift(comment);
+		await this.props.postVideoComment(videoId, 19, currentComment);
 		this.setState({ comments, currentComment: '' });
+
 		this.commentsScroll.scrollTo({ y: 0 });
 	};
 
@@ -152,13 +154,13 @@ class CommentsScreen extends Component {
 			<View style={styles.commentItemContainer}>
 				<Image
 					source={{
-						uri: comment.user.img
+						uri: comment.user
 					}}
 					resizeMode="contain"
 					style={styles.commentUserImage}
 				/>
 				<View style={styles.commentCenterContainer}>
-					<Text style={styles.commentUserHandleText}>{comment.user.handle}</Text>
+					<Text style={styles.commentUserHandleText}>{comment.user}</Text>
 					<Text style={styles.commentText}>{comment.comment}</Text>
 				</View>
 				<View style={{ alignItems: 'center' }}>
@@ -190,4 +192,4 @@ class CommentsScreen extends Component {
 
 const mapStateToProps = ({ videos, auth }) => ({ comments: videos.comments, loggedUser: auth.loggedUser });
 
-export default connect(mapStateToProps, { getVideoComments })(CommentsScreen);
+export default connect(mapStateToProps, { getVideoComments, postVideoComment })(CommentsScreen);

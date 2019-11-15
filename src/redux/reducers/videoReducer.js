@@ -11,6 +11,8 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			return { ...state, videosInfo: payload };
 		case types.GET_VIDEO_COMMENTS:
 			return { ...state, comments: payload };
+		case types.POST_VIDEO_COMMENT:
+			return { ...state, comments: [...state.comments, payload] };
 		default:
 			return state;
 	}

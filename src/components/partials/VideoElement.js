@@ -53,6 +53,7 @@ export default class VideoElement extends PureComponent {
 		const { laughed, showComments, loaded } = this.state;
 
 		const elementsViewHeight = showComments ? screenHeight - globals.NAVBAR_HEIGHT : videoElementsHeight;
+		console.log(video);
 		return (
 			<View style={[styles.mainContainer, { height }]}>
 				<DoubleTap doubleTap={this.onDoubleTap} delay={200}>

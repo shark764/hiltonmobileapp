@@ -30,7 +30,8 @@ export default class VideoActions extends Component {
 						<View style={styles.userImageContainer2}>
 							<Image
 								source={{
-									uri: videoItem.user.img
+									//uri: videoItem.user.img
+									uri: '/'
 								}}
 								resizeMode="contain"
 								style={styles.userImage}
@@ -39,13 +40,13 @@ export default class VideoActions extends Component {
 					</View>
 					<View>
 						<View style={styles.userHandleContainer}>
-							<Text style={styles.userHandleText}>{videoItem.user.handle}</Text>
+							<Text style={styles.userHandleText}>{videoItem.user}</Text>
 							<Text style={styles.dotSeparator}>•</Text>
 							<TouchableOpacity onPress={this.onFollowPress}>
 								<Text style={styles.userFollowText}>{this.state.follow ? 'Follow' : 'Unfollow'}</Text>
 							</TouchableOpacity>
 						</View>
-						<Text style={styles.videoCaptionText}>{videoItem.caption}</Text>
+						<Text style={styles.videoCaptionText}>{videoItem.description}</Text>
 					</View>
 				</View>
 				<View style={styles.actionContainer}>

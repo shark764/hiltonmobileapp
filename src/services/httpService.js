@@ -1,18 +1,11 @@
 import axios from 'axios';
-import config from '../../app.json';
-import md5 from 'md5';
+import { globals } from '../config/constants/index.js';
 
 //Setting a base url for all axios requests
-axios.defaults.baseURL = config.apiEndPoint;
+axios.defaults.baseURL = globals.API_URL;
 
 //Interceptor on/before Request
 axios.interceptors.request.use(req => {
-	const time = Date.now();
-	const userAgent = 'VortexStudios/app';
-
-	req.headers.common['User-Agent'] = userAgent;
-	req.headers.common['X-Authorization-Token'] = md5(config.apiKey + time + userAgent);
-	req.headers.common['X-Authorization-Time'] = time;
 	//console.log(req.headers);
 	//console.log('req', req);
 	return Promise.resolve(req);
