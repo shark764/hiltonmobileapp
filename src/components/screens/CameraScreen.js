@@ -3,16 +3,14 @@ import React, { Component } from 'react';
 import { Text, TouchableOpacity,TouchableWithoutFeedback, View, ActivityIndicator,Dimensions,SafeAreaView,PermissionsAndroid } from 'react-native';
 import { Container} from 'native-base'
 import AsyncStorage from '@react-native-community/async-storage';
-import {RNCamera} from 'react-native-camera'//https://github.com/react-native-community/react-native-cameraroll //https://facebook.github.io/react-native/docs/linking-libraries-ios
-//https://snowball.digital/blog/switch-between-front-and-back-camera-in-react-native
+import {RNCamera} from 'react-native-camera'
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import CameraRoll from "@react-native-community/cameraroll";//https://medium.com/react-native-training/mastering-the-camera-roll-in-react-native-13b3b1963a2d
+import CameraRoll from "@react-native-community/cameraroll";
 import * as Progress from 'react-native-progress';
 import { fonts,colors } from '../../config/constants'
 import { cameraStyle } from '../../assets/styles/cameraStyle';
-//the ones bellow are just for testing purpose
 import fs from "react-native-fs";
 import { decode } from "base64-arraybuffer";
 
@@ -28,36 +26,25 @@ const checkAndroidPermission = async () => {
   }
 };
 
-//const aws = require('aws-sdk');
-//https://stackoverflow.com/questions/56682109/react-native-through-upload-image-on-s3-bucket-using-aws-sdk
-//const AWS_KEY_ID = "AKIA6AVSWAXFK2AWBAFH";
-//const AWS_SECRET_KEY = "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";
-//const AWS_S3_BUCKET = "s3-hilton-videos-test";
-//const AWS_REGION = "us-west-2"
-/*
-aws.config.update({
-  accessKeyId: AWS_KEY_ID,
-  secretAccessKey: AWS_SECRET_KEY
-});
-*/
-//const s3 = new aws.S3();
+const ENDPOINT = 'http://ec2co-ecsel-e7kzz6bjzpwo-1247028944.us-east-2.elb.amazonaws.com/video';
+const MAX_VIDEO_SIZE = 9000;
+const MIN_VIDEO_SIZE = 5000;
 export default class CameraScreen extends Component {
         state = {
           recording: false,
-          progress: 0,//between 0.0 and 1.0 
+          progress: 0,
           animationId: 0,
           processing: false,
           pause:false,
           continue:false,
-          isSavingVideo:true,
           cameraType : 'back',
-          mirrorMode : false
+          mirrorMode : false,
+          video_segments: []
         };
 
 componentDidMount(){
   this.setState({progress: 0,
-    isSavingVideo:false,
-    continue: false})
+                 continue: false})
 }
 
   goBack(){
@@ -65,69 +52,60 @@ componentDidMount(){
     this.props.navigation.goBack(null);
   }
 
-  async startRecording() {
-      this.animateProgress();
-      if(this.state.pause){
-        this.resumeRecording();
-        return;
-      }
-      /*******************remove this later, this bellow is just for testing purpose**************************/
-      if(this.state.recording){
-        console.log("camera is already initiated...");
-        return;
-      }
-        
-      this.setState({ recording: true });
-      try{
-        const { uri, codec = "mp4" } = await this.camera.recordAsync();  
+  showSegments(){
+    let {video_segments} = this.state;
+    console.log("----------------------------------------------------");
+    video_segments.map((segment) => console.log(" segment :  "+JSON.stringify(segment)));
+    console.log("----------------------------------------------------");
+  }
 
-        if(!this.state.isSavingVideo){
-          console.log("we're not saving anything");
-          return;
-        }
-        console.log("----------------------------------------------------");
-        console.log(" video :  "+uri);
-        console.log("----------------------------------------------------");
-        await AsyncStorage.setItem('videoToPost', uri);
+  async startRecording() {
+      if(this.state.progress>100)
+        return;
+      this.animateProgress();
+      this.setState({ recording: true });
+
+      try{
+        let { uri, codec = "mp4" } = await this.camera.recordAsync();  
+        let type = `video/${codec}`;
+
         this.setState({ recording: false});
-        const type = `video/${codec}`;
-        //const data = new FormData();
-        /*data.append("video", {
-                                name: "mobile-video-upload",
-                                type,
-                                uri
-                              });*/
+
+        let {video_segments} = this.state;
+        video_segments.push({segment: this.state.progress,
+                             real_time: (this.state.progress>0?((this.state.progress * 9000)/100):0),
+                             url_segment : uri});
+        this.setState({video_segments: video_segments});
+        
+        this.showSegments();
 
         let uri_elements = uri.split("/");// "file:///data/user/0/com.hilton/cache/Camera/58ef942a-2870-4a1f-90d7-b9bf38e2c497.mp4"
         let video = uri_elements[uri_elements.length -1];
         let base64 = await fs.readFile(uri, "base64");               
         let videoObject = decode(base64);
-      /*
-        let params = {
-                      Bucket: AWS_S3_BUCKET,
-                      Body : videoObject,//video object
-                      Key : video, //video-name.mp4 (example: 58ef942a-2870-4a1f-90d7-b9bf38e2c497.mp4)
-                      ContentType: type,
-                      ContentDisposition: 'attachment'
-                    };
-      */
-		//s3.getSignedUrl('putObject', params);
-		/*
-    s3.upload(params, 
-            (err, data) => {
-                              if (err) 
-                                console.warn("Error : ", err);
-                              
-                              if (data) 
-                                console.log("Uploaded in : ", data.Location);
-                            });
-    */                      
-        /*await fetch(ENDPOINT, {
-                                method: "post",
-                                body: data
-                              });*/                              
         
-        this.setState({ processing: false });
+        let video_body = {
+                          title: video,
+                          description: video,
+                          duration: 9,
+                          id_user: 19,
+                          video: videoObject
+                        };
+      /*
+        console.log("about to save the video....");
+        fetch(ENDPOINT, {
+                        method: "POST",
+                        headers: {
+                          'Accept': 'application/json, text/plain',
+                          'Content-Type': 'multipart/form-data'//, application/json'
+                      },
+                        body: JSON.stringify(video_body)
+                      })
+                .then(res => {console.log(`the result is : ${res.status}`); return res.json()})
+                .then(res => console.log(res))
+                .catch(err => console.warn(err))
+        */
+        this.setState({ processing: false })
         
       }catch(err){
         console.warn(err);
@@ -136,82 +114,60 @@ componentDidMount(){
   
 stopRecording() {
       if(this.state.recording){
-        this.stopProgress();
+        clearInterval(this.state.animationId);
         this.camera.stopRecording();
-        this.setState({recording:0})
         console.log("stop recording....");
       }
-      
-  }       
-
-pauseRecording() {
-    if(this.state.recording && !this.state.pause && this.state.progress<99){
-      this.stopProgress();
-      this.setState({pause : true});
-      //this.camera.pausePreview();
-      console.log("pause recording....");
-    }
-    if(this.state.progress>99)
-      this.stopRecording();
-  }    
-resumeRecording() {
-    if(this.state.recording && this.state.pause){
-      this.setState({pause : false});
-      //this.camera.resumePreview();
-      console.log("resume recording....");
-    }
-  }      
+  }            
 
   animateProgress(){
     console.log("start animation progress...");
-    if(this.state.progress>99)
-      this.setState({progress : 0});
-
-    //if(!this.state.progress>0)//solo cuando sea cero
-    //  this.setState({ indeterminate: false });
-
+    if(this.state.progress>100){
+      //this.setState({progress : 0});// we can go back by remove the last section
+      this.stopRecording();
+      return;
+    }
     let animationId = setInterval(()=>{
-                              if(this.state.progress>99){
-                                //this.stopRecording();
-                                this.stopProgress();
+                              if(this.state.progress>100){
+                                //this.setState({progress : 0});// we can go back by remove the last section
+                                this.stopRecording();
                               }
                               this.setState({progress : this.state.progress + 1});
-                            },83)//83 milliseconds
+                            },(MAX_VIDEO_SIZE / 100))//with step of 1%
     this.setState({animationId});
   }
 
-  stopProgress(){
-    console.log("stop animation progress...");
-    clearInterval(this.state.animationId);
-  }
-
   async compileVideo(){
-      let is_any_video = await AsyncStorage.getItem('videoToPost');
-      if(is_any_video){
+      let {video_segments = [] , progress} = this.state;
+      if(video_segments.length && progress>=(MIN_VIDEO_SIZE / 100)){//it means at least 5 seconds of the current record.
         console.log("Compiling Video....");
         this.setState({processing:true})
         this.setState({continue:true,processing:false})
-        /*
-        let counter = 0;
-        let ID = setInterval(()=>counter++,50)
-        setTimeout(()=>{clearInterval(ID)
-                        this.setState({continue:true,processing:false})
-                      },2000)
-                      */
+        //---------------> need to send all the videos to the endpoint to start processing and join all the splitted videos
+        await AsyncStorage.setItem('videoToPost', this.state.video_segments);
+      }else{
+        console.log("show a tool tip to tell that you must need to record at least a section of 5 seconds");
       }
-      
   }
 
   redoVideo(){
-    console.log("Retake the video...");
-    this.setState({progress: 0,
-                   isSavingVideo:false,
-                   continue: false})
-    this.stopRecording();
-  }
-
-  keepVideo(){
-    console.log("This option is in building....");
+    let {video_segments} = this.state;
+    console.log("Retake the last section of the video...");
+    if(video_segments.length>0){
+      video_segments.pop();//removing the last video
+      if(video_segments.length===0)
+        this.setState({progress: 0,
+                       continue: false})
+      else{
+        let last_segment = video_segments[video_segments.length -1];
+        this.setState({progress: last_segment.segment})
+        if(last_segment.segment>=(MIN_VIDEO_SIZE / 100))
+          this.setState({continue: true});
+        else
+          this.setState({continue: false});
+      }
+    }
+    this.showSegments();
   }
 
   flipCamera(){
@@ -249,7 +205,6 @@ resumeRecording() {
         <RNCamera
             ref={ref => {this.camera = ref}}
             style={cameraStyle.preview}
-            //type={RNCamera.Constants.Type.back}
             type={this.state.cameraType} 
             mirrorImage={this.state.mirrorMode}
             flashMode={RNCamera.Constants.FlashMode.on}>
@@ -263,12 +218,12 @@ resumeRecording() {
                               }}
                 >
                   <Progress.Bar animated={true}
-                                //indeterminate={this.state.indeterminate}
                                 progress={(this.state.progress/100)} 
                                 height={6} 
                                 width={width*0.80} 
                                 color={'rgba(108,92,231, 0.8)'}
                                 borderWidth={0.5} />
+                  
                 </View>
 
                 <View style={{flexDirection: "row",
@@ -300,16 +255,17 @@ resumeRecording() {
                 </View>
             </View>
 
-            <TouchableWithoutFeedback onPressIn={()=>this.startRecording()}//this.animateProgress()
-                                      onPressOut={()=>this.stopRecording()}//this.stopProgress()}
-                                        >
+            <TouchableWithoutFeedback onPressIn={()=>this.startRecording()}
+                                      onPressOut={()=>this.stopRecording()}
+            >
                   
                     <View style={{alignSelf:'center',
                                   height:(height * 0.9), 
                                   width:(width*0.75), 
                                   //opacity:0.5, 
                                   //backgroundColor:'red'
-                                  }}>
+                                  }}
+                    >
                                     {
                                       this.state.processing?
                                       <ActivityIndicator animating color={colors.MAIN} size={50}/>:
@@ -317,30 +273,35 @@ resumeRecording() {
                                     }
                       </View>
                     
-              </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
               
                 <View style={{flexDirection:'column',
                 justifyContent:'flex-end',
-                //paddingBottom:60,
                 paddingBottom:(width*0.17),
                 paddingRight:25
                 }}>
 
                 <TouchableOpacity>
-                  <View style={{paddingBottom:15}}>
+                  <View style={{
+                    paddingBottom:15,
+                    opacity:(this.state.video_segments.length? 1:0)
+                    }}>
                     <FeatherIcon name="refresh-ccw" style={cameraStyle.goBack} onPress={()=> this.redoVideo()} />
                     <Text style={cameraStyle.textIcon} >Redo</Text>
                   </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity>
-                <View style={{paddingBottom:15}}>
+                <View style={{paddingBottom:15,
+                              opacity:(this.state.progress>=(MIN_VIDEO_SIZE / 100)? 1:0)
+                              }}>
                     <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.compileVideo()} />
                   <Text style={cameraStyle.textIcon} >Compile</Text>
                 </View>
                 </TouchableOpacity>
 
-                <View style={{flexDirection:'column'}}>
+                <View style={{flexDirection:'column',
+                              opacity:(this.state.continue? 1:0)}}>
                 <TouchableOpacity
                   onPress={()=>this.props.navigation.replace('PostVideo')}
                   style={cameraStyle.circleButton}>
