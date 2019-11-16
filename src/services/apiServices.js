@@ -21,7 +21,6 @@ export default apiServices = {
 		try {
 			const endPoint = `video/${videoId}/comments`;
 			const { data } = await httpService.get(endPoint);
-			console.log('getcomments', data);
 			response.data = data.data;
 		} catch (error) {
 			response.errorMessage = error.message || 'Unable to connect to the api';
@@ -38,11 +37,26 @@ export default apiServices = {
 				comment
 			}
 		};
-		console.log('payload', dataToSend);
 		try {
 			const endPoint = `video/${videoId}/comment`;
 			const { data } = await httpService.post(endPoint, dataToSend);
-			console.log('postcomment', data);
+			response.data = data.data;
+		} catch (error) {
+			response.errorMessage = error.message || 'Unable to connect to the api';
+		}
+
+		return response;
+	},
+	async createUser(user) {
+		const response = { data: null, errorMessage: '' };
+
+		try {
+			const endPoint = `user`;
+			const dataToSend = {
+				data: user
+			};
+			console.log(dataToSend);
+			const { data } = await httpService.post(endPoint, dataToSend);
 			response.data = data.data;
 		} catch (error) {
 			response.errorMessage = error.message || 'Unable to connect to the api';

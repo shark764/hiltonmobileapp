@@ -170,7 +170,7 @@ export const getVideoComments = videoId => async dispatch => {
 
 export const postVideoComment = (videoId, userId, comment) => async dispatch => {
 	const response = await apiServices.postVideoComment(videoId, userId, comment);
-	console.log(response);
+
 	if (!response.errorMessage) dispatch({ type: types.POST_VIDEO_COMMENT, payload: response.data });
 	else dispatch({ type: types.API_ERROR, payload: response.errorMessage });
 };

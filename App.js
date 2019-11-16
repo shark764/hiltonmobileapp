@@ -25,6 +25,8 @@ import PostVideoScreen from './src/components/screens/PostVideoScreen';
 import { navigationStyles } from './src/assets/styles';
 import { colors } from './src/config/constants';
 import SingleVideoScreen from './src/components/screens/SingleVideoScreen';
+import LoginOrSignupScreen from './src/components/screens/SignUp/LoginOrSignupScreen';
+import EmailRegistrationScreen from './src/components/screens/SignUp/EmailRegistrationScreen';
 
 export default class App extends Component {
 	render() {
@@ -41,6 +43,13 @@ export default class App extends Component {
 
 const ProfileStack = createStackNavigator(
 	{
+		LoginOrSignup: {
+			screen: LoginOrSignupScreen,
+			navigationOptions: { header: null }
+		},
+		EmailRegistration: {
+			screen: EmailRegistrationScreen
+		},
 		Profile: {
 			screen: ProfileScreen,
 			navigationOptions: { header: null }
@@ -74,7 +83,7 @@ const ProfileStack = createStackNavigator(
 		}
 	},
 	{
-		initialRouteName: 'Profile',
+		initialRouteName: 'LoginOrSignup',
 		defaultNavigationOptions: {
 			headerTitleStyle: navigationStyles.header
 		}
@@ -119,9 +128,11 @@ const CameraStack = createStackNavigator(
 	}
 );
 
-//To Hide the bottom tab navigation in all screens except the first one
+//To Hide the bottom tab navigation in all screens except
+//the first one (LoginOrSignup) and the second one (Profile)
 ProfileStack.navigationOptions = ({ navigation }) => {
-	if (navigation.state.index > 0) return { tabBarVisible: false };
+	console.log(navigation.state.index);
+	if (navigation.state.index > 1) return { tabBarVisible: false };
 	return { tabBarVisible: true };
 };
 
