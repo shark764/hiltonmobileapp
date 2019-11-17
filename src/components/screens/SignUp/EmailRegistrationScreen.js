@@ -10,6 +10,8 @@ import ModalPopup from '../../commons/ModalPopup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { createUser } from '../../../redux/actions/userActions';
 import { connect } from 'react-redux';
+import { Loader } from '../../commons/Loader';
+import AlertMessages from '../../commons/AlertMessages';
 
 class EmailRegistrationScreen extends Component {
 	static navigationOptions = () => ({ title: 'Sign up with your email' });
@@ -17,7 +19,8 @@ class EmailRegistrationScreen extends Component {
 	state = {
 		data: { email: '', full_name: '', bio: '', username: '', birth_date: '', password: '', confirmPassword: '' },
 		showDialog: false,
-		dialogTitle: ''
+		dialogTitle: '',
+		loading: false
 	};
 
 	rawInputs = [];
@@ -79,7 +82,12 @@ class EmailRegistrationScreen extends Component {
 	onSubmit = async () => {
 		const user = { ...this.state.data };
 		delete user.confirmPassword;
-		await this.props.createUser(user);
+		this.setState({ loading: true });
+		const result = await this.props.createUser(user);
+		if (!result.success) AlertMessages.error(result.message);
+		else this.props.navigation.replace('Profile');
+
+		this.setState({ loading: false });
 	};
 
 	showModal = option => {
@@ -93,7 +101,7 @@ class EmailRegistrationScreen extends Component {
 	};
 
 	render() {
-		const { data, showDialog, dialogTitle } = this.state;
+		const { data, showDialog, dialogTitle, loading } = this.state;
 		const inputErrors = this.inputErrors;
 
 		return (
@@ -277,17 +285,20 @@ class EmailRegistrationScreen extends Component {
 						</Text>
 					</Text>
 				</View>
-				<Button
-					containerStyle={{ width: '100%', marginTop: 20 }}
-					buttonStyle={{
-						backgroundColor: colors.MAIN,
-						padding: 16,
-						borderRadius: 6
-					}}
-					titleStyle={{ fontSize: 19, fontFamily: fonts.OPENSANS_BOLD, color: '#fff' }}
-					title="Sign Up"
-					onPress={this.handleSubmit}
-				/>
+				{!loading && (
+					<Button
+						containerStyle={{ width: '100%', marginTop: 20 }}
+						buttonStyle={{
+							backgroundColor: colors.MAIN,
+							padding: 16,
+							borderRadius: 6
+						}}
+						titleStyle={{ fontSize: 19, fontFamily: fonts.OPENSANS_BOLD, color: '#fff' }}
+						title="Sign Up"
+						onPress={this.handleSubmit}
+					/>
+				)}
+				<Loader show={loading} />
 				<ModalPopup
 					title={dialogTitle}
 					confirmBtnText="Got it"
@@ -309,14 +320,13 @@ class EmailRegistrationScreen extends Component {
 	}
 }
 
-const mapstateToProps = ({ apiMessages }) => ({ apiMessages });
+const mapstateToProps = null;
 
 export default connect(mapstateToProps, { createUser })(EmailRegistrationScreen);
 
 const styles = {
 	scrollContainer: {
 		padding: 16,
-		//flex: 1,
 		width: '100%'
 	},
 	input: {

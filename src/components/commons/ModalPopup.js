@@ -74,7 +74,6 @@ ModalPopup.defaultProps = {
 };
 
 ModalPopup.propTypes = {
-	//mode: PropTypes.oneOf(['date', 'datetime', 'time']),
 	title: PropTypes.string,
 	titleStyle: PropTypes.object,
 	onConfirmPressed: PropTypes.func,

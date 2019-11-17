@@ -48,7 +48,7 @@ export default apiServices = {
 		return response;
 	},
 	async createUser(user) {
-		const response = { data: null, errorMessage: '' };
+		const response = { data: null, success: false, message: '' };
 
 		try {
 			const endPoint = `user`;
@@ -58,8 +58,10 @@ export default apiServices = {
 			console.log(dataToSend);
 			const { data } = await httpService.post(endPoint, dataToSend);
 			response.data = data.data;
+			response.success = true;
+			response.message = 'Registration was done successfully!';
 		} catch (error) {
-			response.errorMessage = error.message || 'Unable to connect to the api';
+			response.message = error.message || 'Unable to connect to the api';
 		}
 
 		return response;
