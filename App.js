@@ -27,6 +27,7 @@ import { colors } from './src/config/constants';
 import SingleVideoScreen from './src/components/screens/SingleVideoScreen';
 import LoginOrSignupScreen from './src/components/screens/SignUp/LoginOrSignupScreen';
 import EmailRegistrationScreen from './src/components/screens/SignUp/EmailRegistrationScreen';
+import CameraRollView from './src/components/partials/CameraRollView';
 
 export default class App extends Component {
 	render() {
@@ -114,12 +115,15 @@ const CameraStack = createStackNavigator(
 		Camera: {
 			screen: CameraScreen
 		},
+		CameraRoll: {
+			screen: CameraRollView
+		},
 		PostVideo: {
 			screen: PostVideoScreen
 		},
 		Profile: {
 			screen: ProfileScreen,
-			navigationOptions: { header: null }
+			navigationOptions: { header: null, tabBarVisible: true }
 		}
 	},
 	{
@@ -142,6 +146,11 @@ SearchStack.navigationOptions = ({ navigation }) => {
 	return { tabBarVisible: true };
 };
 
+CameraStack.navigationOptions = ({ navigation }) => {
+	if (navigation.state.index!=3) return { tabBarVisible: false };
+	return { tabBarVisible: true };
+};
+
 const bottomTabNavigator = createBottomTabNavigator(
 	{
 		Home: {
@@ -159,8 +168,8 @@ const bottomTabNavigator = createBottomTabNavigator(
 		Camera: {
 			screen: CameraStack,
 			navigationOptions: {
-				tabBarIcon: ({ tintColor }) => <FeatherIcon name="plus-circle" size={25} color={tintColor} />,
-				tabBarVisible: false
+				tabBarIcon: ({ tintColor }) => <FeatherIcon name="plus-circle" size={25} color={tintColor} />
+				//tabBarVisible: false
 			}
 		},
 		Boost: {

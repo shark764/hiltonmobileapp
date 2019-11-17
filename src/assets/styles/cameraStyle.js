@@ -71,4 +71,32 @@ export const cameraStyle = {
         alignSelf:'center'
       },
       safeArea: { flex: 1 },
+      textIcon:{
+        fontSize:10,
+        fontFamily:fonts.OPENSANS_REGULAR,
+        color:'white',
+        alignSelf:'center'
+      },
+      circleButton:{
+        backgroundColor:colors.MAIN,
+        flex: 0,
+        borderRadius: 75,
+        alignSelf: 'center',
+        padding: 10,
+      },
+      rightMenu:{
+        flexDirection:'column',
+        justifyContent:'flex-end',
+        paddingBottom:(width*0.17),
+        paddingRight:25
+      },
+      feedbackVideo: {
+        height: height,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        alignItems: "stretch",
+        bottom: 0,
+        right: 0
+        }
 };

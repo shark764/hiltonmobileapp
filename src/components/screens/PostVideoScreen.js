@@ -7,11 +7,9 @@ import CameraRoll from "@react-native-community/cameraroll";//https://github.com
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import Ionicon from 'react-native-vector-icons/Ionicons';
-//import fs from "react-native-fs";
-//import { decode } from "base64-arraybuffer";
-//import {RNFetchBlob} from "react-native-fetch-blob"
 import { fonts,colors } from '../../config/constants'
 const { height, width } = Dimensions.get('window');
+import { postStyle } from '../../assets/styles/postStyle';
 
 const checkAndroidPermission = async () => {
     try {
@@ -45,12 +43,13 @@ export default class PostVideoScreen extends Component {
 
 goForward(){
     console.log("its supposed to navigate through profile screen... (working on that...)");
-    this.props.navigation.replace('Profile');
+    this.props.navigation.push('Profile');
 }
 
 async componentDidMount(){
-    let url_video = await AsyncStorage.getItem('videoToPost');
-    this.setState({url_video,paused:false});
+    let videoSegment = await AsyncStorage.getItem('videoToPost');
+    let lastSegment = videoSegment[videoSegment.length - 1];
+    this.setState({url_video : lastSegment,paused:false});
 }
 
 async postVideo(){
@@ -69,31 +68,6 @@ async postVideo(){
     }catch(error){
         console.warn(error);
     }
-     
-    //let base64 = await fs.readFile(url_video, "base64");               
-    //let videoObject = decode(base64);
-/*
-    console.log(`About to save ${url_video} into cameraRoll...`);
-      
-    RNFetchBlob
-    .config({
-        fileCache : true,
-        appendExt : 'mp4'
-    })
-    .fetch('GET',url_video)
-        .then((res) => {
-            CameraRoll.saveToCameraRoll(res.path())
-                .then(()=>console.log("stored successfully"))
-                .catch(err => console.warn(err))
-        })
-*/
-    /*
-    let result = await CameraRoll.saveToCameraRoll(url_video,"video");
-    if(result)
-        console.log("success!!");
-    else
-        console.warn("Error!!");                                  
-    */
 }
 
     render() {
@@ -102,73 +76,47 @@ async postVideo(){
             {
                 //********HEADER*********** */
             }
-            <View style={{flexDirection: "row",
-                          justifyContent: 'flex-start',
-                          alignItems: 'center',
-                          borderBottomWidth: 1,
-                          borderBottomColor:'rgba(0, 0, 0, 0.1)',
-                            }}>
+            <View style={postStyle.header}>
                 <View style={{padding:10}}>
-                  <Ionicon name="md-arrow-back" style={{
-                      fontFamily:fonts.OPENSANS_BOLD,
-                      fontSize: 30, 
-                      color:colors.MAIN,
-                  }} onPress={()=> this.goBack()} />
+                  <Ionicon name="md-arrow-back" style={postStyle.backIcon} onPress={()=> this.goBack()} />
                 </View>
                 <View style={{paddingLeft:(width*0.30)}}>
-                    <Text style={{fontFamily:fonts.OPENSANS_SEMI_BOLD,fontSize:16,color:'#2F2F2F'}}> New Video </Text>
+                    <Text style={postStyle.title}> New Video </Text>
                 </View>
             </View>
             {
                 //*****VIDEO POSTING******** */
             }
-            <View style={{flexDirection: "row",
-                          justifyContent: 'flex-start',
-                          padding:10
-                          }}>
-                <View style={{padding:10,paddingBottom:0,paddingTop:0,alignSelf:'center'}}>
+            <View style={postStyle.postFrame}>
+                <View style={postStyle.leftSide}>
                     {this.state.url_video?
                         <Video
                             source={{ uri: this.state.url_video }} // Can be a URL or a local file.
                             repeat
                             resizeMode={'cover'}
                             paused={this.state.paused}
-                            style={{width: (width * 0.23),
-                                    height: (height * 0.25),
-                                    paddingRight:10,
-                                }}
+                            style={postStyle.rightSide}
                         />
                         :null}
                 </View>
-                <View style={{borderWidth:1,
-                              borderColor:'rgba(0, 0, 0, 0.01)',
-                              paddingLeft:20,
-                              width:(width*0.6)
-                             }}>
-                    <TextInput style={{alignSelf:'center',color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}
+                <View style={postStyle.commentBox}>
+                    <TextInput style={postStyle.textStyle}
                                autoCapitalize='sentences'
                                multiline={true}
-                               maxLength={50}
+                               maxLength={39}
                                textAlignVertical='bottom'
                                numberOfLines={3}
-                    >Write a caption here!...(50 Max). This is a long caption, to test thwe maxLength.
+                    >Write a caption here!...(39 Max). This is a long caption, to test thwe maxLength.
                     </TextInput>
                 </View>
             </View>
             {
                 //********BOOSTING********* */
             }
-            <View style={{flexDirection: "row",
-                          justifyContent: 'space-between',
-                          paddingHorizontal:20,
-                          paddingBottom:10,
-                          borderBottomWidth:1,
-                          borderBottomColor:'rgba(0, 0, 0, 0.05)',
-                          paddingTop:10
-                          }}>
+            <View style={postStyle.boostRow}>
                 <View style={{flexDirection: "row"}}>
                     <FeatherIcon name="zap" size={15} color={colors.MAIN} style={{paddingTop:2}} />
-                    <Text style={{color:colors.MAIN,paddingLeft:5,fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}} >
+                    <Text style={postStyle.boostText} >
                         Boost Video
                     </Text>
                 </View>
@@ -184,21 +132,14 @@ async postVideo(){
             {
                 //******************SETTINGS************************
             }
-            <View style={{paddingHorizontal:20,
-                          paddingBottom:10,
-                          paddingTop:10,
-                          paddingBottom:20}}>
-                <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_SEMI_BOLD,fontSize:16}}>
+            <View style={postStyle.subtitleRow}>
+                <Text style={postStyle.subtitleText}>
                     Settings
                 </Text>
             </View>
-            <View style={{flexDirection: "row",
-                          justifyContent: 'space-between',
-                          paddingHorizontal:20,
-                          paddingBottom:15
-                          }}>
+            <View style={postStyle.normalRow}>
                 <View>
-                <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}>
+                <Text style={postStyle.itemText}>
                     Save Video
                 </Text>
                 </View>
@@ -211,15 +152,9 @@ async postVideo(){
                     />
                 </View>
             </View>
-            <View style={{flexDirection: "row",
-                          justifyContent: 'space-between',
-                          paddingHorizontal:20,
-                          paddingBottom:25,
-                          borderBottomWidth:1,
-                          borderBottomColor:'rgba(0, 0, 0, 0.05)',
-                          }}>
+            <View style={postStyle.endRow}>
                 <View>
-                    <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}>
+                    <Text style={postStyle.itemText}>
                         Allow Commenting
                     </Text>
                 </View>
@@ -235,22 +170,15 @@ async postVideo(){
             {
                 //************SHARE********** */
             }
-            <View style={{paddingHorizontal:20,
-                          paddingBottom:10,
-                          paddingTop:10,
-                          paddingBottom:20}}>
-                <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_SEMI_BOLD,fontSize:16}}>
+            <View style={postStyle.subtitleRow}>
+                <Text style={postStyle.subtitleText}>
                     Share
                 </Text>
             </View>
             <ScrollView>
-                <View style={{flexDirection: "row",
-                            justifyContent: 'space-between',
-                            paddingHorizontal:20,
-                            paddingBottom:15
-                            }}>
+                <View style={postStyle.normalRow}>
                     <View>
-                    <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}>
+                    <Text style={postStyle.itemText}>
                         Facebook
                     </Text>
                     </View>
@@ -263,13 +191,9 @@ async postVideo(){
                         />
                     </View>
                 </View>
-                <View style={{flexDirection: "row",
-                            justifyContent: 'space-between',
-                            paddingHorizontal:20,
-                            paddingBottom:15
-                            }}>
+                <View style={postStyle.normalRow}>
                     <View>
-                    <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}>
+                    <Text style={postStyle.itemText}>
                         Instagram Story
                     </Text>
                     </View>
@@ -282,13 +206,9 @@ async postVideo(){
                         />
                     </View>
                 </View>
-                <View style={{flexDirection: "row",
-                            justifyContent: 'space-between',
-                            paddingHorizontal:20,
-                            paddingBottom:15
-                            }}>
+                <View style={postStyle.normalRow}>
                     <View>
-                    <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}>
+                    <Text style={postStyle.itemText}>
                         Instagram Post
                     </Text>
                     </View>
@@ -301,13 +221,9 @@ async postVideo(){
                         />
                     </View>
                 </View>
-                <View style={{flexDirection: "row",
-                            justifyContent: 'space-between',
-                            paddingHorizontal:20,
-                            paddingBottom:15
-                            }}>
+                <View style={postStyle.normalRow}>
                     <View>
-                    <Text style={{color:'#5F5F5F',fontFamily:fonts.OPENSANS_REGULAR,fontSize:16}}>
+                    <Text style={postStyle.itemText}>
                         Twitter
                     </Text>
                     </View>
@@ -321,21 +237,11 @@ async postVideo(){
                     </View>
                 </View>
             </ScrollView>
-            <TouchableOpacity style={{
-                                        flex: 0,
-                                        backgroundColor: colors.MAIN,
-                                        borderRadius: 6,
-                                        padding: 10,
-                                        paddingHorizontal: 14,
-                                        alignSelf: 'center',
-                                        margin: 10,
-                                        width: (width * 0.80),
-                                        height: (height * 0.08)
-                                    }}
+            <TouchableOpacity style={postStyle.postButton}
                               onPress={()=>this.postVideo()}
             >
                 <View style={{alignSelf:'center',paddingTop:4}}>
-                    <Text style={{fontFamily:fonts.OPENSANS_BOLD,color:'white',fontSize:19}}>
+                    <Text style={postStyle.postTextButton}>
                         Post Video
                     </Text>
                 </View>
