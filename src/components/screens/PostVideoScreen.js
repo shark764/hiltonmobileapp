@@ -47,8 +47,9 @@ goForward(){
 }
 
 async componentDidMount(){
-    let url_video = await AsyncStorage.getItem('videoToPost');
-    this.setState({url_video,paused:false});
+    let videoSegment = await AsyncStorage.getItem('videoToPost');
+    let lastSegment = videoSegment[videoSegment.length - 1];
+    this.setState({url_video : lastSegment,paused:false});
 }
 
 async postVideo(){

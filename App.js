@@ -27,6 +27,7 @@ import { colors } from './src/config/constants';
 import SingleVideoScreen from './src/components/screens/SingleVideoScreen';
 import LoginOrSignupScreen from './src/components/screens/SignUp/LoginOrSignupScreen';
 import EmailRegistrationScreen from './src/components/screens/SignUp/EmailRegistrationScreen';
+import CameraRollView from './src/components/partials/CameraRollView';
 
 export default class App extends Component {
 	render() {
@@ -114,6 +115,9 @@ const CameraStack = createStackNavigator(
 		Camera: {
 			screen: CameraScreen
 		},
+		CameraRoll: {
+			screen: CameraRollView
+		},
 		PostVideo: {
 			screen: PostVideoScreen
 		},
@@ -143,7 +147,7 @@ SearchStack.navigationOptions = ({ navigation }) => {
 };
 
 CameraStack.navigationOptions = ({ navigation }) => {
-	if (navigation.state.index!=2) return { tabBarVisible: false };
+	if (navigation.state.index!=3) return { tabBarVisible: false };
 	return { tabBarVisible: true };
 };
 

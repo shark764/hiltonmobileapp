@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { Dimensions,PermissionsAndroid } from 'react-native';
 import { Container} from 'native-base'
 import AsyncStorage from '@react-native-community/async-storage';
-
 import CameraRoll from "@react-native-community/cameraroll";
 import { cameraStyle } from '../../assets/styles/cameraStyle';
 import fs from "react-native-fs";
@@ -199,11 +198,16 @@ stopRecording() {
       await checkAndroidPermission();
     }
     CameraRoll.getPhotos({
-      first: 10,
-      groupTypes:'All',
-      assetType:'Videos'
-    })
-    .then(r => console.log("it works!"))
+                          first: 10,
+                          groupTypes:'All',
+                          assetType:'Videos'
+                        })
+    .then((data) => {
+                      //console.log("it works....");
+                      //console.log(`The data is : ${JSON.stringify(data.edges)}`)
+                      this.props.navigation.push('CameraRoll',{cameraRollItems: JSON.stringify(data.edges)})
+                      //this.props.navigation.navigate('CameraRoll',{cameraRollItems: JSON.stringify(data.edges)})
+                    })
     .catch(e => console.warn(e))
   }
 
