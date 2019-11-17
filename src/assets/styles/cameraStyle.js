@@ -83,5 +83,11 @@ export const cameraStyle = {
         borderRadius: 75,
         alignSelf: 'center',
         padding: 10,
+      },
+      rightMenu:{
+        flexDirection:'column',
+        justifyContent:'flex-end',
+        paddingBottom:(width*0.17),
+        paddingRight:25
       }
 };

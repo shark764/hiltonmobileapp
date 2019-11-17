@@ -13,6 +13,7 @@ import { fonts,colors } from '../../config/constants'
 import { cameraStyle } from '../../assets/styles/cameraStyle';
 import fs from "react-native-fs";
 import { decode } from "base64-arraybuffer";
+import CameraElement from "../partials/CameraElement"
 
 const { height, width } = Dimensions.get('window');
 
@@ -37,8 +38,8 @@ export default class CameraScreen extends Component {
           processing: false,
           pause:false,
           continue:false,
-          cameraType : 'back',
-          mirrorMode : false,
+          //cameraType : 'back',
+          //mirrorMode : false,
           video_segments: []
         };
 
@@ -60,7 +61,7 @@ componentDidMount(){
   }
 
   async startRecording() {
-      if(this.state.progress>100)
+      if(this.state.progress>99)
         return;
       this.animateProgress();
       this.setState({ recording: true });
@@ -122,13 +123,13 @@ stopRecording() {
 
   animateProgress(){
     console.log("start animation progress...");
-    if(this.state.progress>100){
+    if(this.state.progress>99){
       //this.setState({progress : 0});// we can go back by remove the last section
       this.stopRecording();
       return;
     }
     let animationId = setInterval(()=>{
-                              if(this.state.progress>100){
+                              if(this.state.progress>99){
                                 //this.setState({progress : 0});// we can go back by remove the last section
                                 this.stopRecording();
                               }
@@ -137,14 +138,15 @@ stopRecording() {
     this.setState({animationId});
   }
 
-  async compileVideo(){
+ async compileVideo(){
       let {video_segments = [] , progress} = this.state;
       if(video_segments.length && progress>=(MIN_VIDEO_SIZE / 100)){//it means at least 5 seconds of the current record.
         console.log("Compiling Video....");
         this.setState({processing:true})
         this.setState({continue:true,processing:false})
         //---------------> need to send all the videos to the endpoint to start processing and join all the splitted videos
-        await AsyncStorage.setItem('videoToPost', this.state.video_segments);
+        await AsyncStorage.setItem('videoToPost', JSON.stringify(this.state.video_segments));
+
       }else{
         console.log("show a tool tip to tell that you must need to record at least a section of 5 seconds");
       }
@@ -172,9 +174,9 @@ stopRecording() {
 
   flipCamera(){
     if (this.state.cameraType === 'back') 
-      this.setState({cameraType: 'front',mirror: true});
+      this.setState({cameraType: 'front',mirrorMode: true});
      else 
-      this.setState({cameraType: 'back',mirror: false});
+      this.setState({cameraType: 'back',mirrorMode: false});
     
   }
 
@@ -198,129 +200,30 @@ stopRecording() {
     .catch(e => console.warn(e))
   }
 
+  setCameraReference(ref){
+    this.camera = ref;
+  }
+
   render() {
     return (
       
       <Container style={cameraStyle.container}>
-        <RNCamera
-            ref={ref => {this.camera = ref}}
-            style={cameraStyle.preview}
-            type={this.state.cameraType} 
-            mirrorImage={this.state.mirrorMode}
-            flashMode={RNCamera.Constants.FlashMode.on}>
-        
-        <SafeAreaView style={cameraStyle.safeArea}>
-
-          <View style={cameraStyle.progressStatus}>
-                <View style={{padding:10, 
-                              alignSelf:'center',
-                              opacity:(this.state.progress? 1:0) 
-                              }}
-                >
-                  <Progress.Bar animated={true}
-                                progress={(this.state.progress/100)} 
-                                height={6} 
-                                width={width*0.80} 
-                                color={'rgba(108,92,231, 0.8)'}
-                                borderWidth={0.5} />
-                  
-                </View>
-
-                <View style={{flexDirection: "row",
-                              justifyContent: 'space-between',
-                              paddingHorizontal:35,
-                              
-                          }}>
-                <View>
-                  <Ionicon name="md-arrow-back" style={cameraStyle.goBack} onPress={()=> this.goBack()} />
-                </View>
-
-                <View>
-                  <AntIcon name="retweet" style={cameraStyle.goBack} onPress={()=> this.flipCamera()} />
-                  <Text style={cameraStyle.textIcon} >Flip</Text>
-                </View>
-
-            </View>
-
-          </View>
-          <View style={{flexDirection:'row'}}>
-              <View style={{
-                justifyContent:'flex-end',
-                paddingLeft:25,
-                paddingBottom:(width*0.2)
-                }}>
-                  <View >
-                    <Ionicon name="md-photos" style={[cameraStyle.goBack,{alignSelf:'center'}]} onPress={()=> this.getVideosRoll()} />
-                  <Text style={cameraStyle.textIcon}>Upload</Text>
-                </View>
-            </View>
-
-            <TouchableWithoutFeedback onPressIn={()=>this.startRecording()}
-                                      onPressOut={()=>this.stopRecording()}
-            >
-                  
-                    <View style={{alignSelf:'center',
-                                  height:(height * 0.9), 
-                                  width:(width*0.75), 
-                                  //opacity:0.5, 
-                                  //backgroundColor:'red'
-                                  }}
-                    >
-                                    {
-                                      this.state.processing?
-                                      <ActivityIndicator animating color={colors.MAIN} size={50}/>:
-                                      null
-                                    }
-                      </View>
-                    
-            </TouchableWithoutFeedback>
-              
-                <View style={{flexDirection:'column',
-                justifyContent:'flex-end',
-                paddingBottom:(width*0.17),
-                paddingRight:25
-                }}>
-
-                <TouchableOpacity>
-                  <View style={{
-                    paddingBottom:15,
-                    opacity:(this.state.video_segments.length? 1:0)
-                    }}>
-                    <FeatherIcon name="refresh-ccw" style={cameraStyle.goBack} onPress={()=> this.redoVideo()} />
-                    <Text style={cameraStyle.textIcon} >Redo</Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                <View style={{paddingBottom:15,
-                              opacity:(this.state.progress>=(MIN_VIDEO_SIZE / 100)? 1:0)
-                              }}>
-                    <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.compileVideo()} />
-                  <Text style={cameraStyle.textIcon} >Compile</Text>
-                </View>
-                </TouchableOpacity>
-
-                <View style={{flexDirection:'column',
-                              opacity:(this.state.continue? 1:0)}}>
-                <TouchableOpacity
-                  onPress={()=>this.props.navigation.replace('PostVideo')}
-                  style={cameraStyle.circleButton}>
-                    <View>
-                      <FeatherIcon name="check" style={{
-                                                        fontFamily:fonts.OPENSANS_LIGHT,
-                                                        fontSize: 20, 
-                                                        color:'white',
-                                                      }} 
-                                                      onPress={()=> this.continueToPost()} />
-                    </View>
-                </TouchableOpacity>
-                <Text style={cameraStyle.textIcon} >Done</Text>
-                </View>
-
-              </View>
-          </View>
-          </SafeAreaView>
-        </RNCamera>
+        <CameraElement 
+          reference={(ref)=>{this.setCameraReference(ref)}}
+          progress={this.state.progress}
+          goBack={()=>this.goBack()}
+          flipCamera={()=>this.flipCamera()}
+          getVideosRoll={()=>this.getVideosRoll()}
+          startRecording={()=>this.startRecording()}
+          stopRecording={()=>this.stopRecording()}
+          videoSegments={this.state.video_segments}
+          redoVideo={()=>this.redoVideo()}
+          compileVideo={()=>this.compileVideo()}
+          continue={this.state.continue}
+          continueToPost={()=>this.continueToPost()}
+          processing={this.state.processing}
+          compile={this.state.progress>=(MIN_VIDEO_SIZE / 100)? 1:0}
+        />
       </Container>
       
     );

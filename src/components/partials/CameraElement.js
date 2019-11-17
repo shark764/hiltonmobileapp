@@ -15,11 +15,21 @@ export default class CameraElement extends Component {
     constructor(props) {
         super(props);
       }
+      state = {
+        //recording: false,
+        //progress: 0,
+        //animationId: 0,
+        //processing: false,
+        //continue:false,
+        cameraType : 'back',
+        mirrorMode : false,
+        //video_segments: []
+      };
 
     render(){
         return(
             <RNCamera
-            ref={ref => {this.camera = ref}}
+            ref={(ref) => {this.camera = ref; this.props.reference(this.camera);}}
             style={cameraStyle.preview}
             type={this.state.cameraType} 
             mirrorImage={this.state.mirrorMode}
@@ -30,11 +40,11 @@ export default class CameraElement extends Component {
           <View style={cameraStyle.progressStatus}>
                 <View style={{padding:10, 
                               alignSelf:'center',
-                              opacity:(this.state.progress? 1:0) 
+                              opacity:(this.props.progress? 1:0) 
                               }}
                 >
                   <Progress.Bar animated={true}
-                                progress={(this.state.progress/100)} 
+                                progress={(this.props.progress/100)} 
                                 height={6} 
                                 width={width*0.80} 
                                 color={'rgba(108,92,231, 0.8)'}
@@ -48,11 +58,11 @@ export default class CameraElement extends Component {
                               
                           }}>
                 <View>
-                  <Ionicon name="md-arrow-back" style={cameraStyle.goBack} onPress={()=> this.goBack()} />
+                  <Ionicon name="md-arrow-back" style={cameraStyle.goBack} onPress={()=> this.props.goBack()} />
                 </View>
 
                 <View>
-                  <AntIcon name="retweet" style={cameraStyle.goBack} onPress={()=> this.flipCamera()} />
+                  <AntIcon name="retweet" style={cameraStyle.goBack} onPress={()=> this.props.flipCamera()} />
                   <Text style={cameraStyle.textIcon} >Flip</Text>
                 </View>
 
@@ -66,13 +76,13 @@ export default class CameraElement extends Component {
                 paddingBottom:(width*0.2)
                 }}>
                   <View >
-                    <Ionicon name="md-photos" style={[cameraStyle.goBack,{alignSelf:'center'}]} onPress={()=> this.getVideosRoll()} />
+                    <Ionicon name="md-photos" style={[cameraStyle.goBack,{alignSelf:'center'}]} onPress={()=> this.props.getVideosRoll()} />
                   <Text style={cameraStyle.textIcon}>Upload</Text>
                 </View>
             </View>
 
-            <TouchableWithoutFeedback onPressIn={()=>this.startRecording()}
-                                      onPressOut={()=>this.stopRecording()}
+            <TouchableWithoutFeedback onPressIn={()=>this.props.startRecording()}
+                                      onPressOut={()=>this.props.stopRecording()}
             >
                   
                     <View style={{alignSelf:'center',
@@ -83,7 +93,7 @@ export default class CameraElement extends Component {
                                   }}
                     >
                                     {
-                                      this.state.processing?
+                                      this.props.processing?
                                       <ActivityIndicator animating color={colors.MAIN} size={50}/>:
                                       null
                                     }
@@ -91,35 +101,31 @@ export default class CameraElement extends Component {
                     
             </TouchableWithoutFeedback>
               
-                <View style={{flexDirection:'column',
-                justifyContent:'flex-end',
-                paddingBottom:(width*0.17),
-                paddingRight:25
-                }}>
+                <View style={cameraStyle.rightMenu}>
 
                 <TouchableOpacity>
                   <View style={{
                     paddingBottom:15,
-                    opacity:(this.state.video_segments.length? 1:0)
+                    opacity:(this.props.videoSegments.length? 1:0)
                     }}>
-                    <FeatherIcon name="refresh-ccw" style={cameraStyle.goBack} onPress={()=> this.redoVideo()} />
+                    <FeatherIcon name="refresh-ccw" style={cameraStyle.goBack} onPress={()=> this.props.redoVideo()} />
                     <Text style={cameraStyle.textIcon} >Redo</Text>
                   </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity>
                 <View style={{paddingBottom:15,
-                              opacity:(this.state.progress>=(MIN_VIDEO_SIZE / 100)? 1:0)
+                              opacity:(this.props.compile)
                               }}>
-                    <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.compileVideo()} />
+                    <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.props.compileVideo()} />
                   <Text style={cameraStyle.textIcon} >Compile</Text>
                 </View>
                 </TouchableOpacity>
 
                 <View style={{flexDirection:'column',
-                              opacity:(this.state.continue? 1:0)}}>
+                              opacity:(this.props.continue? 1:0)}}>
                 <TouchableOpacity
-                  onPress={()=>this.props.navigation.replace('PostVideo')}
+                  onPress={()=>this.props.continueToPost()}
                   style={cameraStyle.circleButton}>
                     <View>
                       <FeatherIcon name="check" style={{
@@ -127,7 +133,7 @@ export default class CameraElement extends Component {
                                                         fontSize: 20, 
                                                         color:'white',
                                                       }} 
-                                                      onPress={()=> this.continueToPost()} />
+                                                      onPress={()=> this.props.continueToPost()} />
                     </View>
                 </TouchableOpacity>
                 <Text style={cameraStyle.textIcon} >Done</Text>
