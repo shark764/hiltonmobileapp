@@ -1,19 +1,15 @@
 'use strict';
 import React, { Component } from 'react';
-import { Text, TouchableOpacity,TouchableWithoutFeedback, View, ActivityIndicator,Dimensions,SafeAreaView,PermissionsAndroid } from 'react-native';
+import { Dimensions,PermissionsAndroid } from 'react-native';
 import { Container} from 'native-base'
 import AsyncStorage from '@react-native-community/async-storage';
-import {RNCamera} from 'react-native-camera'
-import Ionicon from 'react-native-vector-icons/Ionicons';
-import AntIcon from 'react-native-vector-icons/AntDesign';
-import FeatherIcon from 'react-native-vector-icons/Feather';
+
 import CameraRoll from "@react-native-community/cameraroll";
-import * as Progress from 'react-native-progress';
-import { fonts,colors } from '../../config/constants'
 import { cameraStyle } from '../../assets/styles/cameraStyle';
 import fs from "react-native-fs";
 import { decode } from "base64-arraybuffer";
 import CameraElement from "../partials/CameraElement"
+import FeedbackVideo from "../partials/FeedbackVideo"
 
 const { height, width } = Dimensions.get('window');
 
@@ -40,23 +36,34 @@ export default class CameraScreen extends Component {
           continue:false,
           //cameraType : 'back',
           //mirrorMode : false,
-          video_segments: []
+          feedbackSegment:false,//must be false to start
+          currentSegment:'',
+          videoSegment: []
         };
 
 componentDidMount(){
   this.setState({progress: 0,
-                 continue: false})
+                 continue: false,
+                 feedbackSegment:false,
+                 videoSegment: []
+                })
 }
 
   goBack(){
     console.log("go back.....");
+    this.stopRecording();
+    this.setState({progress: 0,
+                   continue: false,
+                   feedbackSegment:false,
+                   videoSegment: []
+                 })
     this.props.navigation.goBack(null);
   }
 
   showSegments(){
-    let {video_segments} = this.state;
+    let {videoSegment} = this.state;
     console.log("----------------------------------------------------");
-    video_segments.map((segment) => console.log(" segment :  "+JSON.stringify(segment)));
+    videoSegment.map((segment) => console.log(" segment :  "+JSON.stringify(segment)));
     console.log("----------------------------------------------------");
   }
 
@@ -72,12 +79,15 @@ componentDidMount(){
 
         this.setState({ recording: false});
 
-        let {video_segments} = this.state;
-        video_segments.push({segment: this.state.progress,
-                             real_time: (this.state.progress>0?((this.state.progress * 9000)/100):0),
-                             url_segment : uri});
-        this.setState({video_segments: video_segments});
+        let {videoSegment} = this.state;
+        videoSegment.push({segment: this.state.progress,
+                           realTime: (this.state.progress>0?((this.state.progress * 9000)/100):0),
+                           urlSegment : uri});
+        this.setState({videoSegment: videoSegment});
         
+        this.getLastSegment();
+        this.setState({feedbackSegment : true})
+
         this.showSegments();
 
         let uri_elements = uri.split("/");// "file:///data/user/0/com.hilton/cache/Camera/58ef942a-2870-4a1f-90d7-b9bf38e2c497.mp4"
@@ -106,7 +116,7 @@ componentDidMount(){
                 .then(res => console.log(res))
                 .catch(err => console.warn(err))
         */
-        this.setState({ processing: false })
+        //this.setState({ processing: false })
         
       }catch(err){
         console.warn(err);
@@ -138,37 +148,32 @@ stopRecording() {
     this.setState({animationId});
   }
 
- async compileVideo(){
-      let {video_segments = [] , progress} = this.state;
-      if(video_segments.length && progress>=(MIN_VIDEO_SIZE / 100)){//it means at least 5 seconds of the current record.
-        console.log("Compiling Video....");
-        this.setState({processing:true})
-        this.setState({continue:true,processing:false})
-        //---------------> need to send all the videos to the endpoint to start processing and join all the splitted videos
-        await AsyncStorage.setItem('videoToPost', JSON.stringify(this.state.video_segments));
-
-      }else{
-        console.log("show a tool tip to tell that you must need to record at least a section of 5 seconds");
-      }
+ compileVideo(){
+      let {videoSegment = [] , progress} = this.state;
+      console.log("Compiling Video....");
+      if(progress<=(MAX_VIDEO_SIZE / 100))//it means at least 5 seconds of the current record.
+        this.setState({feedbackSegment : false})
+      else
+        this.setState({continue : true})
+      
   }
 
   redoVideo(){
-    let {video_segments} = this.state;
+    let {videoSegment} = this.state;
     console.log("Retake the last section of the video...");
-    if(video_segments.length>0){
-      video_segments.pop();//removing the last video
-      if(video_segments.length===0)
+    if(videoSegment.length>0){
+      videoSegment.pop();//removing the last video
+      if(videoSegment.length===0)
         this.setState({progress: 0,
                        continue: false})
       else{
-        let last_segment = video_segments[video_segments.length -1];
+        let last_segment = videoSegment[videoSegment.length -1];
         this.setState({progress: last_segment.segment})
-        if(last_segment.segment>=(MIN_VIDEO_SIZE / 100))
-          this.setState({continue: true});
-        else
+        if(last_segment.segment<(MIN_VIDEO_SIZE / 100))
           this.setState({continue: false});
       }
     }
+    this.setState({feedbackSegment : false})
     this.showSegments();
   }
 
@@ -180,10 +185,12 @@ stopRecording() {
     
   }
 
-  continueToPost(){
-    if(this.state.continue)
+  async continueToPost(){
+    if(this.state.continue){
+        //---------------> need to send all the videos to the endpoint to start processing and join all the splitted videos
+        await AsyncStorage.setItem('videoToPost', JSON.stringify(this.state.videoSegment));
       this.props.navigation.push('PostVideo');
-    else
+    }else
       console.log("nothing to save or post");
   }
 
@@ -204,26 +211,48 @@ stopRecording() {
     this.camera = ref;
   }
 
+  getLastSegment(){
+    let {videoSegment = []} = this.state;
+    if(videoSegment.length){
+      let lastSegment = videoSegment[videoSegment.length - 1];
+      console.log(`Current Segment : ${lastSegment.urlSegment}`);
+      this.setState({currentSegment : lastSegment.urlSegment});
+    }
+      
+  }
+
   render() {
     return (
       
       <Container style={cameraStyle.container}>
-        <CameraElement 
-          reference={(ref)=>{this.setCameraReference(ref)}}
-          progress={this.state.progress}
-          goBack={()=>this.goBack()}
-          flipCamera={()=>this.flipCamera()}
-          getVideosRoll={()=>this.getVideosRoll()}
-          startRecording={()=>this.startRecording()}
-          stopRecording={()=>this.stopRecording()}
-          videoSegments={this.state.video_segments}
-          redoVideo={()=>this.redoVideo()}
-          compileVideo={()=>this.compileVideo()}
-          continue={this.state.continue}
-          continueToPost={()=>this.continueToPost()}
-          processing={this.state.processing}
-          compile={this.state.progress>=(MIN_VIDEO_SIZE / 100)? 1:0}
-        />
+        {
+          !this.state.feedbackSegment?
+            <CameraElement 
+            reference={(ref)=>{this.setCameraReference(ref)}}
+            progress={this.state.progress}
+            goBack={()=>this.goBack()}
+            flipCamera={()=>this.flipCamera()}
+            getVideosRoll={()=>this.getVideosRoll()}//TODO: actually isn't working...
+            startRecording={()=>this.startRecording()}
+            stopRecording={()=>this.stopRecording()}
+            videoSegments={this.state.videoSegment}
+            redoVideo={()=>this.redoVideo()}
+            compileVideo={()=>this.compileVideo()}
+            continue={this.state.continue}
+            continueToPost={()=>this.continueToPost()}
+            processing={this.state.processing}
+            compile={this.state.progress>=(MIN_VIDEO_SIZE / 100)? 1:0}
+          />:
+          <FeedbackVideo 
+            source={this.state.currentSegment}
+            goBack={()=>this.goBack()}
+            arraySegments={this.state.videoSegment}
+            redoVideo={()=>this.redoVideo()}
+            compileVideo={()=>this.compileVideo()}
+            continueToPost={()=>this.continueToPost()}
+            continue={this.state.continue}
+          />
+        }
       </Container>
       
     );

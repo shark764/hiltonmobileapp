@@ -16,14 +16,8 @@ export default class CameraElement extends Component {
         super(props);
       }
       state = {
-        //recording: false,
-        //progress: 0,
-        //animationId: 0,
-        //processing: false,
-        //continue:false,
         cameraType : 'back',
         mirrorMode : false,
-        //video_segments: []
       };
 
     render(){
@@ -73,7 +67,8 @@ export default class CameraElement extends Component {
               <View style={{
                 justifyContent:'flex-end',
                 paddingLeft:25,
-                paddingBottom:(width*0.2)
+                paddingBottom:(width*0.2),
+                opacity:(this.props.videoSegments.length? 0:1)
                 }}>
                   <View >
                     <Ionicon name="md-photos" style={[cameraStyle.goBack,{alignSelf:'center'}]} onPress={()=> this.props.getVideosRoll()} />
@@ -115,7 +110,7 @@ export default class CameraElement extends Component {
 
                 <TouchableOpacity>
                 <View style={{paddingBottom:15,
-                              opacity:(this.props.compile)
+                              opacity:0//(this.props.compile)
                               }}>
                     <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.props.compileVideo()} />
                   <Text style={cameraStyle.textIcon} >Compile</Text>

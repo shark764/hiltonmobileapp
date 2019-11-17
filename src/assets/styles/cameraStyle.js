@@ -89,5 +89,14 @@ export const cameraStyle = {
         justifyContent:'flex-end',
         paddingBottom:(width*0.17),
         paddingRight:25
-      }
+      },
+      feedbackVideo: {
+        height: height,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        alignItems: "stretch",
+        bottom: 0,
+        right: 0
+        }
 };
