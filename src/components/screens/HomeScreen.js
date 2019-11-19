@@ -4,7 +4,7 @@ import { NavigationEvents } from 'react-navigation';
 import VideoElement from '../partials/VideoElement';
 import { connect } from 'react-redux';
 import { getVideos } from '../../redux/actions/videoActions';
-import { userLogin } from '../../redux/actions/authActions';
+import { getLoggedUser } from '../../redux/actions/authActions';
 
 class HomeScreen extends Component {
 	state = {
@@ -17,7 +17,7 @@ class HomeScreen extends Component {
 	};
 
 	async componentDidMount() {
-		await this.props.userLogin();
+		await this.props.getLoggedUser();
 		await this.props.getVideos();
 	}
 
@@ -118,4 +118,4 @@ class HomeScreen extends Component {
 
 const mapstateToProps = ({ videos }) => ({ videos: videos.videosInfo });
 
-export default connect(mapstateToProps, { getVideos, userLogin })(HomeScreen);
+export default connect(mapstateToProps, { getVideos, getLoggedUser })(HomeScreen);

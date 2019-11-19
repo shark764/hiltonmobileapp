@@ -12,8 +12,9 @@ import { createUser } from '../../../redux/actions/userActions';
 import { connect } from 'react-redux';
 import { Loader } from '../../commons/Loader';
 import AlertMessages from '../../commons/AlertMessages';
+import Form from '../../commons/Form';
 
-class EmailRegistrationScreen extends Component {
+class EmailRegistrationScreen extends Form {
 	static navigationOptions = () => ({ title: 'Sign up with your email' });
 
 	state = {
@@ -23,71 +24,17 @@ class EmailRegistrationScreen extends Component {
 		loading: false
 	};
 
-	rawInputs = [];
-
-	inputErrors = {};
-
-	onInputChange = (value, field) => {
-		const data = { ...this.state.data };
-		data[field] = value;
-		this.setState({ data });
-		this.validateField(field, value);
-	};
-
-	validations = () => {
-		const { data } = this.state;
-		let hasErrors = false;
-		Object.keys(data).forEach(key => {
-			const isValid = this.validateField(key, data[key]);
-			hasErrors = hasErrors || !isValid;
-			console.log(hasErrors);
-		});
-		return !hasErrors;
-	};
-
-	validateField = (name, value) => {
-		const { data } = this.state;
-		let error = '';
-
-		if (name === 'email') {
-			if (!validateEmail(value)) error = 'Invalid email';
-		} else if (name === 'confirmPassword' && value) {
-			if (value !== data['password']) error = 'Confirmation password does not match';
-		} else if (!value && typeof value !== 'boolean') error = 'Please enter a value';
-
-		if (error) {
-			this.inputErrors[name] = error;
-		} else {
-			delete this.inputErrors[name];
-		}
-		this.setState({});
-		return !error;
-	};
-
-	handleInputSubmit = (e, next) => {
-		if (next === 'submit') return this.handleSubmit();
-
-		//If the focus function doesnot exists, it means the input was a MaskedText,
-		//So we need to get the raw Input element
-		if (typeof this.rawInputs[next].focus !== 'function') this.rawInputs[next] = this.rawInputs[next].getElement();
-
-		return this.rawInputs[next].focus();
-	};
-
-	handleSubmit = () => {
-		if (!this.validations()) return;
-		this.onSubmit();
-	};
-
-	onSubmit = async () => {
+	doSubmit = async () => {
 		const user = { ...this.state.data };
-		delete user.confirmPassword;
+
 		this.setState({ loading: true });
 		const result = await this.props.createUser(user);
-		if (!result.success) AlertMessages.error(result.message);
-		else this.props.navigation.replace('Profile');
 
-		this.setState({ loading: false });
+		//If create user fails, we show an error, if not, the redux action will redirect to home
+		if (!result.success) {
+			AlertMessages.error(result.message);
+			this.setState({ loading: false });
+		}
 	};
 
 	showModal = option => {
@@ -287,7 +234,7 @@ class EmailRegistrationScreen extends Component {
 				</View>
 				{!loading && (
 					<Button
-						containerStyle={{ width: '100%', marginTop: 20 }}
+						containerStyle={{ width: '100%', marginTop: 20, marginBottom: 40 }}
 						buttonStyle={{
 							backgroundColor: colors.MAIN,
 							padding: 16,

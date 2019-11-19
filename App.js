@@ -28,14 +28,26 @@ import SingleVideoScreen from './src/components/screens/SingleVideoScreen';
 import LoginOrSignupScreen from './src/components/screens/SignUp/LoginOrSignupScreen';
 import EmailRegistrationScreen from './src/components/screens/SignUp/EmailRegistrationScreen';
 import CameraRollView from './src/components/partials/CameraRollView';
+import LoginScreen from './src/components/screens/SignUp/LoginScreen';
+import LocalStorage from './src/services/LocalStorage';
+import appJson from './app.json';
+import NavigationService from './src/services/NavigationService';
 
 export default class App extends Component {
+	componentDidMount() {
+		LocalStorage.setAppName(appJson.name);
+	}
+
 	render() {
 		return (
 			<View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 				<Provider store={configureStore()}>
 					<StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-					<AppContainer />
+					<AppContainer
+						ref={navigatorRef => {
+							NavigationService.setTopLevelNavigator(navigatorRef);
+						}}
+					/>
 				</Provider>
 			</View>
 		);
@@ -50,6 +62,9 @@ const ProfileStack = createStackNavigator(
 		},
 		EmailRegistration: {
 			screen: EmailRegistrationScreen
+		},
+		Login: {
+			screen: LoginScreen
 		},
 		Profile: {
 			screen: ProfileScreen,
@@ -147,7 +162,7 @@ SearchStack.navigationOptions = ({ navigation }) => {
 };
 
 CameraStack.navigationOptions = ({ navigation }) => {
-	if (navigation.state.index!=3) return { tabBarVisible: false };
+	if (navigation.state.index != 3) return { tabBarVisible: false };
 	return { tabBarVisible: true };
 };
 
