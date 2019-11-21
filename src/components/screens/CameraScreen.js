@@ -5,8 +5,6 @@ import { Container} from 'native-base'
 import AsyncStorage from '@react-native-community/async-storage';
 import CameraRoll from "@react-native-community/cameraroll";
 import { cameraStyle } from '../../assets/styles/cameraStyle';
-import fs from "react-native-fs";
-import { decode } from "base64-arraybuffer";
 import CameraElement from "../partials/CameraElement"
 import FeedbackVideo from "../partials/FeedbackVideo"
 
@@ -22,7 +20,6 @@ const checkAndroidPermission = async () => {
   }
 };
 
-const ENDPOINT = 'http://ec2co-ecsel-e7kzz6bjzpwo-1247028944.us-east-2.elb.amazonaws.com/video';
 const MAX_VIDEO_SIZE = 9000;
 const MIN_VIDEO_SIZE = 5000;
 export default class CameraScreen extends Component {
@@ -74,48 +71,14 @@ componentDidMount(){
 
       try{
         let { uri, codec = "mp4" } = await this.camera.recordAsync();  
-        let type = `video/${codec}`;
+        //let type = `video/${codec}`;
 
-        this.setState({ recording: false});
+        this.setState({ recording: false,
+                        currentSegment: uri,
+                        feedbackSegment : true});
 
-        let {videoSegment} = this.state;
-        videoSegment.push({segment: this.state.progress,
-                           realTime: (this.state.progress>0?((this.state.progress * 9000)/100):0),
-                           urlSegment : uri});
-        this.setState({videoSegment: videoSegment});
-        
-        this.getLastSegment();
-        this.setState({feedbackSegment : true})
-
-        this.showSegments();
-
-        let uri_elements = uri.split("/");// "file:///data/user/0/com.hilton/cache/Camera/58ef942a-2870-4a1f-90d7-b9bf38e2c497.mp4"
-        let video = uri_elements[uri_elements.length -1];
-        let base64 = await fs.readFile(uri, "base64");               
-        let videoObject = decode(base64);
-        
-        let video_body = {
-                          title: video,
-                          description: video,
-                          duration: 9,
-                          id_user: 19,
-                          video: videoObject
-                        };
-      /*
-        console.log("about to save the video....");
-        fetch(ENDPOINT, {
-                        method: "POST",
-                        headers: {
-                          'Accept': 'application/json, text/plain',
-                          'Content-Type': 'multipart/form-data'//, application/json'
-                      },
-                        body: JSON.stringify(video_body)
-                      })
-                .then(res => {console.log(`the result is : ${res.status}`); return res.json()})
-                .then(res => console.log(res))
-                .catch(err => console.warn(err))
-        */
-        //this.setState({ processing: false })
+        if(((this.state.progress * MAX_VIDEO_SIZE)/100)>MIN_VIDEO_SIZE)//it means at least 5 seconds of the current record.
+          this.setState({continue : true})
         
       }catch(err){
         console.warn(err);
@@ -148,13 +111,19 @@ stopRecording() {
   }
 
  compileVideo(){
-      let {videoSegment = [] , progress} = this.state;
+      //let {videoSegment = [] , progress} = this.state;
       console.log("Compiling Video....");
-      if(progress<=(MAX_VIDEO_SIZE / 100))//it means at least 5 seconds of the current record.
-        this.setState({feedbackSegment : false})
-      else
-        this.setState({continue : true})
-      
+      this.setState({feedbackSegment : false})
+
+      let {videoSegment, progress, currentSegment} = this.state;
+        videoSegment.push({segment: progress,
+                           realTime: (progress>0?((progress * MAX_VIDEO_SIZE)/100):0),
+                           url : currentSegment});
+        this.setState({videoSegment: videoSegment,
+                       currentSegment:''});
+
+        this.showSegments();
+
   }
 
   redoVideo(){
@@ -185,6 +154,10 @@ stopRecording() {
   }
 
   async continueToPost(){
+
+    if(this.state.currentSegment)
+      this.compileVideo()
+
     if(this.state.continue){
         //---------------> need to send all the videos to the endpoint to start processing and join all the splitted videos
         await AsyncStorage.setItem('videoToPost', JSON.stringify(this.state.videoSegment));
@@ -219,8 +192,8 @@ stopRecording() {
     let {videoSegment = []} = this.state;
     if(videoSegment.length){
       let lastSegment = videoSegment[videoSegment.length - 1];
-      console.log(`Current Segment : ${lastSegment.urlSegment}`);
-      this.setState({currentSegment : lastSegment.urlSegment});
+      console.log(`Current Segment : ${lastSegment.url}`);
+      this.setState({currentSegment : lastSegment.url});
     }
       
   }
@@ -250,7 +223,6 @@ stopRecording() {
           <FeedbackVideo 
             source={this.state.currentSegment}
             goBack={()=>this.goBack()}
-            arraySegments={this.state.videoSegment}
             redoVideo={()=>this.redoVideo()}
             compileVideo={()=>this.compileVideo()}
             continueToPost={()=>this.continueToPost()}

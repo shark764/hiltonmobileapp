@@ -3,10 +3,11 @@ import { Text,TextInput, View, Dimensions,ScrollView,TouchableOpacity,Permission
 import ToggleSwitch from 'toggle-switch-react-native'
 import AsyncStorage from '@react-native-community/async-storage';
 import { Container } from 'native-base'
-import CameraRoll from "@react-native-community/cameraroll";//https://github.com/react-native-community/react-native-camera/blob/master/docs/installation.md#mostly-automatic-install-with-cocoapods
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import Ionicon from 'react-native-vector-icons/Ionicons';
+import fs from "react-native-fs";
+import { decode } from "base64-arraybuffer";
 import { fonts,colors } from '../../config/constants'
 const { height, width } = Dimensions.get('window');
 import { postStyle } from '../../assets/styles/postStyle';
@@ -21,19 +22,22 @@ const checkAndroidPermission = async () => {
     }
 };
 
+const ENDPOINT = 'http://ec2co-ecsel-e7kzz6bjzpwo-1247028944.us-east-2.elb.amazonaws.com/video';
+
 export default class PostVideoScreen extends Component {
   constructor(props) {
     super(props)
     this.state = {
                     url_video:'',
-                    paused: true,
+                    paused: false,
                     boostOption:false,
                     saveVideo:false,
                     allowComment:false,
                     postOnFacebook:false,
                     postOnIGstory:false,
                     postOnIGpost:false,
-                    postOnTwitter:false
+                    postOnTwitter:false,
+                    description:''
                 }
 }
 
@@ -48,16 +52,59 @@ goForward(){
 
 async componentDidMount(){
     let videoSegment = await AsyncStorage.getItem('videoToPost');
+    videoSegment = JSON.parse(videoSegment);
     let lastSegment = videoSegment[videoSegment.length - 1];
-    this.setState({url_video : lastSegment,paused:false});
+    this.setState({url_video : lastSegment.url, paused: false});
+    console.log(this.state.url_video)
 }
 
+async uploadSegments(){
+    let videoSegment = await AsyncStorage.getItem('videoToPost');
+    videoSegment = JSON.parse(videoSegment);
+    let lastSegment = videoSegment[videoSegment.length - 1];
+    let test = null;
+    let arrayVideoObjects = [];
+
+    for(let i=0;i<videoSegment.length;i++){
+        let segment = videoSegment[i];
+        let base64 = await fs.readFile(segment.url, "base64");
+        let videoObject = decode(base64);  
+        test = videoObject;
+        arrayVideoObjects.push(videoObject);
+    }
+    
+    console.log(`--> arrayVideoObject : ${arrayVideoObjects.length}`);
+    let { description } = this.state;
+    let video_body = {
+                      title: description,
+                      description: description,
+                      duration: lastSegment.realTime/1000,//seconds ? or millis?
+                      id_user: 28,
+                      video: test //arrayVideoObjects
+                    };
+  
+    console.log("about to save the video....");
+    fetch(ENDPOINT, {
+                    method: "POST",
+                    headers: {
+                      'Accept': 'application/json, text/plain',
+                      'Content-Type': 'multipart/form-data'
+                    },
+                    body: JSON.stringify(video_body)
+                  })
+            .then(res => {console.log(`the result is : ${res.status}`); return res.json()})
+            .then(res => console.log(res))
+            .catch(err => console.warn(err))
+  }
+
 async postVideo(){
-    let {url_video} = this.state;
+    //let {url_video} = this.state;
+    await this.uploadSegments();
 
     if (Platform.OS === 'android'){
         await checkAndroidPermission();
       }
+    /*  
     try{
         if(this.state.saveVideo)
             CameraRoll.saveToCameraRoll(url_video,"video")
@@ -68,6 +115,8 @@ async postVideo(){
     }catch(error){
         console.warn(error);
     }
+    */
+   this.goForward();
 }
 
     render() {
@@ -93,7 +142,6 @@ async postVideo(){
                         <Video
                             source={{ uri: this.state.url_video }} // Can be a URL or a local file.
                             repeat
-                            resizeMode={'cover'}
                             paused={this.state.paused}
                             style={postStyle.rightSide}
                         />
@@ -106,7 +154,9 @@ async postVideo(){
                                maxLength={39}
                                textAlignVertical='bottom'
                                numberOfLines={3}
-                    >Write a caption here!...(39 Max). This is a long caption, to test thwe maxLength.
+                               placeholder='Write a caption here!...(39 Max).'
+                               onChangeText={(description) => this.setState({ description })}
+                    >
                     </TextInput>
                 </View>
             </View>
