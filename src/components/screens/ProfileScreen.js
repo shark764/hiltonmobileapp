@@ -165,11 +165,11 @@ class ProfileScreen extends Component {
 	};
 
 	async componentDidMount() {
-		let url_video = await AsyncStorage.getItem('videoToPost');
-		this.setState({ url_video, paused: false });
-		console.log('..................................');
-		console.log(this.state.url_video);
-		console.log('..................................');
+		//let url_video = await AsyncStorage.getItem('videoToPost');
+		//this.setState({ url_video, paused: false });
+		//console.log('..................................');
+		//console.log(this.state.url_video);
+		//console.log('..................................');
 		await this.getImages();
 		await this.getLaughs();
 		await this.getProfileInfo();

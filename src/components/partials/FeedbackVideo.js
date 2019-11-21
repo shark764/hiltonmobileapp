@@ -55,7 +55,6 @@ export default class FeedbackVideo extends Component {
                         <View style={{
                                         paddingBottom:15,
                                         alignItems: 'center',
-                                        opacity:(this.props.arraySegments.length? 1:0)
                         }}>
                         <FeatherIcon name="refresh-ccw" style={cameraStyle.goBack} onPress={()=> this.props.redoVideo()} />
                         <Text style={cameraStyle.textIcon} >Redo</Text>
@@ -65,7 +64,6 @@ export default class FeedbackVideo extends Component {
                     <TouchableOpacity>
                     <View style={{paddingBottom:15,
                                     alignItems: 'center',
-                                    opacity:(this.props.arraySegments.length? 1:0)
                                     }}>
                         <FeatherIcon name="layers" style={cameraStyle.goBack} onPress={()=> this.props.compileVideo()} />
                         <Text style={cameraStyle.textIcon} >Compile</Text>
