@@ -163,7 +163,8 @@ SearchStack.navigationOptions = ({ navigation }) => {
 
 CameraStack.navigationOptions = ({ navigation }) => {
 	if (navigation.state.index != 3) return { tabBarVisible: false };
-	return { tabBarVisible: true };
+	return { tabBarVisible: true,
+			 header: null };
 };
 
 const bottomTabNavigator = createBottomTabNavigator(

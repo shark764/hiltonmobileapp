@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 const { height, width } = Dimensions.get('window');
 
 class ProfileScreen extends Component {
+	static navigationOptions = () => ({ title: 'Profile' });
 	constructor(props) {
 		super(props);
 

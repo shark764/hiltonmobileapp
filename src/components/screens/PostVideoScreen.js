@@ -46,7 +46,6 @@ export default class PostVideoScreen extends Component {
 }
 
 goForward(){
-    console.log("its supposed to navigate through profile screen... (working on that...)");
     this.props.navigation.push('Profile');
 }
 
@@ -82,19 +81,34 @@ async uploadSegments(){
                       id_user: 28,
                       video: test //arrayVideoObjects
                     };
+    
+    let video_name = lastSegment.url.split("/");
+    console.log(`video name : ${video_name[video_name.length -1]}`)    
+
+    const data = new FormData();
+    data.append("title",description)
+    data.append("description",description)
+    data.append("duration",parseInt(lastSegment.realTime/1000))
+    data.append("id_user",28)//-------->change the user
+    data.append('video', {
+        uri: lastSegment.url,
+        type: lastSegment.type,
+        name: video_name[video_name.length -1]
+    });       
   
     console.log("about to save the video....");
-    fetch(ENDPOINT, {
+    //try{
+        await fetch(ENDPOINT, {
                     method: "POST",
+                    mode: 'no-cors',
                     headers: {
-                      'Accept': 'application/json, text/plain',
-                      'Content-Type': 'multipart/form-data'
-                    },
-                    body: JSON.stringify(video_body)
-                  })
-            .then(res => {console.log(`the result is : ${res.status}`); return res.json()})
-            .then(res => console.log(res))
-            .catch(err => console.warn(err))
+                        'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+                        'Content-Type': 'multipart/form-data'
+                      },
+                    body: data
+                    }).then(res => res.json())
+                    .then(res => console.log(`---> result : ${JSON.stringify(res)}`))
+                    .catch(err => console.error(err))
   }
 
 async postVideo(){

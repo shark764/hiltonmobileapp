@@ -34,6 +34,7 @@ export default class CameraScreen extends Component {
           //mirrorMode : false,
           feedbackSegment:false,//must be false to start
           currentSegment:'',
+          videoType : 'video/mp4',
           videoSegment: []
         };
 
@@ -71,11 +72,12 @@ componentDidMount(){
 
       try{
         let { uri, codec = "mp4" } = await this.camera.recordAsync();  
-        //let type = `video/${codec}`;
+        let videoType = `video/${codec}`;
 
         this.setState({ recording: false,
                         currentSegment: uri,
-                        feedbackSegment : true});
+                        feedbackSegment : true,
+                        videoType});
 
         if(((this.state.progress * MAX_VIDEO_SIZE)/100)>MIN_VIDEO_SIZE)//it means at least 5 seconds of the current record.
           this.setState({continue : true})
@@ -115,10 +117,11 @@ stopRecording() {
       console.log("Compiling Video....");
       this.setState({feedbackSegment : false})
 
-      let {videoSegment, progress, currentSegment} = this.state;
+      let {videoSegment, progress, currentSegment, videoType} = this.state;
         videoSegment.push({segment: progress,
                            realTime: (progress>0?((progress * MAX_VIDEO_SIZE)/100):0),
-                           url : currentSegment});
+                           url : currentSegment,
+                           type : videoType});
         this.setState({videoSegment: videoSegment,
                        currentSegment:''});
 
