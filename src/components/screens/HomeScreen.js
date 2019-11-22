@@ -21,11 +21,13 @@ class HomeScreen extends Component {
 		await this.props.getVideos();
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		const { videos } = this.props;
+	async componentDidUpdate(prevProps, prevState) {
+		const { videos, loggedUser, getVideos } = this.props;
 
 		//If we have new videos, they will be aded to the end.
 		if (prevProps.videos !== videos) this.setState({ videos, loading: false });
+
+		if (prevProps.loggedUser !== loggedUser) await getVideos();
 	}
 
 	videoChanged = e => {
@@ -116,6 +118,6 @@ class HomeScreen extends Component {
 	};
 }
 
-const mapstateToProps = ({ videos }) => ({ videos: videos.videosInfo });
+const mapstateToProps = ({ videos, auth }) => ({ videos: videos.videosInfo, loggedUser: auth.loggedUser });
 
 export default connect(mapstateToProps, { getVideos, getLoggedUser })(HomeScreen);

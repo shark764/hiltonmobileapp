@@ -1,38 +1,48 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { Input, Button, CheckBox } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Feather';
 import { connect } from 'react-redux';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { fonts, colors } from '../../../config/constants';
 import { Loader } from '../../commons/Loader';
-import { userLogin } from '../../../redux/actions/authActions';
+import { userLoginWithEmail } from '../../../redux/actions/authActions';
 import Form from '../../commons/Form';
 import AlertMessages from '../../commons/AlertMessages';
 
 class LoginScreen extends Form {
 	state = {
 		data: { email: '', password: '' },
+		rememberMe: false,
 		loading: false
 	};
 
+	onRemberMePress = () => this.setState({ rememberMe: !this.state.rememberMe });
+
 	doSubmit = async () => {
 		const user = { ...this.state.data };
+		const { rememberMe } = this.state;
 		this.setState({ loading: true });
-		const result = await this.props.userLogin(user);
+		const result = await this.props.userLoginWithEmail(user, rememberMe);
 
 		//If login fails, we show an error, if not, the redux action will redirect to home
 		if (!result.success) {
-			AlertMessages.error(result.message);
+			AlertMessages.error(result.message, undefined, undefined, 50);
 			this.setState({ loading: false });
 		}
 	};
 
 	render() {
-		const { data, loading } = this.state;
+		const { data, loading, rememberMe } = this.state;
 		const inputErrors = this.inputErrors;
 
 		return (
-			<View style={{ flex: 1, alignItems: 'center', margin: 16, marginTop: 20 }}>
+			<KeyboardAwareScrollView
+				keyboardShouldPersistTaps="handled"
+				keyboardDismissMode="on-drag"
+				style={{ flex: 1, margin: 16, marginTop: 20 }}
+				contentContainerStyle={{ alignItems: 'center' }}
+			>
 				<Text style={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 17, color: '#2F2F2F' }}>
 					Log in to GrapeVine
 				</Text>
@@ -66,7 +76,18 @@ class LoginScreen extends Form {
 						value={data['password']}
 					/>
 				</View>
-				<View style={{ marginTop: 20 }}>
+				<View style={{ width: '100%', marginTop: 10 }}>
+					<CheckBox
+						title="Remember me?"
+						checkedColor={colors.MAIN}
+						checked={rememberMe}
+						onPress={this.onRemberMePress}
+						containerStyle={{ backgroundColor: '#fff', borderWidth: 0 }}
+						textStyle={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 14, color: '#606060' }}
+					/>
+				</View>
+
+				<View style={{ marginTop: 10 }}>
 					<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 13, color: colors.MAIN }}>
 						Forgot your password?
 					</Text>
@@ -111,7 +132,7 @@ class LoginScreen extends Form {
 				<View
 					style={{
 						width: '100%',
-						marginTop: 20,
+						marginTop: 10,
 						flexDirection: 'row',
 						justifyContent: 'center',
 						alignItems: 'center'
@@ -134,12 +155,12 @@ class LoginScreen extends Form {
 						Login via phone number
 					</Text>
 				</View>
-			</View>
+			</KeyboardAwareScrollView>
 		);
 	}
 }
 
-export default connect(null, { userLogin })(LoginScreen);
+export default connect(null, { userLoginWithEmail })(LoginScreen);
 
 const styles = {
 	input: {

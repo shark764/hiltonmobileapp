@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
-import { Text, View, KeyboardAvoidingView } from 'react-native';
-import { fonts, colors, globals } from '../../../config/constants';
+import React from 'react';
+import { Text, View } from 'react-native';
+import { fonts, colors } from '../../../config/constants';
 import { Button } from 'react-native-elements';
 import DatePicker from '../../commons/DateTimePicker';
 import { Input } from 'react-native-elements';
-import { validateEmail } from '../../../utils/helpers';
+
 import { Header } from 'react-navigation-stack';
 import ModalPopup from '../../commons/ModalPopup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';

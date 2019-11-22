@@ -23,6 +23,7 @@ export default class VideoActions extends Component {
 
 	render() {
 		const { videoItem, showVideoInfo } = this.props;
+
 		return (
 			<LinearGradient colors={['rgba(0, 0, 0,0)', 'rgba(0, 0, 0,0.4)']} style={styles.gradientContainer}>
 				<View style={[styles.userContainer, getShowHideStyle(showVideoInfo)]}>
@@ -30,8 +31,7 @@ export default class VideoActions extends Component {
 						<View style={styles.userImageContainer2}>
 							<Image
 								source={{
-									//uri: videoItem.user.img
-									uri: '/'
+									uri: videoItem.user.avatar || '/'
 								}}
 								resizeMode="contain"
 								style={styles.userImage}
@@ -40,7 +40,7 @@ export default class VideoActions extends Component {
 					</View>
 					<View>
 						<View style={styles.userHandleContainer}>
-							<Text style={styles.userHandleText}>{videoItem.user}</Text>
+							<Text style={styles.userHandleText}>@{videoItem.user.username}</Text>
 							<Text style={styles.dotSeparator}>•</Text>
 							<TouchableOpacity onPress={this.onFollowPress}>
 								<Text style={styles.userFollowText}>{this.state.follow ? 'Follow' : 'Unfollow'}</Text>
@@ -60,7 +60,7 @@ export default class VideoActions extends Component {
 							textShadowRadius: 1
 						}}
 					/>
-					<Text style={styles.actionCounters}>24k</Text>
+					<Text style={styles.actionCounters}>{videoItem.laughs}</Text>
 					<TouchableOpacity onPress={this.props.onShowHideCommentsPress}>
 						<Icon
 							name="message-square"
@@ -73,7 +73,7 @@ export default class VideoActions extends Component {
 							}}
 						/>
 					</TouchableOpacity>
-					<Text style={[styles.actionCounters, { marginTop: 0 }]}>9k</Text>
+					<Text style={[styles.actionCounters, { marginTop: 0 }]}>{videoItem.comments}</Text>
 					<TouchableOpacity onPress={this.shareVideo}>
 						<Icon
 							name="share"

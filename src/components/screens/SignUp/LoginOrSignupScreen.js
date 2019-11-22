@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { Text, View, SafeAreaView, TextInput } from 'react-native';
+import { Text, View, SafeAreaView, TextInput, Dimensions } from 'react-native';
 import { connect } from 'react-redux';
 import { fonts, colors } from '../../../config/constants';
 import IconFeather from 'react-native-vector-icons/Feather';
 import LineSeparator from '../../commons/LineSeparator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 class LoginOrSignupScreen extends Component {
 	componentDidMount() {
@@ -65,16 +67,39 @@ class LoginOrSignupScreen extends Component {
 								<IconFeather name={'mail'} size={45} color={'#fff'} />
 							</View>
 						</TouchableOpacity>
-						<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 14, color: '#2F2F2F' }}>
+						<Text
+							style={{
+								fontFamily: fonts.OPENSANS_REGULAR,
+								fontSize: 14,
+								color: '#2F2F2F',
+								marginTop: 10
+							}}
+						>
 							Sign up with your email
 						</Text>
 
-						<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 12, color: '#555555' }}>
+						<Text
+							style={{
+								fontFamily: fonts.OPENSANS_REGULAR,
+								fontSize: 12,
+								color: '#555555',
+								marginTop: 10
+							}}
+						>
 							Note: You will receive an email with a code to confirm your registration.
 						</Text>
 					</View>
-					<View style={{ width: '100%', marginVertical: 40, justifyContent: 'center', alignItems: 'center' }}>
+
+					<View
+						style={{
+							width: screenWidth,
+							marginVertical: 40,
+							justifyContent: 'center',
+							alignItems: 'center'
+						}}
+					>
 						<LineSeparator style={{ marginVertical: 0 }} />
+
 						<Text
 							style={{
 								position: 'absolute',
@@ -116,11 +141,25 @@ class LoginOrSignupScreen extends Component {
 								<IconFeather name={'phone'} size={45} color={'#fff'} />
 							</View>
 						</TouchableOpacity>
-						<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 14, color: '#2F2F2F' }}>
+						<Text
+							style={{
+								fontFamily: fonts.OPENSANS_REGULAR,
+								fontSize: 14,
+								color: '#2F2F2F',
+								marginTop: 10
+							}}
+						>
 							Sign up with your phone
 						</Text>
 
-						<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 12, color: '#555555' }}>
+						<Text
+							style={{
+								fontFamily: fonts.OPENSANS_REGULAR,
+								fontSize: 12,
+								color: '#555555',
+								marginTop: 10
+							}}
+						>
 							Note: You will receive a sms with a code to confirm your registration.
 						</Text>
 					</View>

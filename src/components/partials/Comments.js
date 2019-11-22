@@ -13,11 +13,11 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IconFeather from 'react-native-vector-icons/Feather';
 import LottieView from 'lottie-react-native';
+import { connect } from 'react-redux';
 import { heartAnimation } from '../../assets/animations/index';
 import { globals } from '../../config/constants';
 import { commentsStyles as styles } from '../../assets/styles';
-import { connect } from 'react-redux';
-import { getVideoComments, postVideoComment } from '../../redux/actions/videoActions';
+import { getVideoComments, postVideoComment, commentLiked } from '../../redux/actions/videoActions';
 import { getShowHideStyle } from '../../utils/helpers';
 
 const screenHeight = Math.round(Dimensions.get('window').height);
@@ -35,23 +35,26 @@ class CommentsScreen extends Component {
 	}
 
 	componentDidMount = async () => {
-		await this.props.getVideoComments(this.props.videoId);
+		const { video, loggedUser, getVideoComments } = this.props;
+		const userId = loggedUser ? loggedUser.id : null;
+		await getVideoComments(video.id, userId);
 	};
 
-	componentDidUpdate(prevProps, prevState) {
+	async componentDidUpdate(prevProps, prevState) {
 		this.showHideView();
-		const { comments } = this.props;
+		const { video, comments, getVideoComments, loggedUser } = this.props;
 		if (prevProps.comments !== comments) this.setState({ comments, loading: false });
+
+		const userId = loggedUser ? loggedUser.id : null;
+		if (prevProps.loggedUser !== loggedUser) await getVideoComments(video.id, userId);
 	}
 
-	onLikePress = id => {
-		const { comments } = this.state;
-		const comment = comments.find(c => c.id === id);
-		comment.liked = !comment.liked;
-		if (comment.liked) comment.likes++;
-		else comment.likes--;
+	onLikePress = async comment => {
+		const { loggedUser, commentLiked } = this.props;
 
-		this.setState({ comments });
+		if (!loggedUser) return;
+
+		await commentLiked(comment.id, loggedUser.id, !comment.already_like);
 	};
 
 	onChangeText = text => {
@@ -59,22 +62,15 @@ class CommentsScreen extends Component {
 	};
 
 	onSubmitMessage = async () => {
-		const { comments, currentComment } = this.state;
-		const { loggedUser, videoId } = this.props;
+		const { currentComment } = this.state;
+		const { loggedUser, video } = this.props;
 
 		if (!currentComment) return;
 
-		// const comment = {
-		// 	id: Date.now(),
-		// 	comment: currentComment,
-		// 	user: loggedUser,
-		// 	likes: 0
-		// };
-		// comments.unshift(comment);
-		await this.props.postVideoComment(videoId, 19, currentComment);
-		this.setState({ comments, currentComment: '' });
-
+		await this.props.postVideoComment(video.id, loggedUser.id, currentComment);
+		this.setState({ currentComment: '' });
 		this.commentsScroll.scrollTo({ y: 0 });
+		//video.comments++;
 	};
 
 	showHideView = () => {
@@ -130,7 +126,7 @@ class CommentsScreen extends Component {
 					<View style={[styles.addCommentContainer, newMarginBottom]}>
 						<Image
 							source={{
-								uri: loggedUser.img
+								uri: loggedUser.avatar || '/'
 							}}
 							style={styles.currentUserImage}
 						/>
@@ -154,31 +150,31 @@ class CommentsScreen extends Component {
 			<View style={styles.commentItemContainer}>
 				<Image
 					source={{
-						uri: comment.user
+						uri: comment.user.avatar || '/'
 					}}
 					resizeMode="contain"
 					style={styles.commentUserImage}
 				/>
 				<View style={styles.commentCenterContainer}>
-					<Text style={styles.commentUserHandleText}>{comment.user}</Text>
+					<Text style={styles.commentUserHandleText}>@{comment.user.username}</Text>
 					<Text style={styles.commentText}>{comment.comment}</Text>
 				</View>
 				<View style={{ alignItems: 'center' }}>
-					<TouchableOpacity onPress={() => this.onLikePress(comment.id)}>
+					<TouchableOpacity onPress={() => this.onLikePress(comment)}>
 						<View style={styles.likeContainer}>
 							<Icon
 								name={'heart-o'}
 								size={18}
 								color={'#9F9F9F'}
-								style={getShowHideStyle(!comment.liked)}
+								style={getShowHideStyle(!comment.already_like)}
 							/>
 
-							{comment.liked && (
+							{comment.already_like && (
 								<LottieView
 									source={heartAnimation}
 									autoPlay
 									loop={false}
-									style={[styles.likeAnimation, getShowHideStyle(comment.liked)]}
+									style={[styles.likeAnimation, getShowHideStyle(comment.already_like)]}
 								/>
 							)}
 						</View>
@@ -192,4 +188,4 @@ class CommentsScreen extends Component {
 
 const mapStateToProps = ({ videos, auth }) => ({ comments: videos.comments, loggedUser: auth.loggedUser });
 
-export default connect(mapStateToProps, { getVideoComments, postVideoComment })(CommentsScreen);
+export default connect(mapStateToProps, { getVideoComments, postVideoComment, commentLiked })(CommentsScreen);

@@ -24,6 +24,7 @@ class ProfileScreen extends Component {
 			profile_info: {},
 			url_video: ''
 		};
+		this._isMounted = false;
 	}
 
 	getImages = () => {
@@ -165,14 +166,22 @@ class ProfileScreen extends Component {
 	};
 
 	async componentDidMount() {
-		//let url_video = await AsyncStorage.getItem('videoToPost');
-		//this.setState({ url_video, paused: false });
-		//console.log('..................................');
-		//console.log(this.state.url_video);
-		//console.log('..................................');
-		await this.getImages();
-		await this.getLaughs();
-		await this.getProfileInfo();
+		this._isMounted = true;
+		let url_video = await AsyncStorage.getItem('videoToPost');
+
+		if (this._isMounted) {
+			this.setState({ url_video, paused: false });
+			console.log('..................................');
+			console.log(this.state.url_video);
+			console.log('..................................');
+			await this.getImages();
+			await this.getLaughs();
+			await this.getProfileInfo();
+		}
+	}
+
+	componentWillUnmount() {
+		this._isMounted = false;
 	}
 
 	goToSettings() {
@@ -234,7 +243,8 @@ class ProfileScreen extends Component {
 	}
 
 	render() {
-		const { profile_info } = this.state;
+		const { loggedUser } = this.props;
+		if (!loggedUser) return null;
 
 		return (
 			<Container style={profileStyle.container}>
@@ -272,11 +282,11 @@ class ProfileScreen extends Component {
 					<View style={{ paddingTop: 10 }}>
 						<View style={{ flexDirection: 'row' }}>
 							<View style={profileStyle.profileContainer}>
-								<Image source={{ uri: profile_info.profilePhoto }} style={profileStyle.profilePhoto} />
+								<Image source={{ uri: loggedUser.avatar }} style={profileStyle.profilePhoto} />
 							</View>
 							<View style={{ flex: 2, paddingTop: 20 }}>
-								<Text style={profileStyle.userName}>{profile_info.userId}</Text>
-								<Text style={profileStyle.bioInfo}>{profile_info.bioInfo}</Text>
+								<Text style={profileStyle.userName}>@{loggedUser.username}</Text>
+								<Text style={profileStyle.bioInfo}>{loggedUser.bio}</Text>
 							</View>
 						</View>
 

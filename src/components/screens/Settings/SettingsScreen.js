@@ -2,26 +2,21 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackActions, NavigationActions } from 'react-navigation';
+import { connect } from 'react-redux';
+import { userLogout } from '../../../redux/actions/authActions';
 import { settingsStyles as styles } from '../../../assets/styles';
 import LineSeparator from '../../commons/LineSeparator';
 
-export default class SettingsScreen extends Component {
+class SettingsScreen extends Component {
 	static navigationOptions = () => ({ title: 'Settings' });
 
 	goToSettingItem = item => {
 		this.props.navigation.push(item);
 	};
 
-	onLogOut = () => {
-		//Reset current Stack
-		const resetAction = StackActions.reset({
-			index: 0,
-			actions: [NavigationActions.navigate({ routeName: 'Profile' })]
-		});
-
-		this.props.navigation.dispatch(resetAction);
-		//Go to parent screen - Home
-		this.props.navigation.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Home' });
+	onLogOut = async () => {
+		//Remove the local storage data of the logged user and redirect
+		await this.props.userLogout();
 	};
 
 	render() {
@@ -68,3 +63,5 @@ export default class SettingsScreen extends Component {
 		);
 	}
 }
+
+export default connect(null, { userLogout })(SettingsScreen);

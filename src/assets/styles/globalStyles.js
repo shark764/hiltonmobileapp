@@ -7,5 +7,7 @@ export const globalStyles = {
 		width: 100,
 		height: 100,
 		alignSelf: 'center'
-	}
+	},
+	textBlackShadow: { textShadowColor: '#000', textShadowOffset: { width: 0.3, height: 0.3 }, textShadowRadius: 1 },
+	textWhiteShadow: { textShadowColor: '#fff', textShadowOffset: { width: 0.3, height: 0.3 }, textShadowRadius: 1 }
 };

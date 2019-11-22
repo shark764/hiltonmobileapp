@@ -2,9 +2,9 @@ import * as types from '../types';
 import apiServices from '../../services/apiServices';
 import { globals } from '../../config/constants';
 import httpService from '../../services/httpService';
+import AlertMessages from '../../components/commons/AlertMessages';
 
 export const getVideos = () => async dispatch => {
-	//TODO: api callback
 	// const videos = [
 	//   {
 	//     id: 1,
@@ -80,105 +80,62 @@ export const getVideos = () => async dispatch => {
 
 	const response = await apiServices.getHomeVideos();
 
-	const videos = getVideosWithUrlField(response.data);
+	let videos = getVideosWithUrlField(response.data);
+	//TODO: REMOVE THIS
+	if (videos) videos = videos.reverse();
 
-	if (!response.errorMessage) dispatch({ type: types.GET_VIDEOS, payload: videos });
-	else dispatch({ type: types.API_ERROR, payload: response.errorMessage });
+	//console.log('Videos: ', videos);
+	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: videos });
 };
 
-export const getVideoComments = videoId => async dispatch => {
-	//TODO: api callback
-	// const comments = [
-	// 	{
-	// 		id: 1,
-	// 		comment:
-	// 			'Here is where the comment will appear and it can be up to 4 lines long which is about how long this sentence is here',
-	// 		user: {
-	// 			handle: '@mega87',
-	// 			img: 'https://pbs.twimg.com/profile_images/1029816770897408000/aUljTnyv.jpg'
-	// 		},
-	// 		likes: 10
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		comment:
-	// 			'Here is where the comment will appear and it can be up to 4 lines long which is about how long this sentence is here 2',
-	// 		user: {
-	// 			handle: '@marioTux1',
-	// 			img: 'https://mario.nintendo.com/assets/img/home/intro/mario-pose2.png'
-	// 		},
-	// 		likes: 10
-	// 	},
-	// 	{
-	// 		id: 3,
-	// 		comment: 'Here is where the',
-	// 		user: {
-	// 			handle: '@Samu2019',
-	// 			img: 'http://www.sweatpantsgaming.com/wp-content/uploads/2019/01/Samus-Super-Smash-Bros-Ultimate.png'
-	// 		},
-	// 		likes: 10
-	// 	},
-	// 	{
-	// 		id: 4,
-	// 		comment:
-	// 			'Here is where the comment will appear and it can be up to 4 lines long which is about how long this sentence is here 2',
-	// 		user: {
-	// 			handle: '@mega87',
-	// 			img: 'https://pbs.twimg.com/profile_images/1029816770897408000/aUljTnyv.jpg'
-	// 		},
-	// 		likes: 10
-	// 	},
-	// 	{
-	// 		id: 5,
-	// 		comment:
-	// 			'Here is where the comment will appear and it can be up to 4 lines long which is about how long this sentence is here 2',
-	// 		user: {
-	// 			handle: '@marioTux1',
-	// 			img: 'https://mario.nintendo.com/assets/img/home/intro/mario-pose2.png'
-	// 		},
-	// 		likes: 10
-	// 	},
-	// 	{
-	// 		id: 6,
-	// 		comment:
-	// 			'Here is where the comment will appear and it can be up to 4 lines long which is about how long this sentence is here 2',
-	// 		user: {
-	// 			handle: '@Samu2019',
-	// 			img: 'http://www.sweatpantsgaming.com/wp-content/uploads/2019/01/Samus-Super-Smash-Bros-Ultimate.png'
-	// 		},
-	// 		likes: 10
-	// 	},
-	// 	{
-	// 		id: 7,
-	// 		comment:
-	// 			'Here is where the comment will appear and it can be up to 4 lines long which is about how long this sentence is here 2',
-	// 		user: {
-	// 			handle: '@mega87',
-	// 			img: 'https://pbs.twimg.com/profile_images/1029816770897408000/aUljTnyv.jpg'
-	// 		},
-	// 		likes: 10
-	// 	}
-	// ];
+export const getVideoComments = (videoId, userId) => async dispatch => {
+	const response = await apiServices.getVideoComments(videoId, userId);
+	let comments = response.data;
 
-	const response = await apiServices.getVideoComments(videoId);
+	if (comments) comments = comments.sort((a, b) => b.created - a.created);
 
-	const comments = response.data;
+	if (response.success) dispatch({ type: types.GET_VIDEO_COMMENTS, payload: comments });
+};
 
-	if (!response.errorMessage) dispatch({ type: types.GET_VIDEO_COMMENTS, payload: comments });
-	else dispatch({ type: types.API_ERROR, payload: response.errorMessage });
+export const videoLaughed = (videoId, userId) => async dispatch => {
+	const response = await apiServices.videoLaughed(videoId, userId);
+
+	if (response.success)
+		dispatch({ type: types.VIDEO_LAUGHED_SUCCESS, payload: { videoId, laughs: response.data.total } });
+	else if (!response.message.includes('code 400')) {
+		AlertMessages.error(response.message);
+	}
+
+	return response;
 };
 
 export const postVideoComment = (videoId, userId, comment) => async dispatch => {
 	const response = await apiServices.postVideoComment(videoId, userId, comment);
 
-	if (!response.errorMessage) dispatch({ type: types.POST_VIDEO_COMMENT, payload: response.data });
-	else dispatch({ type: types.API_ERROR, payload: response.errorMessage });
+	if (response.success) dispatch({ type: types.POST_VIDEO_COMMENT_SUCCESS, payload: response.data });
+	else AlertMessages.error(response.message);
 };
 
+export const commentLiked = (commentId, userId, liked) => async dispatch => {
+	const response = await apiServices.commentLiked(commentId, userId, liked);
+	console.log('like ' + liked.toString(), response);
+	if (response.success)
+		dispatch({ type: types.COMMENT_LIKED_SUCCESS, payload: { commentId, likes: response.data.total, liked } });
+	else if (!response.message.includes('code 400')) {
+		AlertMessages.error(response.message);
+	}
+
+	return response;
+};
+
+//******************************************************************************************* */
+//Helper functions
+
+//To build the url of the video and add it to the object
 const getVideosWithUrlField = videos => {
 	//videos = [videos[1]];
 	return videos.map(video => {
-		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.id_user}/${video.path}`;
+		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
 		return video;
 	});
 };
