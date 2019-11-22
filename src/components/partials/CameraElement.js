@@ -27,7 +27,9 @@ export default class CameraElement extends Component {
             style={cameraStyle.preview}
             type={this.state.cameraType} 
             mirrorImage={this.state.mirrorMode}
-            flashMode={RNCamera.Constants.FlashMode.on}>
+            flashMode={RNCamera.Constants.FlashMode.on}
+            captureAudio={this.props.captureAudio}
+            >
         
         <SafeAreaView style={cameraStyle.safeArea}>
 

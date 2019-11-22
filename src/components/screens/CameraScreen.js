@@ -23,6 +23,9 @@ const checkAndroidPermission = async () => {
 const MAX_VIDEO_SIZE = 9000;
 const MIN_VIDEO_SIZE = 5000;
 export default class CameraScreen extends Component {
+  constructor(props) {
+    super(props)
+  }
         state = {
           recording: false,
           progress: 0,
@@ -30,6 +33,7 @@ export default class CameraScreen extends Component {
           processing: false,
           pause:false,
           continue:false,
+          captureAudio:true,
           //cameraType : 'back',
           //mirrorMode : false,
           feedbackSegment:false,//must be false to start
@@ -68,7 +72,7 @@ componentDidMount(){
       if(this.state.progress>99)
         return;
       this.animateProgress();
-      this.setState({ recording: true });
+      this.setState({ recording: true , captureAudio: true});
 
       try{
         let { uri, codec = "mp4" } = await this.camera.recordAsync();  
@@ -77,7 +81,8 @@ componentDidMount(){
         this.setState({ recording: false,
                         currentSegment: uri,
                         feedbackSegment : true,
-                        videoType});
+                        videoType,
+                        captureAudio: false});
 
         if(((this.state.progress * MAX_VIDEO_SIZE)/100)>MIN_VIDEO_SIZE)//it means at least 5 seconds of the current record.
           this.setState({continue : true})
@@ -230,6 +235,7 @@ stopRecording() {
             compileVideo={()=>this.compileVideo()}
             continueToPost={()=>this.continueToPost()}
             continue={this.state.continue}
+            progress={this.state.progress}
           />
         }
       </Container>

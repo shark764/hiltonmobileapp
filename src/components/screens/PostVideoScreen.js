@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Text,TextInput, View, Dimensions,ScrollView,TouchableOpacity,PermissionsAndroid, Platform } from 'react-native';
+import { Text,TextInput,Keyboard, View, Dimensions,ScrollView,
+    TouchableOpacity,PermissionsAndroid, Platform, TouchableWithoutFeedback } from 'react-native';
 import ToggleSwitch from 'toggle-switch-react-native'
 import AsyncStorage from '@react-native-community/async-storage';
 import { Container } from 'native-base'
@@ -161,18 +162,21 @@ async postVideo(){
                         />
                         :null}
                 </View>
-                <View style={postStyle.commentBox}>
-                    <TextInput style={postStyle.textStyle}
-                               autoCapitalize='sentences'
-                               multiline={true}
-                               maxLength={39}
-                               textAlignVertical='bottom'
-                               numberOfLines={3}
-                               placeholder='Write a caption here!...(39 Max).'
-                               onChangeText={(description) => this.setState({ description })}
-                    >
-                    </TextInput>
-                </View>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                    <View style={postStyle.commentBox}>
+                        <TextInput style={postStyle.textStyle}
+                                autoCapitalize='sentences'
+                                multiline={true}
+                                maxLength={39}
+                                textAlignVertical='bottom'
+                                numberOfLines={3}
+                                placeholder='Write a caption here!...(39 Max).'
+                                onChangeText={(description) => this.setState({ description })}
+                                onEndEditing={this.clearFocus}
+                        >
+                        </TextInput>
+                    </View>
+                </TouchableWithoutFeedback>
             </View>
             {
                 //********BOOSTING********* */

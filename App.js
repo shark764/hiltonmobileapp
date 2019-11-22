@@ -138,7 +138,7 @@ const CameraStack = createStackNavigator(
 		},
 		Profile: {
 			screen: ProfileScreen,
-			navigationOptions: { header: null, tabBarVisible: true }
+			navigationOptions: { tabBarVisible: true }
 		}
 	},
 	{
@@ -163,8 +163,7 @@ SearchStack.navigationOptions = ({ navigation }) => {
 
 CameraStack.navigationOptions = ({ navigation }) => {
 	if (navigation.state.index != 3) return { tabBarVisible: false };
-	return { tabBarVisible: true,
-			 header: null };
+	return { tabBarVisible: true};
 };
 
 const bottomTabNavigator = createBottomTabNavigator(
