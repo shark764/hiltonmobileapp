@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Text,TextInput, View, Dimensions,ScrollView,TouchableOpacity,PermissionsAndroid, Platform } from 'react-native';
+import { Text,TextInput,Keyboard, View, Dimensions,ScrollView,
+    TouchableOpacity,PermissionsAndroid, Platform, TouchableWithoutFeedback } from 'react-native';
 import ToggleSwitch from 'toggle-switch-react-native'
 import AsyncStorage from '@react-native-community/async-storage';
 import { Container } from 'native-base'
@@ -46,7 +47,6 @@ export default class PostVideoScreen extends Component {
 }
 
 goForward(){
-    console.log("its supposed to navigate through profile screen... (working on that...)");
     this.props.navigation.push('Profile');
 }
 
@@ -82,19 +82,34 @@ async uploadSegments(){
                       id_user: 28,
                       video: test //arrayVideoObjects
                     };
+    
+    let video_name = lastSegment.url.split("/");
+    console.log(`video name : ${video_name[video_name.length -1]}`)    
+
+    const data = new FormData();
+    data.append("title",description)
+    data.append("description",description)
+    data.append("duration",parseInt(lastSegment.realTime/1000))
+    data.append("id_user",28)//-------->change the user
+    data.append('video', {
+        uri: lastSegment.url,
+        type: lastSegment.type,
+        name: video_name[video_name.length -1]
+    });       
   
     console.log("about to save the video....");
-    fetch(ENDPOINT, {
+    //try{
+        await fetch(ENDPOINT, {
                     method: "POST",
+                    mode: 'no-cors',
                     headers: {
-                      'Accept': 'application/json, text/plain',
-                      'Content-Type': 'multipart/form-data'
-                    },
-                    body: JSON.stringify(video_body)
-                  })
-            .then(res => {console.log(`the result is : ${res.status}`); return res.json()})
-            .then(res => console.log(res))
-            .catch(err => console.warn(err))
+                        'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+                        'Content-Type': 'multipart/form-data'
+                      },
+                    body: data
+                    }).then(res => res.json())
+                    .then(res => console.log(`---> result : ${JSON.stringify(res)}`))
+                    .catch(err => console.error(err))
   }
 
 async postVideo(){
@@ -147,18 +162,21 @@ async postVideo(){
                         />
                         :null}
                 </View>
-                <View style={postStyle.commentBox}>
-                    <TextInput style={postStyle.textStyle}
-                               autoCapitalize='sentences'
-                               multiline={true}
-                               maxLength={39}
-                               textAlignVertical='bottom'
-                               numberOfLines={3}
-                               placeholder='Write a caption here!...(39 Max).'
-                               onChangeText={(description) => this.setState({ description })}
-                    >
-                    </TextInput>
-                </View>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                    <View style={postStyle.commentBox}>
+                        <TextInput style={postStyle.textStyle}
+                                autoCapitalize='sentences'
+                                multiline={true}
+                                maxLength={39}
+                                textAlignVertical='bottom'
+                                numberOfLines={3}
+                                placeholder='Write a caption here!...(39 Max).'
+                                onChangeText={(description) => this.setState({ description })}
+                                onEndEditing={this.clearFocus}
+                        >
+                        </TextInput>
+                    </View>
+                </TouchableWithoutFeedback>
             </View>
             {
                 //********BOOSTING********* */

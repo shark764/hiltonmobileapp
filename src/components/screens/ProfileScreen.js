@@ -22,7 +22,7 @@ class ProfileScreen extends Component {
 			my_images: [],
 			my_laughs: [],
 			profile_info: {},
-			url_video: ''
+			url_video: []
 		};
 		this._isMounted = false;
 	}
@@ -168,12 +168,13 @@ class ProfileScreen extends Component {
 	async componentDidMount() {
 		this._isMounted = true;
 		let url_video = await AsyncStorage.getItem('videoToPost');
-
+		url_video = JSON.parse(url_video);
+		console.log(`==========> Profile : ${this._isMounted}`);
 		if (this._isMounted) {
 			this.setState({ url_video, paused: false });
-			console.log('..................................');
-			console.log(this.state.url_video);
-			console.log('..................................');
+			//console.log('..................................');
+			//console.log(this.state.url_video);
+			//console.log('..................................');
 			await this.getImages();
 			await this.getLaughs();
 			await this.getProfileInfo();
@@ -244,7 +245,7 @@ class ProfileScreen extends Component {
 
 	render() {
 		const { loggedUser } = this.props;
-		if (!loggedUser) return null;
+		//if (!loggedUser) return null;
 
 		return (
 			<Container style={profileStyle.container}>
