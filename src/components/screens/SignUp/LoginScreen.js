@@ -30,7 +30,7 @@ class LoginScreen extends Form {
 		const user = { ...this.state.data };
 		const { rememberMe } = this.state;
 		this.setState({ loading: true });
-		const result = await this.props.userLoginWithEmail(user, rememberMe, this.fromScreen);
+		const result = await this.props.userLoginWithEmail(user, rememberMe, 'Profile');
 
 		//If login fails, we show an error, if not, the redux action will redirect to home
 		if (!result.success) {

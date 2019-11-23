@@ -18,6 +18,25 @@ export default apiServices = {
 
 		return response;
 	},
+	async videoWasViewed(videoId, userId) {
+		const response = { ...DEFAULT_RESPONSE };
+		const dataToSend = {
+			data: {
+				id_user: userId
+			}
+		};
+		try {
+			const endPoint = `video/${videoId}/view`;
+			const { data } = await httpService.post(endPoint, dataToSend);
+
+			response.data = data.data;
+			response.success = true;
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
+		}
+
+		return response;
+	},
 	async getVideoComments(videoId, userId) {
 		const response = { ...DEFAULT_RESPONSE };
 
@@ -27,11 +46,6 @@ export default apiServices = {
 			else endPoint = `video/${videoId}/comments`;
 
 			const { data } = await httpService.get(endPoint);
-
-			// console.log('***************************************');
-			// console.log('Comments for video ', videoId, data.data);
-			// console.log('***************************************');
-
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {

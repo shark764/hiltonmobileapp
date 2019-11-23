@@ -6,17 +6,28 @@ const INITIAL_STATE = {
 };
 
 let tempComments = [];
+let tempVideos = [];
+let tempVideo = {};
+
 export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 	switch (type) {
 		case types.GET_VIDEOS:
 			return { ...state, videosInfo: payload };
 		case types.VIDEO_LAUGHED_SUCCESS:
-			const { videoId, laughs } = payload;
-			const videos = [...state.videosInfo];
-			const video = videos.find(v => v.id === videoId);
-			video.laughs = laughs;
-			video.laughed = true;
-			return { ...state, videosInfo: videos };
+			const { laughs } = payload;
+			tempVideos = [...state.videosInfo];
+			tempVideo = tempVideos.find(v => v.id === payload.videoId);
+			console.log('Total laughs', laughs);
+			tempVideo.laughs = laughs;
+			tempVideo.laughed = true;
+			return { ...state, videosInfo: tempVideos };
+
+		case types.VIDEO_WAS_VIEWED_SUCCESS:
+			//TODO:
+			tempVideos = [...state.videosInfo];
+			tempVideo = tempVideos.find(v => v.id === payload.videoId);
+			tempVideo.views++;
+			return { ...state, videosInfo: tempVideos };
 		case types.GET_VIDEO_COMMENTS:
 			tempComments = [...state.comments];
 			tempComments[payload.videoId] = payload.comments;
@@ -36,8 +47,6 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			tempComments = [...state.comments];
 			const tempComment = tempComments[comment.id_video].find(c => c.id === comment.id);
 
-			//const comments = [...state.comments];
-			//const comment = comments.find(c => c.id === comment.id);
 			tempComment.likes = likes;
 			tempComment.already_like = liked;
 			return { ...state, comments: tempComments };

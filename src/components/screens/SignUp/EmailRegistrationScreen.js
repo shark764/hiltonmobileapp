@@ -18,7 +18,16 @@ class EmailRegistrationScreen extends Form {
 	static navigationOptions = () => ({ title: 'Sign up with your email' });
 
 	state = {
-		data: { email: '', full_name: '', bio: '', username: '', birth_date: '', password: '', confirmPassword: '' },
+		data: {
+			email: '',
+			full_name: '',
+			bio: '',
+			username: '',
+			birth_date: '',
+			password: '',
+			confirmPassword: '',
+			avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
+		},
 		// data: {
 		// 	email: 'david6@email.com',
 		// 	full_name: 'DAvid Abrego',

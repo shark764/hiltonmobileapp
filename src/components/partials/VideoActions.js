@@ -3,10 +3,11 @@ import { Text, Image, TouchableOpacity, View, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import IconFontAwesome from 'react-native-vector-icons/FontAwesome5';
+import { connect } from 'react-redux';
 import { homeStyles as styles } from '../../assets/styles';
-import { getShowHideStyle, shareVideo } from '../../utils/helpers';
+import { getShowHideStyle } from '../../utils/helpers';
 
-export default class VideoActions extends Component {
+class VideoActions extends Component {
 	state = {
 		follow: true
 	};
@@ -15,15 +16,8 @@ export default class VideoActions extends Component {
 		this.setState({ follow: !this.state.follow });
 	};
 
-	shareVideo = async () => {
-		const { videoItem } = this.props;
-
-		await shareVideo(videoItem.url);
-	};
-
 	render() {
-		const { videoItem, showVideoInfo } = this.props;
-
+		const { videoItem, showVideoInfo, onShowHideCommentsPress, onShareVideo, loggedUser } = this.props;
 		return (
 			<LinearGradient colors={['rgba(0, 0, 0,0)', 'rgba(0, 0, 0,0.4)']} style={styles.gradientContainer}>
 				<View style={[styles.userContainer, getShowHideStyle(showVideoInfo)]}>
@@ -61,7 +55,7 @@ export default class VideoActions extends Component {
 						}}
 					/>
 					<Text style={styles.actionCounters}>{videoItem.laughs}</Text>
-					<TouchableOpacity onPress={this.props.onShowHideCommentsPress}>
+					<TouchableOpacity onPress={onShowHideCommentsPress}>
 						<Icon
 							name="message-square"
 							size={30}
@@ -74,7 +68,7 @@ export default class VideoActions extends Component {
 						/>
 					</TouchableOpacity>
 					<Text style={[styles.actionCounters, { marginTop: 0 }]}>{videoItem.comments}</Text>
-					<TouchableOpacity onPress={this.shareVideo}>
+					<TouchableOpacity onPress={onShareVideo}>
 						<Icon
 							name="share"
 							size={30}
@@ -86,8 +80,30 @@ export default class VideoActions extends Component {
 							}}
 						/>
 					</TouchableOpacity>
+					<Text style={[styles.actionCounters, { marginTop: 0 }]}>{videoItem.shares}</Text>
+					{loggedUser && loggedUser.id === videoItem.user.id && (
+						<React.Fragment>
+							<Icon
+								name="eye"
+								size={30}
+								color={'#fff'}
+								style={{
+									textShadowColor: '#000000',
+									textShadowOffset: { width: 0.3, height: 0.3 },
+									textShadowRadius: 1
+								}}
+							/>
+							<Text style={[styles.actionCounters, { marginTop: 0, marginBottom: 0 }]}>
+								{videoItem.views}
+							</Text>
+						</React.Fragment>
+					)}
 				</View>
 			</LinearGradient>
 		);
 	}
 }
+
+const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
+
+export default connect(mapStateToProps, null)(VideoActions);

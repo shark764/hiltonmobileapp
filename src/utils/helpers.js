@@ -45,6 +45,7 @@ export const shareVideo = async videoUrl => {
 			url
 		});
 
+		console.log(result);
 		if (result.action === Share.sharedAction) {
 			if (result.activityType) {
 				// shared with activity type of result.activityType
@@ -53,6 +54,7 @@ export const shareVideo = async videoUrl => {
 			}
 		} else if (result.action === Share.dismissedAction) {
 			// dismissed
+			console.log('Share dismissed');
 		}
 
 		const exists = await RNFS.exists(blob.path());

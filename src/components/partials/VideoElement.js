@@ -1,32 +1,60 @@
 import React, { PureComponent } from 'react';
-import { View, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Dimensions, KeyboardAvoidingView, Platform, Text } from 'react-native';
 import Video from 'react-native-video';
 import LottieView from 'lottie-react-native';
 import { connect } from 'react-redux';
 import DoubleTap from '../commons/DoubleTap';
 import { laughAnimation } from '../../assets/animations/index';
 import VideoActions from './VideoActions';
-import { videoLaughed } from '../../redux/actions/videoActions';
+import { videoLaughed, videoWasViewed } from '../../redux/actions/videoActions';
 import CommentsScreen from './Comments';
 import { globals } from '../../config/constants';
 import { homeStyles as styles, globalStyles } from '../../assets/styles';
 import { ErrorMessage } from '../commons/ErrorMessage';
+import ModalPopup from '../commons/ModalPopup';
+import { goToRootRouteFromSibling, shareVideo } from '../../utils/helpers';
 
 const screenHeight = Math.round(Dimensions.get('window').height);
-const videoElementsHeight = screenHeight / 3;
+const videoElementsHeight = 280;
 
 class VideoElement extends PureComponent {
-	constructor(props) {
-		super(props);
-		this.state = {
-			follow: true,
-			laughed: false,
-			showComments: false,
-			loaded: false,
-			loadedVideoError: false
-		};
-		this.player = null;
+	state = {
+		follow: true,
+		laughed: false,
+		showComments: false,
+		loaded: false,
+		loadedVideoError: false,
+		showDialog: false
+	};
+
+	player = null;
+	viewTimeout = null;
+
+	componentDidMount() {
+		if (!this.props.userLeftVideo) this.createTimerForViewVideo();
 	}
+
+	componentDidUpdate(prevProps, prevState) {
+		const { userLeftVideo, video, loggedUser } = this.props;
+
+		if (!prevProps.userLeftVideo && userLeftVideo) {
+			console.log('user left video', video.id);
+			clearTimeout(this.viewTimeout);
+			this.viewTimeout = null;
+		} else if (prevProps.userLeftVideo && !userLeftVideo) {
+			this.createTimerForViewVideo();
+		}
+	}
+
+	createTimerForViewVideo = () => {
+		const { video, loggedUser } = this.props;
+		console.log('user started watching video', video.id);
+		if (!loggedUser) return;
+		this.viewTimeout = setTimeout(() => {
+			console.log('==>Viewed finishd', video.id)
+			this.props.videoWasViewed(video.id, loggedUser.id);
+		}, globals.VIDEO_VIEW_TIME);
+	};
 
 	videoOnLoad = () => {
 		this.setState({ loaded: true });
@@ -37,11 +65,26 @@ class VideoElement extends PureComponent {
 	};
 
 	onShowHideCommentsPress = () => {
+		const { loggedUser, onShowComments } = this.props;
+
+		if (!loggedUser) {
+			this.showNoLoggedPopup();
+			return;
+		}
+
 		const { showComments } = this.state;
 		//If the comments will be shown, then we run the home function to enable/disable scrolling
-		this.props.onShowComments(!showComments);
-
+		onShowComments(!showComments);
 		this.setState({ showComments: !showComments });
+	};
+
+	shareVideo = async () => {
+		if (!this.props.loggedUser) {
+			this.showNoLoggedPopup();
+			return;
+		}
+		const { video } = this.props;
+		await shareVideo(video.url);
 	};
 
 	onDoubleTap = async () => {
@@ -57,11 +100,22 @@ class VideoElement extends PureComponent {
 		}
 	};
 
+	showNoLoggedPopup = () => {
+		this.setState({ showDialog: true });
+	};
+
+	onGoToLogin = () => {
+		goToRootRouteFromSibling('Profile');
+		this.hideModal();
+	};
+
+	hideModal = () => this.setState({ showDialog: false });
+
 	hideLaughAnimation = () => this.setState({ laughed: false });
 
 	render() {
 		const { video, height, play, onPauseVideo, onResumeVideo, isSingleVideo } = this.props;
-		const { laughed, showComments, loaded, loadedVideoError } = this.state;
+		const { laughed, showComments, loaded, loadedVideoError, showDialog } = this.state;
 
 		const elementsViewHeight = showComments ? screenHeight - globals.NAVBAR_HEIGHT : videoElementsHeight;
 
@@ -105,8 +159,10 @@ class VideoElement extends PureComponent {
 						<View style={{ height: elementsViewHeight }}>
 							<DoubleTap doubleTap={this.onDoubleTap} delay={200}>
 								<VideoActions
-									videoItem={video}
+									//To trigger re-render on child that has redux connet, we need to clone the object
+									videoItem={{ ...video }}
 									onShowHideCommentsPress={this.onShowHideCommentsPress}
+									onShareVideo={this.shareVideo}
 									showVideoInfo={!showComments}
 									onPauseVideo={onPauseVideo}
 									onResumeVideo={onResumeVideo}
@@ -121,6 +177,18 @@ class VideoElement extends PureComponent {
 						</View>
 					</KeyboardAvoidingView>
 				)}
+				<ModalPopup
+					title="Login or Register"
+					confirmBtnText="Got it"
+					onConfirmPressed={this.onGoToLogin}
+					onCancelPressed={this.hideModal}
+					confirmBtnText="Yes!"
+					cancelBtnText="Not now"
+					visible={showDialog}
+				>
+					In order to have access to this feature, you need login or create an account. Do you want to login
+					or register?
+				</ModalPopup>
 			</View>
 		);
 	}
@@ -128,4 +196,4 @@ class VideoElement extends PureComponent {
 
 const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
 
-export default connect(mapStateToProps, { videoLaughed })(VideoElement);
+export default connect(mapStateToProps, { videoLaughed, videoWasViewed })(VideoElement);
