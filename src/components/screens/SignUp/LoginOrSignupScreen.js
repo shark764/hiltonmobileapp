@@ -9,26 +9,37 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 const { width: screenWidth } = Dimensions.get('window');
 
 class LoginOrSignupScreen extends Component {
+	fromScreen = '';
+	state = { fromScreen: '' };
+
 	componentDidMount() {
-		const { loggedUser } = this.props;
-		if (loggedUser) this.props.navigation.replace('Profile');
+		this.fromScreen = this.props.navigation.getParam('fromScreen');
+		console.log('1. did mount', this.fromScreen);
+		this.redirectToLoggedScreen();
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		const { loggedUser } = this.props;
-		if (loggedUser) this.props.navigation.replace('Profile');
+		this.fromScreen = this.props.navigation.getParam('fromScreen');
+		console.log('1. did update', this.fromScreen);
+		this.redirectToLoggedScreen();
 	}
 
+	redirectToLoggedScreen = () => {
+		console.log(this.fromScreen);
+		const { loggedUser } = this.props;
+		if (loggedUser && this.fromScreen) this.props.navigation.replace(this.fromScreen);
+	};
+
 	goToEmailRegistration = () => {
-		this.props.navigation.push('EmailRegistration');
+		this.props.navigation.push('EmailRegistration', { fromScreen: this.fromScreen });
 	};
 
 	goToPhoneRegistration = () => {
-		this.props.navigation.push('PhoneRegistration');
+		this.props.navigation.push('PhoneRegistration', { fromScreen: this.fromScreen });
 	};
 
 	goToLogin = () => {
-		this.props.navigation.push('Login');
+		this.props.navigation.push('Login', { fromScreen: this.fromScreen });
 	};
 
 	render() {

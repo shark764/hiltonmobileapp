@@ -81,8 +81,6 @@ export const getVideos = () => async dispatch => {
 	const response = await apiServices.getHomeVideos();
 
 	let videos = getVideosWithUrlField(response.data);
-	//TODO: REMOVE THIS
-	if (videos) videos = videos.reverse();
 
 	//console.log('Videos: ', videos);
 	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: videos });
@@ -94,7 +92,8 @@ export const getVideoComments = (videoId, userId) => async dispatch => {
 
 	if (comments) comments = comments.sort((a, b) => b.created - a.created);
 
-	if (response.success) dispatch({ type: types.GET_VIDEO_COMMENTS, payload: comments });
+	if (response.success) dispatch({ type: types.GET_VIDEO_COMMENTS, payload: { videoId, comments } });
+	return response;
 };
 
 export const videoLaughed = (videoId, userId) => async dispatch => {
@@ -116,11 +115,11 @@ export const postVideoComment = (videoId, userId, comment) => async dispatch => 
 	else AlertMessages.error(response.message);
 };
 
-export const commentLiked = (commentId, userId, liked) => async dispatch => {
-	const response = await apiServices.commentLiked(commentId, userId, liked);
+export const commentLiked = (comment, userId, liked) => async dispatch => {
+	const response = await apiServices.commentLiked(comment.id, userId, liked);
 	console.log('like ' + liked.toString(), response);
 	if (response.success)
-		dispatch({ type: types.COMMENT_LIKED_SUCCESS, payload: { commentId, likes: response.data.total, liked } });
+		dispatch({ type: types.COMMENT_LIKED_SUCCESS, payload: { comment, likes: response.data.total, liked } });
 	else if (!response.message.includes('code 400')) {
 		AlertMessages.error(response.message);
 	}
@@ -136,6 +135,7 @@ const getVideosWithUrlField = videos => {
 	//videos = [videos[1]];
 	return videos.map(video => {
 		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
+		console.log(video.url);
 		return video;
 	});
 };

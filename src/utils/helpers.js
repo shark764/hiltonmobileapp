@@ -4,6 +4,8 @@ import Share from 'react-native-share';
 import { globals } from '../config/constants';
 import AlertMessages from '../components/commons/AlertMessages';
 import { Platform } from 'react-native';
+import { StackActions, NavigationActions } from 'react-navigation';
+import NavigationService from '../services/NavigationService';
 
 //************************************************************************************************
 //This is used to return an object with the display property based on a truthy
@@ -57,5 +59,32 @@ export const shareVideo = async videoUrl => {
 		if (exists) await RNFS.unlink(blob.path());
 	} catch (error) {
 		if (error.message && error.message.indexOf('User did') === -1) AlertMessages.error(error.message);
+	}
+};
+
+export const goToRootRouteFromChild = (parentRoute, rootRoute) => {
+	try {
+		//Redirect to Home Process
+		const resetAction = StackActions.reset({
+			index: 0,
+			actions: [NavigationActions.navigate({ routeName: parentRoute })]
+		});
+
+		//Go to current parent route
+		NavigationService.dispatch(resetAction);
+
+		//Now, go to sibling screen - Home
+		NavigationService.dispatch({ type: 'Navigation/NAVIGATE', routeName: rootRoute });
+	} catch (error) {
+		console.error(error.message);
+	}
+};
+
+export const goToRootRouteFromSibling = rootRoute => {
+	try {
+		//Now, go to sibling screen - Home
+		NavigationService.dispatch({ type: 'Navigation/NAVIGATE', routeName: rootRoute });
+	} catch (error) {
+		console.error(error.message);
 	}
 };

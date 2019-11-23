@@ -19,16 +19,37 @@ class EmailRegistrationScreen extends Form {
 
 	state = {
 		data: { email: '', full_name: '', bio: '', username: '', birth_date: '', password: '', confirmPassword: '' },
+		// data: {
+		// 	email: 'david6@email.com',
+		// 	full_name: 'DAvid Abrego',
+		// 	bio: 'my bio',
+		// 	username: 'david6',
+		// 	birth_date: '01/01/2000',
+		// 	password: '1234',
+		// 	confirmPassword: '1234',
+		// 	avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
+		// },
 		showDialog: false,
 		dialogTitle: '',
 		loading: false
 	};
 
+	fromScreen = '';
+
+	componentDidMount() {
+		this.fromScreen = this.props.navigation.getParam('fromScreen');
+		console.log(this.fromScreen);
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		this.fromScreen = this.props.navigation.getParam('fromScreen');
+	}
+
 	doSubmit = async () => {
 		const user = { ...this.state.data };
 
 		this.setState({ loading: true });
-		const result = await this.props.createUser(user);
+		const result = await this.props.createUser(user, this.fromScreen);
 
 		//If create user fails, we show an error, if not, the redux action will redirect to home
 		if (!result.success) {
@@ -83,6 +104,8 @@ class EmailRegistrationScreen extends Form {
 						placeholder="Full Name"
 						placeholderTextColor="#D9D9D9"
 						errorMessage={inputErrors['full_name']}
+						autoCapitalize="words"
+						autoCompleteType="off"
 						inputContainerStyle={styles.inputContainer}
 						inputStyle={styles.input}
 						labelStyle={styles.label}
@@ -100,11 +123,12 @@ class EmailRegistrationScreen extends Form {
 							paddingHorizontal: 15,
 							color: '#fff',
 							position: 'absolute',
-							top: 36,
+							top: 35,
 							left: 10,
 							borderTopLeftRadius: 10,
 							borderBottomLeftRadius: 10,
 							width: 'auto',
+							height: 44,
 							zIndex: 100
 						}}
 					>
@@ -123,6 +147,7 @@ class EmailRegistrationScreen extends Form {
 						placeholder="Username"
 						placeholderTextColor="#D9D9D9"
 						autoCapitalize="none"
+						autoCompleteType="off"
 						errorMessage={inputErrors['username']}
 						inputContainerStyle={styles.inputContainer}
 						inputStyle={[styles.input, { paddingLeft: 60 }]}
@@ -143,7 +168,7 @@ class EmailRegistrationScreen extends Form {
 						showIcon={false}
 						errorMessage={inputErrors['birth_date']}
 						customStyles={styles.datePickerCustom}
-						onDateChange={date => this.onInputChange(date, 'birth_date')}
+						onDateChange={(e, date) => this.onInputChange(date, 'birth_date')}
 					/>
 				</View>
 				<View style={{ width: '100%', marginTop: 20 }}>

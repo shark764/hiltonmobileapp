@@ -37,13 +37,18 @@ class CommentsScreen extends Component {
 	componentDidMount = async () => {
 		const { video, loggedUser, getVideoComments } = this.props;
 		const userId = loggedUser ? loggedUser.id : null;
-		await getVideoComments(video.id, userId);
+		const result = await getVideoComments(video.id, userId);
+		// if(result.success){
+		// 	this.setState({comments: result.data})
+		// }
 	};
 
 	async componentDidUpdate(prevProps, prevState) {
 		this.showHideView();
 		const { video, comments, getVideoComments, loggedUser } = this.props;
-		if (prevProps.comments !== comments) this.setState({ comments, loading: false });
+		if (prevProps.comments !== comments) {
+			this.setState({ comments: comments[video.id], loading: false });
+		}
 
 		const userId = loggedUser ? loggedUser.id : null;
 		if (prevProps.loggedUser !== loggedUser) await getVideoComments(video.id, userId);
@@ -54,7 +59,7 @@ class CommentsScreen extends Component {
 
 		if (!loggedUser) return;
 
-		await commentLiked(comment.id, loggedUser.id, !comment.already_like);
+		await commentLiked(comment, loggedUser.id, !comment.already_like);
 	};
 
 	onChangeText = text => {
@@ -86,8 +91,10 @@ class CommentsScreen extends Component {
 	};
 
 	render() {
-		const { comments, currentComment, heightBounceValue, loading } = this.state;
-		const { loggedUser, isSingleVideo } = this.props;
+		const { currentComment, heightBounceValue, loading } = this.state;
+		const { loggedUser, isSingleVideo, video } = this.props;
+
+		const comments = this.props.comments[video.id];
 
 		if (loading) return null;
 
@@ -146,6 +153,7 @@ class CommentsScreen extends Component {
 	}
 
 	renderComment = ({ item: comment }) => {
+		const { loggedUser } = this.props;
 		return (
 			<View style={styles.commentItemContainer}>
 				<Image
@@ -160,7 +168,7 @@ class CommentsScreen extends Component {
 					<Text style={styles.commentText}>{comment.comment}</Text>
 				</View>
 				<View style={{ alignItems: 'center' }}>
-					<TouchableOpacity onPress={() => this.onLikePress(comment)}>
+					<TouchableOpacity onPress={() => this.onLikePress(comment)} disabled={!loggedUser}>
 						<View style={styles.likeContainer}>
 							<Icon
 								name={'heart-o'}

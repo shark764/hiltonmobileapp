@@ -17,13 +17,20 @@ class LoginScreen extends Form {
 		loading: false
 	};
 
+	fromScreen = '';
+
+	componentDidMount() {
+		this.fromScreen = this.props.navigation.getParam('fromScreen');
+		console.log(this.fromScreen);
+	}
+
 	onRemberMePress = () => this.setState({ rememberMe: !this.state.rememberMe });
 
 	doSubmit = async () => {
 		const user = { ...this.state.data };
 		const { rememberMe } = this.state;
 		this.setState({ loading: true });
-		const result = await this.props.userLoginWithEmail(user, rememberMe);
+		const result = await this.props.userLoginWithEmail(user, rememberMe, this.fromScreen);
 
 		//If login fails, we show an error, if not, the redux action will redirect to home
 		if (!result.success) {

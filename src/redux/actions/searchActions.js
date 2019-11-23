@@ -3,7 +3,7 @@ import * as types from '../types';
 export const getTrandingVideos = () => async dispatch => {
 	const videos = [
 		{
-			id: 1,
+			id: 11,
 			url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
 			thumbnail:
 				'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnm5J_F7bcAJiIFd4UcmVTUWxjJk2e24EHJRqMQCsegfWqLTQe&s',

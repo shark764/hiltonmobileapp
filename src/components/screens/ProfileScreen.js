@@ -181,6 +181,12 @@ class ProfileScreen extends Component {
 		}
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		const { loggedUser } = this.props;
+		console.log('fromProfile id update: ', loggedUser);
+		if (!loggedUser) this.props.navigation.replace('LoginOrSignup', { fromScreen: 'Profile' });
+	}
+
 	componentWillUnmount() {
 		this._isMounted = false;
 	}
@@ -245,7 +251,7 @@ class ProfileScreen extends Component {
 
 	render() {
 		const { loggedUser } = this.props;
-		//if (!loggedUser) return null;
+		if (!loggedUser) return null;
 
 		return (
 			<Container style={profileStyle.container}>

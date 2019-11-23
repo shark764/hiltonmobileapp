@@ -6,6 +6,7 @@ export default class Form extends Component {
 	inputErrors = {};
 
 	onInputChange = (value, field) => {
+		//console.log(value, field);
 		const data = { ...this.state.data };
 		data[field] = value;
 		this.setState({ data });

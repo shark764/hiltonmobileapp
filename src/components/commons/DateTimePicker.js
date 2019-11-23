@@ -325,6 +325,11 @@ class DatePicker extends Component {
 		return null;
 	}
 
+	setDate = (event, date) => {
+		date = date || this.state.date;
+		this.setState({ date });
+	};
+
 	render() {
 		const {
 			mode,
@@ -353,6 +358,8 @@ class DatePicker extends Component {
 			disabled && Style.disabled,
 			disabled && customStyles.disabled
 		];
+
+		const { date } = this.state;
 
 		return (
 			<React.Fragment>
@@ -393,11 +400,12 @@ class DatePicker extends Component {
 											>
 												<View pointerEvents={this.state.allowPointerEvents ? 'auto' : 'none'}>
 													<DateTimePicker
-														value={this.state.date}
+														value={date}
 														mode={mode}
 														minimumDate={minDate && this.getDate(minDate)}
 														maximumDate={maxDate && this.getDate(maxDate)}
 														onDateChange={this.onDateChange}
+														onChange={this.setDate}
 														minuteInterval={minuteInterval}
 														timeZoneOffsetInMinutes={
 															timeZoneOffsetInMinutes ? timeZoneOffsetInMinutes : null

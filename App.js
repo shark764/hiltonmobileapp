@@ -99,7 +99,7 @@ const ProfileStack = createStackNavigator(
 		}
 	},
 	{
-		initialRouteName: 'LoginOrSignup',
+		initialRouteName: 'Profile',
 		defaultNavigationOptions: {
 			headerTitleStyle: navigationStyles.header
 		}
@@ -135,14 +135,13 @@ const CameraStack = createStackNavigator(
 		},
 		PostVideo: {
 			screen: PostVideoScreen
-		},
-		Profile: {
-			screen: ProfileScreen,
-			navigationOptions: { tabBarVisible: true }
 		}
 	},
 	{
 		initialRouteName: 'Camera',
+		defaultNavigationOptions: {
+			headerTitleStyle: navigationStyles.header
+		},
 		headerMode: 'none'
 	}
 );
@@ -150,8 +149,9 @@ const CameraStack = createStackNavigator(
 //To Hide the bottom tab navigation in all screens except
 //the first one (LoginOrSignup) and the second one (Profile)
 ProfileStack.navigationOptions = ({ navigation }) => {
-	console.log(navigation.state.index);
-	if (navigation.state.index > 1) return { tabBarVisible: false };
+	const routeName = navigation.state.routes[0].routeName;
+	const screensWithBottomBar = ['LoginOrSignup', 'EmailRegistration', 'Login', 'Profile'];
+	if (!screensWithBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
 	return { tabBarVisible: true };
 };
 
@@ -162,8 +162,10 @@ SearchStack.navigationOptions = ({ navigation }) => {
 };
 
 CameraStack.navigationOptions = ({ navigation }) => {
-	if (navigation.state.index != 3) return { tabBarVisible: false };
-	return { tabBarVisible: true};
+	const routeName = navigation.state.routes[0].routeName;
+	const screensWithHiddenBottomBar = ['Camera', 'CameraRoll', 'PostVideo'];
+	if (screensWithHiddenBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
+	return { tabBarVisible: true };
 };
 
 const bottomTabNavigator = createBottomTabNavigator(

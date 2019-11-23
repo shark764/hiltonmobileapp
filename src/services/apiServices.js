@@ -27,6 +27,11 @@ export default apiServices = {
 			else endPoint = `video/${videoId}/comments`;
 
 			const { data } = await httpService.get(endPoint);
+
+			// console.log('***************************************');
+			// console.log('Comments for video ', videoId, data.data);
+			// console.log('***************************************');
+
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {
@@ -111,6 +116,8 @@ export default apiServices = {
 			const dataToSend = {
 				data: user
 			};
+
+			console.log('Data to send:', dataToSend);
 
 			const { data } = await httpService.post(endPoint, dataToSend);
 			response.data = data.data;
