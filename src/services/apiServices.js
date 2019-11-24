@@ -1,4 +1,5 @@
 import httpService from './httpService';
+import Upload from 'react-native-background-upload'
 
 const DEFAULT_RESPONSE = { data: null, success: false, message: '' };
 
@@ -181,6 +182,35 @@ export default apiServices = {
 			response.message = error.message || 'Unable to connect to the api';
 		}
 
+		return response;
+	},
+	async postVideoInBackground(dataToSend) {
+		const response = { ...DEFAULT_RESPONSE };
+
+		Upload.startUpload(dataToSend)
+		.then((uploadId) => {
+				console.log('Upload started')
+				Upload.addListener('progress', uploadId, (data) => {
+				console.log(`Progress: ${data.progress}%`)
+				})
+				Upload.addListener('error', uploadId, (data) => {
+				console.log(`Error: ${data.error} % ${JSON.stringify(data)}`)
+				})
+				Upload.addListener('cancelled', uploadId, (data) => {
+				console.log(`Cancelled!`)
+				})
+				Upload.addListener('completed', uploadId, (data) => {
+				// data includes responseCode: number and responseBody: Object
+				console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`)
+				console.log('Completed!')
+				response.data = data.responseBody;
+				response.responseCode = data.responseCode;
+				response.success = true;
+				})})
+		.catch((err) => {
+			console.log('Upload error!', err)
+			response.message = error.message || 'Unable to connect to the api';
+		})
 		return response;
 	},
 };

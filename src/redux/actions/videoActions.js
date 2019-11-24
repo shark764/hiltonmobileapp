@@ -59,6 +59,12 @@ export const commentLiked = (comment, userId, liked) => async dispatch => {
 	return response;
 };
 
+export const postVideoInBackground = (videoToUpload) => async dispatch => {
+	const response = await apiServices.postVideoInBackground(videoToUpload);
+
+	if (response.success) dispatch({ type: types.POST_VIDEO_SUCCESS, payload: response.data });
+	else AlertMessages.error(response.message);
+};
 //******************************************************************************************* */
 //Helper functions
 

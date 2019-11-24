@@ -47,6 +47,7 @@ export default class CameraElement extends Component {
 				mirrorImage={this.state.mirrorMode}
 				flashMode={RNCamera.Constants.FlashMode.on}
 				captureAudio={this.props.captureAudio}
+				//captureQuality={'720p'}
 			>
 				<SafeAreaView style={cameraStyle.safeArea}>
 					<View style={cameraStyle.progressStatus}>

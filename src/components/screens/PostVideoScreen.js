@@ -9,7 +9,8 @@ import {
 	TouchableOpacity,
 	PermissionsAndroid,
 	Platform,
-	TouchableWithoutFeedback
+	TouchableWithoutFeedback,
+	SafeAreaView
 } from 'react-native';
 import ToggleSwitch from 'toggle-switch-react-native';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -21,10 +22,7 @@ import { connect } from 'react-redux';
 import {  colors } from '../../config/constants';
 import { postStyle } from '../../assets/styles/postStyle';
 import { goToRootRouteFromChild } from '../../utils/helpers';
-import { Loader } from '../commons/Loader';
-import { getVideos } from '../../redux/actions/videoActions';
-import apiServices from '../../services/apiServices';
-import Upload from 'react-native-background-upload'
+import { getVideos,postVideoInBackground } from '../../redux/actions/videoActions';
 const {  width } = Dimensions.get('window');
 
 const checkAndroidPermission = async () => {
@@ -102,36 +100,20 @@ class PostVideoScreen extends Component {
 			method: 'POST',
 			field: 'video',
 			type: 'multipart',
+			maxRetries: 2,
+			headers: {
+				"content-type": "multipart/form-data",
+			  },
+			parameters: {
+				'title' : description || 'no title',
+				'description' : description || 'no description',
+				'duration' : `${parseInt(lastSegment.realTime / 1000)}`,
+				'id_user' : `${loggedUser.id}`
+				}
 		  }
 
-		  Upload.startUpload(options)
-			.then((uploadId) => {
-					console.log('Upload started')
-					Upload.addListener('progress', uploadId, (data) => {
-					console.log(`Progress: ${data.progress}%`)
-					})
-					Upload.addListener('error', uploadId, (data) => {
-					console.log(`Error: ${data.error}%`)
-					})
-					Upload.addListener('cancelled', uploadId, (data) => {
-					console.log(`Cancelled!`)
-					})
-					Upload.addListener('completed', uploadId, (data) => {
-					// data includes responseCode: number and responseBody: Object
-					console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`)
-					console.log('Completed!')
-					})})
-			.catch((err) => {
-				console.log('Upload error!', err)
-			})
-
-		/*
-		let response = await apiServices.postVideo(data);
-		if (response.success) 
-			console.log(response.data)
-		else 
-			console.log(response.message)
-		*/
+		  await this.props.postVideoInBackground(options);
+		  
 	}
 
 	async postVideo() {
@@ -154,6 +136,7 @@ class PostVideoScreen extends Component {
 	render() {
 		const { isPostingVideo } = this.state;
 		return (
+		<SafeAreaView style={{flex:1}}>
 			<Container style={{ flex: 1, flexDirection: 'column' }}>
 				{
 					//********HEADER*********** */
@@ -305,19 +288,19 @@ class PostVideoScreen extends Component {
 						</View>
 					</View>
 				</ScrollView>
-				{!isPostingVideo && (
+				
 					<TouchableOpacity style={postStyle.postButton} onPress={() => this.postVideo()}>
 						<View style={{ alignSelf: 'center', paddingTop: 4 }}>
 							<Text style={postStyle.postTextButton}>Post Video</Text>
 						</View>
 					</TouchableOpacity>
-				)}
-				<Loader show={isPostingVideo} />
+
 			</Container>
+		</SafeAreaView>
 		);
 	}
 }
 
 const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
 
-export default connect(mapStateToProps, { getVideos })(PostVideoScreen);
+export default connect(mapStateToProps, { getVideos,postVideoInBackground })(PostVideoScreen);
