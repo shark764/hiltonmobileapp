@@ -26,8 +26,8 @@ export const videoLaughed = (videoId, userId) => async dispatch => {
 
 export const videoWasViewed = (videoId, userId) => async dispatch => {
 	const response = await apiServices.videoWasViewed(videoId, userId);
-	//console.log('Video viewed:', response);
-	if (response.success) dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId } });
+	console.log('Video viewed:', response);
+	if (response.success) dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
 };
 
 export const getVideoComments = (videoId, userId) => async dispatch => {

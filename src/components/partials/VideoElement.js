@@ -48,10 +48,11 @@ class VideoElement extends PureComponent {
 
 	createTimerForViewVideo = () => {
 		const { video, loggedUser } = this.props;
-		console.log('user started watching video', video.id);
-		if (!loggedUser) return;
+		const { loaded } = this.state;
+		if (!loggedUser || !loaded) return;
+		console.log('user started watching video', video.id, 'loaded:', loaded);
 		this.viewTimeout = setTimeout(() => {
-			console.log('==>Viewed finishd', video.id)
+			console.log('==>Viewed finishd', video.id);
 			this.props.videoWasViewed(video.id, loggedUser.id);
 		}, globals.VIDEO_VIEW_TIME);
 	};
@@ -61,7 +62,7 @@ class VideoElement extends PureComponent {
 	};
 
 	videoOnError = () => {
-		this.setState({ loadedVideoError: true });
+		this.setState({ loadedVideoError: true, loaded: false });
 	};
 
 	onShowHideCommentsPress = () => {

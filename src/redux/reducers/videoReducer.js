@@ -23,10 +23,10 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			return { ...state, videosInfo: tempVideos };
 
 		case types.VIDEO_WAS_VIEWED_SUCCESS:
-			//TODO:
 			tempVideos = [...state.videosInfo];
 			tempVideo = tempVideos.find(v => v.id === payload.videoId);
-			tempVideo.views++;
+			tempVideo.views = payload.data.views;
+			tempVideo.rewatches = payload.data.rewatches;
 			return { ...state, videosInfo: tempVideos };
 		case types.GET_VIDEO_COMMENTS:
 			tempComments = [...state.comments];
