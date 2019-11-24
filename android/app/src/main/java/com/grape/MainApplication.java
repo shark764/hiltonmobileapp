@@ -24,7 +24,7 @@ public class MainApplication extends Application implements ReactApplication {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
-          // packages.add(new MyReactNativePackage());
+           //packages.add(new UploaderReactPackage());
           return packages;
         }
 
@@ -43,6 +43,7 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
+    //BackgroundTaskPackage.useContext(this);
     initializeFlipper(this); // Remove this line if you don't want Flipper enabled
   }
 

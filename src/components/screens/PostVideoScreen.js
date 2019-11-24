@@ -17,15 +17,15 @@ import { Container } from 'native-base';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import Ionicon from 'react-native-vector-icons/Ionicons';
-import fs from 'react-native-fs';
-import { decode } from 'base64-arraybuffer';
 import { connect } from 'react-redux';
-import { fonts, colors } from '../../config/constants';
-const { height, width } = Dimensions.get('window');
+import {  colors } from '../../config/constants';
 import { postStyle } from '../../assets/styles/postStyle';
 import { goToRootRouteFromChild } from '../../utils/helpers';
 import { Loader } from '../commons/Loader';
 import { getVideos } from '../../redux/actions/videoActions';
+import apiServices from '../../services/apiServices';
+import Upload from 'react-native-background-upload'
+const {  width } = Dimensions.get('window');
 
 const checkAndroidPermission = async () => {
 	try {
@@ -80,29 +80,10 @@ class PostVideoScreen extends Component {
 		let videoSegment = await AsyncStorage.getItem('videoToPost');
 		videoSegment = JSON.parse(videoSegment);
 		let lastSegment = videoSegment[videoSegment.length - 1];
-		let test = null;
-		let arrayVideoObjects = [];
-
-		for (let i = 0; i < videoSegment.length; i++) {
-			let segment = videoSegment[i];
-			let base64 = await fs.readFile(segment.url, 'base64');
-			let videoObject = decode(base64);
-			test = videoObject;
-			arrayVideoObjects.push(videoObject);
-		}
-
-		console.log(`--> arrayVideoObject : ${arrayVideoObjects.length}`);
-		let { description } = this.state;
-		let video_body = {
-			title: description,
-			description: description,
-			duration: lastSegment.realTime / 1000, //seconds ? or millis?
-			id_user: loggedUser.id,
-			video: test //arrayVideoObjects
-		};
-
 		let video_name = lastSegment.url.split('/');
-		console.log(`video name : ${video_name[video_name.length - 1]}`);
+		let { description } = this.state;
+
+		console.log(`video name : ${lastSegment.url}  ===>  ${lastSegment.url.replace("file://", "")}`);
 
 		const data = new FormData();
 		data.append('title', description || 'no title');
@@ -115,42 +96,54 @@ class PostVideoScreen extends Component {
 			name: video_name[video_name.length - 1]
 		});
 
-		console.log('about to save the video....');
-		//try{
-		await fetch(ENDPOINT, {
+		let options = {
+			url: ENDPOINT,
+			path: (Platform.OS === 'android'?lastSegment.url.replace("file://", ""):lastSegment.url),
 			method: 'POST',
-			mode: 'no-cors',
-			headers: {
-				Accept: 'application/json, application/xml, text/plain, text/html, *.*',
-				'Content-Type': 'multipart/form-data'
-			},
-			body: data
-		})
-			.then(res => res.json())
-			.then(res => console.log(`---> result : ${JSON.stringify(res)}`))
-			.catch(err => console.error(err));
+			field: 'video',
+			type: 'multipart',
+		  }
+
+		  Upload.startUpload(options)
+			.then((uploadId) => {
+					console.log('Upload started')
+					Upload.addListener('progress', uploadId, (data) => {
+					console.log(`Progress: ${data.progress}%`)
+					})
+					Upload.addListener('error', uploadId, (data) => {
+					console.log(`Error: ${data.error}%`)
+					})
+					Upload.addListener('cancelled', uploadId, (data) => {
+					console.log(`Cancelled!`)
+					})
+					Upload.addListener('completed', uploadId, (data) => {
+					// data includes responseCode: number and responseBody: Object
+					console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`)
+					console.log('Completed!')
+					})})
+			.catch((err) => {
+				console.log('Upload error!', err)
+			})
+
+		/*
+		let response = await apiServices.postVideo(data);
+		if (response.success) 
+			console.log(response.data)
+		else 
+			console.log(response.message)
+		*/
 	}
 
 	async postVideo() {
-		this.setState({ isPostingVideo: true });
-		//let {url_video} = this.state;
-		await this.uploadSegments();
-		console.log('segmetn uploaded');
 		if (Platform.OS === 'android') {
 			await checkAndroidPermission();
 		}
-		/*
-    try{
-        if(this.state.saveVideo)
-            CameraRoll.saveToCameraRoll(url_video,"video")
-                .then(()=>this.goForward())
-                .catch(err => console.warn(err))
-        else
-            console.log("you're not going to store anything in camera roll...");
-    }catch(error){
-        console.warn(error);
-    }
-    */
+
+		this.setState({ isPostingVideo: true });
+		
+		console.log('about to save the video....');
+		await this.uploadSegments();
+		console.log('segment uploaded');
 
 		//Load videos for home screen, at least for the demo
 		await this.props.getVideos();
