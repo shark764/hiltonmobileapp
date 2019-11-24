@@ -50,6 +50,15 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			tempComment.likes = likes;
 			tempComment.already_like = liked;
 			return { ...state, comments: tempComments };
+		case types.POST_VIDEO:
+			//const videosTemp = [...state.videosInfo];
+			//const videoTemp = videosTemp.find(v => v.id === payload.id_video);
+			//videoTemp.comments++;
+
+			//tempComments = [...state.comments];
+			//tempComments[payload.id_video] = [payload, ...tempComments[payload.id_video]];
+			//return { ...state, videosInfo: videosTemp, comments: tempComments };
+			return { ...state}
 		default:
 			return state;
 	}

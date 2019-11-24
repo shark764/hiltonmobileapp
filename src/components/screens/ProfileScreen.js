@@ -169,7 +169,6 @@ class ProfileScreen extends Component {
 		this._isMounted = true;
 		let url_video = await AsyncStorage.getItem('videoToPost');
 		url_video = JSON.parse(url_video);
-		console.log(`==========> Profile : ${this._isMounted}`);
 		if (this._isMounted) {
 			this.setState({ url_video, paused: false });
 			//console.log('..................................');
@@ -183,7 +182,7 @@ class ProfileScreen extends Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		const { loggedUser } = this.props;
-		console.log('fromProfile id update: ', loggedUser);
+		//console.log('fromProfile id update: ', loggedUser);
 		if (!loggedUser) this.props.navigation.replace('LoginOrSignup', { fromScreen: 'Profile' });
 	}
 

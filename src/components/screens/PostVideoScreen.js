@@ -9,7 +9,8 @@ import {
 	TouchableOpacity,
 	PermissionsAndroid,
 	Platform,
-	TouchableWithoutFeedback
+	TouchableWithoutFeedback,
+	SafeAreaView
 } from 'react-native';
 import ToggleSwitch from 'toggle-switch-react-native';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -17,15 +18,12 @@ import { Container } from 'native-base';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import Ionicon from 'react-native-vector-icons/Ionicons';
-import fs from 'react-native-fs';
-import { decode } from 'base64-arraybuffer';
 import { connect } from 'react-redux';
-import { fonts, colors } from '../../config/constants';
-const { height, width } = Dimensions.get('window');
+import {  colors } from '../../config/constants';
 import { postStyle } from '../../assets/styles/postStyle';
 import { goToRootRouteFromChild } from '../../utils/helpers';
-import { Loader } from '../commons/Loader';
-import { getVideos } from '../../redux/actions/videoActions';
+import { getVideos,postVideoInBackground } from '../../redux/actions/videoActions';
+const {  width } = Dimensions.get('window');
 
 const checkAndroidPermission = async () => {
 	try {
@@ -80,29 +78,10 @@ class PostVideoScreen extends Component {
 		let videoSegment = await AsyncStorage.getItem('videoToPost');
 		videoSegment = JSON.parse(videoSegment);
 		let lastSegment = videoSegment[videoSegment.length - 1];
-		let test = null;
-		let arrayVideoObjects = [];
-
-		for (let i = 0; i < videoSegment.length; i++) {
-			let segment = videoSegment[i];
-			let base64 = await fs.readFile(segment.url, 'base64');
-			let videoObject = decode(base64);
-			test = videoObject;
-			arrayVideoObjects.push(videoObject);
-		}
-
-		console.log(`--> arrayVideoObject : ${arrayVideoObjects.length}`);
-		let { description } = this.state;
-		let video_body = {
-			title: description,
-			description: description,
-			duration: lastSegment.realTime / 1000, //seconds ? or millis?
-			id_user: loggedUser.id,
-			video: test //arrayVideoObjects
-		};
-
 		let video_name = lastSegment.url.split('/');
-		console.log(`video name : ${video_name[video_name.length - 1]}`);
+		let { description } = this.state;
+
+		console.log(`video name : ${lastSegment.url}  ===>  ${lastSegment.url.replace("file://", "")}`);
 
 		const data = new FormData();
 		data.append('title', description || 'no title');
@@ -115,42 +94,38 @@ class PostVideoScreen extends Component {
 			name: video_name[video_name.length - 1]
 		});
 
-		console.log('about to save the video....');
-		//try{
-		await fetch(ENDPOINT, {
+		let options = {
+			url: ENDPOINT,
+			path: (Platform.OS === 'android'?lastSegment.url.replace("file://", ""):lastSegment.url),
 			method: 'POST',
-			mode: 'no-cors',
+			field: 'video',
+			type: 'multipart',
+			maxRetries: 2,
 			headers: {
-				Accept: 'application/json, application/xml, text/plain, text/html, *.*',
-				'Content-Type': 'multipart/form-data'
-			},
-			body: data
-		})
-			.then(res => res.json())
-			.then(res => console.log(`---> result : ${JSON.stringify(res)}`))
-			.catch(err => console.error(err));
+				"content-type": "multipart/form-data",
+			  },
+			parameters: {
+				'title' : description || 'no title',
+				'description' : description || 'no description',
+				'duration' : `${parseInt(lastSegment.realTime / 1000)}`,
+				'id_user' : `${loggedUser.id}`
+				}
+		  }
+
+		  await this.props.postVideoInBackground(options);
+		  
 	}
 
 	async postVideo() {
-		this.setState({ isPostingVideo: true });
-		//let {url_video} = this.state;
-		await this.uploadSegments();
-		console.log('segmetn uploaded');
 		if (Platform.OS === 'android') {
 			await checkAndroidPermission();
 		}
-		/*
-    try{
-        if(this.state.saveVideo)
-            CameraRoll.saveToCameraRoll(url_video,"video")
-                .then(()=>this.goForward())
-                .catch(err => console.warn(err))
-        else
-            console.log("you're not going to store anything in camera roll...");
-    }catch(error){
-        console.warn(error);
-    }
-    */
+
+		this.setState({ isPostingVideo: true });
+		
+		console.log('about to save the video....');
+		await this.uploadSegments();
+		console.log('segment uploaded');
 
 		//Load videos for home screen, at least for the demo
 		await this.props.getVideos();
@@ -161,6 +136,7 @@ class PostVideoScreen extends Component {
 	render() {
 		const { isPostingVideo } = this.state;
 		return (
+		<SafeAreaView style={{flex:1}}>
 			<Container style={{ flex: 1, flexDirection: 'column' }}>
 				{
 					//********HEADER*********** */
@@ -312,19 +288,19 @@ class PostVideoScreen extends Component {
 						</View>
 					</View>
 				</ScrollView>
-				{!isPostingVideo && (
+				
 					<TouchableOpacity style={postStyle.postButton} onPress={() => this.postVideo()}>
 						<View style={{ alignSelf: 'center', paddingTop: 4 }}>
 							<Text style={postStyle.postTextButton}>Post Video</Text>
 						</View>
 					</TouchableOpacity>
-				)}
-				<Loader show={isPostingVideo} />
+
 			</Container>
+		</SafeAreaView>
 		);
 	}
 }
 
 const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
 
-export default connect(mapStateToProps, { getVideos })(PostVideoScreen);
+export default connect(mapStateToProps, { getVideos,postVideoInBackground })(PostVideoScreen);
