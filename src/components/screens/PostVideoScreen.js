@@ -19,6 +19,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
+import RNVideoEditor from 'react-native-video-editor';
 import {  colors } from '../../config/constants';
 import { postStyle } from '../../assets/styles/postStyle';
 import { goToRootRouteFromChild } from '../../utils/helpers';
@@ -51,7 +52,8 @@ class PostVideoScreen extends Component {
 			postOnIGpost: false,
 			postOnTwitter: false,
 			description: '',
-			isPostingVideo: false
+			isPostingVideo: false,
+			videoComplete:''
 		};
 	}
 
@@ -78,25 +80,14 @@ class PostVideoScreen extends Component {
 		let videoSegment = await AsyncStorage.getItem('videoToPost');
 		videoSegment = JSON.parse(videoSegment);
 		let lastSegment = videoSegment[videoSegment.length - 1];
-		let video_name = lastSegment.url.split('/');
+		//let video_name = lastSegment.url.split('/');
 		let { description } = this.state;
 
-		console.log(`video name : ${lastSegment.url}  ===>  ${lastSegment.url.replace("file://", "")}`);
-
-		const data = new FormData();
-		data.append('title', description || 'no title');
-		data.append('description', description || 'no description');
-		data.append('duration', parseInt(lastSegment.realTime / 1000));
-		data.append('id_user', loggedUser.id); //-------->change the user
-		data.append('video', {
-			uri: lastSegment.url,
-			type: lastSegment.type,
-			name: video_name[video_name.length - 1]
-		});
+		//console.log(`video name : ${lastSegment.url}  ===>  ${lastSegment.url.replace("file://", "")}`);
 
 		let options = {
 			url: ENDPOINT,
-			path: (Platform.OS === 'android'?lastSegment.url.replace("file://", ""):lastSegment.url),
+			path: '',//(Platform.OS === 'android'?lastSegment.url.replace("file://", ""):lastSegment.url),//joinedSegments
 			method: 'POST',
 			field: 'video',
 			type: 'multipart',
@@ -112,7 +103,29 @@ class PostVideoScreen extends Component {
 				}
 		  }
 
-		  await this.props.postVideoInBackground(options);
+		if(videoSegment.length===1){
+			options.path = videoSegment[0].url;
+			console.log(options);
+			await this.props.postVideoInBackground(options);
+		}
+
+		if(videoSegment.length > 2){
+			RNVideoEditor.merge(
+				videoSegment.map(item => item.url),
+				(results) => {
+					console.error('Error: ' + results);
+				},
+				async (results, file) => {
+					console.log('Success : ' + results + " file: " + file);
+					options.path = file;
+					console.log(options);
+					await this.props.postVideoInBackground(options);
+					
+				}
+			);
+		}
+
+		  //await this.props.postVideoInBackground(options);
 		  
 	}
 
