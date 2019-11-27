@@ -1,6 +1,7 @@
 import RNFetchBlob from 'rn-fetch-blob';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
+import numberAbbreviation from 'number-abbreviate';
 import { globals } from '../config/constants';
 import AlertMessages from '../components/commons/AlertMessages';
 import { Platform } from 'react-native';
@@ -89,4 +90,11 @@ export const goToRootRouteFromSibling = rootRoute => {
 	} catch (error) {
 		console.error(error.message);
 	}
+};
+
+export const numberAbbreviate = (number, precision) => {
+	const formatted = numberAbbreviation(number, precision)
+		.toString()
+		.toUpperCase();
+	return formatted;
 };

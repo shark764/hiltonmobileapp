@@ -38,7 +38,7 @@ export default class SearchResultComponent extends Component {
 		);
 	}
 
-	renderItem = ({ item: result }) => {
+	renderItem = ({ item: user }) => {
 		return (
 			<TouchableOpacity onPress={this.onResultPress}>
 				<View
@@ -50,7 +50,7 @@ export default class SearchResultComponent extends Component {
 				>
 					<Image
 						source={{
-							uri: result.image
+							uri: user.avatar
 						}}
 						resizeMode="contain"
 						style={{
@@ -64,7 +64,7 @@ export default class SearchResultComponent extends Component {
 					/>
 					<View style={{ paddingLeft: 10, flex: 1, flexShrink: 1 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-							<Text style={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 14 }}>{result.handle}</Text>
+							<Text style={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 14 }}>{user.username}</Text>
 							<Text
 								style={{
 									marginLeft: 10,
@@ -72,10 +72,10 @@ export default class SearchResultComponent extends Component {
 									fontSize: 14
 								}}
 							>
-								{result.fullName}
+								{user.full_name}
 							</Text>
 							<Button
-								onPress={() => this.onFollow(result)}
+								onPress={() => this.onFollow(user)}
 								buttonStyle={{
 									borderWidth: 1,
 									borderColor: '#D5D5D5',
@@ -89,21 +89,21 @@ export default class SearchResultComponent extends Component {
 									fontSize: 13,
 									fontFamily: fonts.OPENSANS_SEMI_BOLD
 								}}
-								title={result.following ? 'Following' : '+ Follow'}
+								title={user.following ? 'Following' : '+ Follow'}
 							/>
 						</View>
 
 						<View style={{ flexDirection: 'row' }}>
 							<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 12, color: '#2F2F2F' }}>
-								{result.followers} Followers
+								{user.followers} Followers
 							</Text>
 							<Text style={{ marginHorizontal: 10 }}>•</Text>
 							<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 12, color: '#2F2F2F' }}>
-								{result.laughs} Laughs
+								{user.laughs} Laughs
 							</Text>
 							<Text style={{ marginHorizontal: 10 }}>•</Text>
 							<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 12, color: '#2F2F2F' }}>
-								{result.views} Views
+								{user.views} Views
 							</Text>
 						</View>
 					</View>

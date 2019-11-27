@@ -31,7 +31,6 @@ export default class SingleVideoScreen extends Component {
 
 	CalculateSafeAreaPadding = e => {
 		const { height } = e.nativeEvent.layout;
-		console.log(height);
 		this.setState({ safeAreaPadding: height });
 	};
 

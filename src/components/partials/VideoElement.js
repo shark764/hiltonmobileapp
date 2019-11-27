@@ -38,7 +38,6 @@ class VideoElement extends PureComponent {
 		const { userLeftVideo, video, loggedUser } = this.props;
 
 		if (!prevProps.userLeftVideo && userLeftVideo) {
-			console.log('user left video', video.id);
 			clearTimeout(this.viewTimeout);
 			this.viewTimeout = null;
 		} else if (prevProps.userLeftVideo && !userLeftVideo) {
@@ -50,9 +49,7 @@ class VideoElement extends PureComponent {
 		const { video, loggedUser } = this.props;
 		const { loaded } = this.state;
 		if (!loggedUser || !loaded) return;
-		console.log('user started watching video', video.id, 'loaded:', loaded);
 		this.viewTimeout = setTimeout(() => {
-			console.log('==>Viewed finishd', video.id);
 			this.props.videoWasViewed(video.id, loggedUser.id);
 		}, globals.VIDEO_VIEW_TIME);
 	};
@@ -66,10 +63,10 @@ class VideoElement extends PureComponent {
 	};
 
 	onShowHideCommentsPress = () => {
-		const { loggedUser, onShowComments } = this.props;
+		const { loggedUser, onShowComments, onShowLoginModal } = this.props;
 
 		if (!loggedUser) {
-			this.showNoLoggedPopup();
+			onShowLoginModal();
 			return;
 		}
 
@@ -80,8 +77,9 @@ class VideoElement extends PureComponent {
 	};
 
 	shareVideo = async () => {
-		if (!this.props.loggedUser) {
-			this.showNoLoggedPopup();
+		const { loggedUser, onShowLoginModal } = this.props;
+		if (!loggedUser) {
+			onShowLoginModal();
 			return;
 		}
 		const { video } = this.props;
@@ -94,15 +92,11 @@ class VideoElement extends PureComponent {
 
 		const { showComments } = this.state;
 		const { video } = this.props;
-		if (!video.laughed && !showComments) {
+		if (!video.already_like && !showComments) {
 			const response = await videoLaughed(video.id, loggedUser.id);
 			//To show the Animation
 			if (response.success) this.setState({ laughed: true });
 		}
-	};
-
-	showNoLoggedPopup = () => {
-		this.setState({ showDialog: true });
 	};
 
 	onGoToLogin = () => {

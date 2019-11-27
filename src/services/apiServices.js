@@ -1,14 +1,16 @@
 import httpService from './httpService';
-import Upload from 'react-native-background-upload'
+import Upload from 'react-native-background-upload';
 
 const DEFAULT_RESPONSE = { data: null, success: false, message: '' };
 
 export default apiServices = {
-	async getHomeVideos(status = 'published', videosPerPage = 30) {
+	async getHomeVideos(userId = null, status = 'published', videosPerPage = 30) {
 		const response = { ...DEFAULT_RESPONSE };
 
 		try {
-			const endPoint = `videos/${status}/${videosPerPage}`;
+			let endPoint = `videos/${status}/${videosPerPage}`;
+			if (userId) endPoint += `?id_user=${userId}`;
+
 			const { data } = await httpService.get(endPoint);
 
 			response.data = data.data;
@@ -42,9 +44,8 @@ export default apiServices = {
 		const response = { ...DEFAULT_RESPONSE };
 
 		try {
-			let endPoint;
-			if (userId) endPoint = `video/${videoId}/comments?id_user=${userId}`;
-			else endPoint = `video/${videoId}/comments`;
+			let endPoint = `video/${videoId}/comments`;
+			if (userId) endPoint += `?id_user=${userId}`;
 
 			const { data } = await httpService.get(endPoint);
 			response.data = data.data;
@@ -69,7 +70,7 @@ export default apiServices = {
 			const endPoint = `comments`;
 
 			const { data } = await httpService.post(endPoint, dataToSend);
-			console.log('post comment data', data);
+
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {
@@ -108,11 +109,11 @@ export default apiServices = {
 
 		try {
 			const endPoint = `comments/${commentId}/like`;
-			console.log(endPoint, dataToSend);
+
 			let res;
 			if (liked) res = await httpService.post(endPoint, dataToSend);
 			else res = await httpService.delete(endPoint, { data: dataToSend });
-			console.log('like on api ' + liked.toString(), res);
+
 			const { data } = res;
 			response.data = data.data;
 			response.success = true;
@@ -131,8 +132,6 @@ export default apiServices = {
 			const dataToSend = {
 				data: user
 			};
-
-			console.log('Data to send:', dataToSend);
 
 			const { data } = await httpService.post(endPoint, dataToSend);
 			response.data = data.data;
@@ -157,7 +156,6 @@ export default apiServices = {
 			};
 
 			const { data } = await httpService.post(endPoint, dataToSend);
-			console.log('api response', data);
 
 			response.data = data;
 			response.success = true;
@@ -173,7 +171,7 @@ export default apiServices = {
 		const response = { ...DEFAULT_RESPONSE };
 		try {
 			const endPoint = `video`;
-			console.log("Uploading video...")
+			console.log('Uploading video...');
 			const { data } = await httpService.post(endPoint, dataToSend);
 			console.log('Video was uploaded...', data);
 			response.data = data;
@@ -188,29 +186,47 @@ export default apiServices = {
 		const response = { ...DEFAULT_RESPONSE };
 
 		Upload.startUpload(dataToSend)
-		.then((uploadId) => {
-				console.log('Upload started')
-				Upload.addListener('progress', uploadId, (data) => {
-				console.log(`Progress: ${data.progress}%`)
-				})
-				Upload.addListener('error', uploadId, (data) => {
-				console.log(`Error: ${data.error} % ${JSON.stringify(data)}`)
-				})
-				Upload.addListener('cancelled', uploadId, (data) => {
-				console.log(`Cancelled!`)
-				})
-				Upload.addListener('completed', uploadId, (data) => {
-				// data includes responseCode: number and responseBody: Object
-				console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`)
-				console.log('Completed!')
-				response.data = data.responseBody;
-				response.responseCode = data.responseCode;
-				response.success = true;
-				})})
-		.catch((err) => {
-			console.log('Upload error!', err)
-			response.message = error.message || 'Unable to connect to the api';
-		})
+			.then(uploadId => {
+				console.log('Upload started');
+				Upload.addListener('progress', uploadId, data => {
+					console.log(`Progress: ${data.progress}%`);
+				});
+				Upload.addListener('error', uploadId, data => {
+					console.log(`Error: ${data.error} % ${JSON.stringify(data)}`);
+				});
+				Upload.addListener('cancelled', uploadId, data => {
+					console.log(`Cancelled!`);
+				});
+				Upload.addListener('completed', uploadId, data => {
+					// data includes responseCode: number and responseBody: Object
+					console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`);
+					console.log('Completed!');
+					response.data = data.responseBody;
+					response.responseCode = data.responseCode;
+					response.success = true;
+				});
+			})
+			.catch(err => {
+				console.log('Upload error!', err);
+				response.message = error.message || 'Unable to connect to the api';
+			});
 		return response;
 	},
+	async searchProfiles(searchQuery) {
+		const response = { ...DEFAULT_RESPONSE };
+		try {
+			//If query search is not blank
+			if (searchQuery) {
+				const endPoint = `profiles?username=${searchQuery}`;
+				const { data } = await httpService.get(endPoint);
+				response.data = data;
+			} else response.data = { data: { data: [] } };
+
+			response.success = true;
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
+		}
+
+		return response;
+	}
 };

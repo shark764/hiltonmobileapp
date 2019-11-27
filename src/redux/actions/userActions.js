@@ -1,7 +1,7 @@
 import * as types from '../types';
 import apiServices from '../../services/apiServices';
 import AlertMessages from '../../components/commons/AlertMessages';
-import { goToRootRouteFromChild } from '../../utils/helpers';
+import { goToRootRouteFromChild, goToRootRouteFromSibling } from '../../utils/helpers';
 
 export const createUser = (user, redirectTo) => async dispatch => {
 	const response = await apiServices.createUser(user);
@@ -10,8 +10,8 @@ export const createUser = (user, redirectTo) => async dispatch => {
 		await dispatch({ type: types.ADD_USER_SUCCESS, payload: response.data });
 
 		AlertMessages.success(response.message);
-		console.log('redirectTo', redirectTo);
-		goToRootRouteFromChild(redirectTo, 'Home');
+		
+		if (redirectTo) goToRootRouteFromChild(redirectTo, 'Home');
 	}
 
 	return response;

@@ -2,30 +2,31 @@ import React, { Component } from 'react';
 import { Text, View, SafeAreaView, TextInput, Dimensions } from 'react-native';
 import { connect } from 'react-redux';
 import { fonts, colors } from '../../../config/constants';
-import IconFeather from 'react-native-vector-icons/Feather';
-import LineSeparator from '../../commons/LineSeparator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import EmailRegistrationScreen from './EmailRegistrationScreen';
+import LoginScreen from './LoginScreen';
+import { getShowHideStyle } from '../../../utils/helpers';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 class LoginOrSignupScreen extends Component {
 	fromScreen = '';
-	state = { fromScreen: '' };
+	state = { currentAction: 'login' };
 
 	componentDidMount() {
-		this.fromScreen = this.props.navigation.getParam('fromScreen');
-		console.log('1. did mount', this.fromScreen);
+		const { navigation } = this.props;
+		this.fromScreen = navigation ? navigation.getParam('fromScreen') : '';
 		this.redirectToLoggedScreen();
+		this.setState({});
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		this.fromScreen = this.props.navigation.getParam('fromScreen');
-		console.log('1. did update', this.fromScreen);
+		const { navigation } = this.props;
+		this.fromScreen = navigation ? navigation.getParam('fromScreen') : '';
 		this.redirectToLoggedScreen();
 	}
 
 	redirectToLoggedScreen = () => {
-		console.log(this.fromScreen);
 		const { loggedUser } = this.props;
 		if (loggedUser && this.fromScreen) this.props.navigation.replace(this.fromScreen);
 	};
@@ -38,143 +39,99 @@ class LoginOrSignupScreen extends Component {
 		this.props.navigation.push('PhoneRegistration', { fromScreen: this.fromScreen });
 	};
 
-	goToLogin = () => {
-		this.props.navigation.push('Login', { fromScreen: this.fromScreen });
-	};
+	showLogin = () => this.setState({ currentAction: 'login' });
+
+	showRegister = () => this.setState({ currentAction: 'register' });
 
 	render() {
+		const { onCloseModal } = this.props;
+		const { currentAction } = this.state;
+		const marginTop = this.props.navigation ? 40 : 0;
 		return (
-			<SafeAreaView style={{ alignItems: 'center', flex: 1 }}>
-				<View style={{ alignItems: 'center', flex: 1, margin: 16, justifyContent: 'space-evenly' }}>
+			<View
+				style={{
+					alignItems: 'center',
+					flex: 1,
+					backgroundColor: '#fff',
+					marginTop
+				}}
+			>
+				<View style={{ alignItems: 'center', flex: 1, margin: 16 }}>
 					<Text
 						style={{
 							fontFamily: fonts.OPENSANS_SEMI_BOLD,
-							fontSize: 16,
+							fontSize: 18,
 							color: '#2F2F2F',
-							marginVertical: 40
+							marginTop: 20,
+							marginBottom: 10
 						}}
 					>
 						You need an account to continue
 					</Text>
-					<View
+
+					<Text
 						style={{
-							flex: 1,
-							width: '100%',
-							alignItems: 'center',
-							justifyContent: 'space-evenly'
+							fontFamily: fonts.OPENSANS_REGULAR,
+							fontSize: 14,
+							color: '#2F2F2F'
 						}}
 					>
-						<TouchableOpacity onPress={this.goToEmailRegistration}>
-							<View
+						{currentAction === 'register'
+							? 'Sign up with your email or phone'
+							: 'Login with your email or phone'}
+					</Text>
+					<View style={{ flexDirection: 'row', marginTop: 10 }}>
+						<TouchableOpacity
+							style={{
+								borderWidth: 1,
+								borderColor: colors.MAIN,
+								backgroundColor: colors.MAIN,
+								borderTopLeftRadius: 5,
+								borderBottomLeftRadius: 5
+							}}
+						>
+							<Text
 								style={{
-									height: 88,
-									width: 88,
-									borderRadius: 44,
-									backgroundColor: colors.MAIN,
-									justifyContent: 'center',
-									alignItems: 'center'
+									color: '#FFF',
+									paddingVertical: 10,
+									paddingHorizontal: 40,
+									fontFamily: fonts.OPENSANS_REGULAR,
+									fontSize: 13
 								}}
 							>
-								<IconFeather name={'mail'} size={45} color={'#fff'} />
-							</View>
+								Email
+							</Text>
 						</TouchableOpacity>
-						<Text
+						<TouchableOpacity
 							style={{
-								fontFamily: fonts.OPENSANS_REGULAR,
-								fontSize: 14,
-								color: '#2F2F2F',
-								marginTop: 10
+								borderWidth: 1,
+								borderColor: colors.MAIN,
+								backgroundColor: '#FFF',
+								borderTopRightRadius: 5,
+								borderBottomRightRadius: 5
 							}}
 						>
-							Sign up with your email
-						</Text>
-
-						<Text
-							style={{
-								fontFamily: fonts.OPENSANS_REGULAR,
-								fontSize: 12,
-								color: '#555555',
-								marginTop: 10
-							}}
-						>
-							Note: You will receive an email with a code to confirm your registration.
-						</Text>
-					</View>
-
-					<View
-						style={{
-							width: screenWidth,
-							marginVertical: 40,
-							justifyContent: 'center',
-							alignItems: 'center'
-						}}
-					>
-						<LineSeparator style={{ marginVertical: 0 }} />
-
-						<Text
-							style={{
-								position: 'absolute',
-								left: '50%',
-								top: '50%',
-								marginTop: -8,
-								marginLeft: -15,
-								backgroundColor: '#fff',
-								width: 'auto',
-								paddingHorizontal: 10,
-								alignSelf: 'center',
-								fontFamily: fonts.OPENSANS_REGULAR,
-								fontSize: 12,
-								color: '#A2A2A2'
-							}}
-						>
-							OR
-						</Text>
-					</View>
-					<View
-						style={{
-							flex: 1,
-							width: '100%',
-							alignItems: 'center',
-							justifyContent: 'space-evenly'
-						}}
-					>
-						<TouchableOpacity>
-							<View
+							<Text
 								style={{
-									height: 88,
-									width: 88,
-									borderRadius: 44,
-									backgroundColor: colors.MAIN,
-									justifyContent: 'center',
-									alignItems: 'center'
+									color: colors.MAIN,
+									paddingVertical: 10,
+									paddingHorizontal: 40,
+									fontFamily: fonts.OPENSANS_REGULAR,
+									fontSize: 13
 								}}
 							>
-								<IconFeather name={'phone'} size={45} color={'#fff'} />
-							</View>
+								Phone
+							</Text>
 						</TouchableOpacity>
-						<Text
-							style={{
-								fontFamily: fonts.OPENSANS_REGULAR,
-								fontSize: 14,
-								color: '#2F2F2F',
-								marginTop: 10
-							}}
-						>
-							Sign up with your phone
-						</Text>
-
-						<Text
-							style={{
-								fontFamily: fonts.OPENSANS_REGULAR,
-								fontSize: 12,
-								color: '#555555',
-								marginTop: 10
-							}}
-						>
-							Note: You will receive a sms with a code to confirm your registration.
-						</Text>
+					</View>
+					<View style={getShowHideStyle(currentAction !== 'login')}>
+						<EmailRegistrationScreen onCloseModal={onCloseModal} />
+					</View>
+					<View style={getShowHideStyle(currentAction === 'login')}>
+						<LoginScreen onCloseModal={onCloseModal} />
 					</View>
 				</View>
+
 				<View
 					style={{
 						width: '100%',
@@ -184,17 +141,36 @@ class LoginOrSignupScreen extends Component {
 						alignItems: 'center'
 					}}
 				>
-					<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 15, color: '#2F2F2F' }}>
+					<Text
+						style={[
+							getShowHideStyle(currentAction !== 'login'),
+							{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 15, color: '#2F2F2F' }
+						]}
+					>
 						Already have an account?{' '}
 						<Text
-							onPress={this.goToLogin}
+							onPress={this.showLogin}
 							style={{ color: colors.MAIN, fontFamily: fonts.OPENSANS_BOLD, fontSize: 15 }}
 						>
 							Login
 						</Text>
 					</Text>
+					<Text
+						style={[
+							getShowHideStyle(currentAction === 'login'),
+							{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 15, color: '#2F2F2F' }
+						]}
+					>
+						Don't have an account?{' '}
+						<Text
+							onPress={this.showRegister}
+							style={{ color: colors.MAIN, fontFamily: fonts.OPENSANS_BOLD, fontSize: 15 }}
+						>
+							Register
+						</Text>
+					</Text>
 				</View>
-			</SafeAreaView>
+			</View>
 		);
 	}
 }

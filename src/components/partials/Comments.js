@@ -18,7 +18,7 @@ import { heartAnimation } from '../../assets/animations/index';
 import { globals } from '../../config/constants';
 import { commentsStyles as styles } from '../../assets/styles';
 import { getVideoComments, postVideoComment, commentLiked } from '../../redux/actions/videoActions';
-import { getShowHideStyle } from '../../utils/helpers';
+import { getShowHideStyle, numberAbbreviate } from '../../utils/helpers';
 
 const screenHeight = Math.round(Dimensions.get('window').height);
 const componentHeight = (screenHeight / 4) * 3 - globals.NAVBAR_HEIGHT * 2;
@@ -187,7 +187,7 @@ class CommentsScreen extends Component {
 							)}
 						</View>
 					</TouchableOpacity>
-					<Text style={styles.likeCounter}>{comment.likes}</Text>
+					<Text style={styles.likeCounter}>{numberAbbreviate(comment.likes, 1)}</Text>
 				</View>
 			</View>
 		);

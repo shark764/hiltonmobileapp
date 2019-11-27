@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import IconFontAwesome from 'react-native-vector-icons/FontAwesome5';
 import { connect } from 'react-redux';
 import { homeStyles as styles } from '../../assets/styles';
-import { getShowHideStyle } from '../../utils/helpers';
+import { getShowHideStyle, numberAbbreviate } from '../../utils/helpers';
 
 class VideoActions extends Component {
 	state = {
@@ -18,6 +18,7 @@ class VideoActions extends Component {
 
 	render() {
 		const { videoItem, showVideoInfo, onShowHideCommentsPress, onShareVideo, loggedUser } = this.props;
+
 		return (
 			<LinearGradient colors={['rgba(0, 0, 0,0)', 'rgba(0, 0, 0,0.4)']} style={styles.gradientContainer}>
 				<View style={[styles.userContainer, getShowHideStyle(showVideoInfo)]}>
@@ -44,17 +45,32 @@ class VideoActions extends Component {
 					</View>
 				</View>
 				<View style={styles.actionContainer}>
-					<IconFontAwesome
-						name="laugh-squint"
-						size={30}
-						color={'#fff'}
+					<View
 						style={{
-							textShadowColor: '#000000',
-							textShadowOffset: { width: 0.3, height: 0.3 },
-							textShadowRadius: 1
+							borderRadius: 20,
+							backgroundColor: videoItem.already_like ? '#FFF' : 'transparent',
+							justifyContent: 'center',
+							alignItems: 'center',
+							width: 28,
+							height: videoItem.already_like ? 28.7 : 30
 						}}
-					/>
-					<Text style={styles.actionCounters}>{videoItem.laughs}</Text>
+					>
+						<IconFontAwesome
+							name="laugh-squint"
+							size={30}
+							color={'#999'}
+							color={videoItem.already_like ? '#000' : '#FFF'}
+							style={[
+								videoItem.already_like && { marginTop: -0.5 },
+								!videoItem.already_like && {
+									textShadowColor: '#000',
+									textShadowOffset: { width: 0.3, height: 0.3 },
+									textShadowRadius: 1
+								}
+							]}
+						/>
+					</View>
+					<Text style={styles.actionCounters}>{numberAbbreviate(videoItem.laughs, 1)}</Text>
 					<TouchableOpacity onPress={onShowHideCommentsPress}>
 						<Icon
 							name="message-square"
@@ -67,7 +83,9 @@ class VideoActions extends Component {
 							}}
 						/>
 					</TouchableOpacity>
-					<Text style={[styles.actionCounters, { marginTop: 0 }]}>{videoItem.comments}</Text>
+					<Text style={[styles.actionCounters, { marginTop: 0 }]}>
+						{numberAbbreviate(videoItem.comments, 1)}
+					</Text>
 					<TouchableOpacity onPress={onShareVideo}>
 						<Icon
 							name="share"
@@ -80,7 +98,9 @@ class VideoActions extends Component {
 							}}
 						/>
 					</TouchableOpacity>
-					<Text style={[styles.actionCounters, { marginTop: 0 }]}>{videoItem.shares}</Text>
+					<Text style={[styles.actionCounters, { marginTop: 0 }]}>
+						{numberAbbreviate(videoItem.shares, 1)}
+					</Text>
 					{loggedUser && loggedUser.id === videoItem.user.id && (
 						<React.Fragment>
 							<Icon
@@ -94,7 +114,7 @@ class VideoActions extends Component {
 								}}
 							/>
 							<Text style={[styles.actionCounters, { marginTop: 0, marginBottom: 0 }]}>
-								{videoItem.views}
+								{numberAbbreviate(videoItem.views, 1)}
 							</Text>
 						</React.Fragment>
 					)}

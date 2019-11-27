@@ -5,6 +5,7 @@ import VideoElement from '../partials/VideoElement';
 import { connect } from 'react-redux';
 import { getVideos } from '../../redux/actions/videoActions';
 import { getLoggedUser } from '../../redux/actions/authActions';
+import LoginOrSignupHomeScreen from './SignUp/LoginOrSignupHomeScreen';
 
 class HomeScreen extends Component {
 	state = {
@@ -13,12 +14,14 @@ class HomeScreen extends Component {
 		listHeight: 0,
 		isFocused: true,
 		loading: true,
-		scrollEnabled: true
+		scrollEnabled: true,
+		showLoginModal: false
 	};
 
 	async componentDidMount() {
+		const { loggedUser } = this.props;
 		await this.props.getLoggedUser();
-		await this.props.getVideos();
+		await this.props.getVideos(loggedUser && loggedUser.id);
 	}
 
 	async componentDidUpdate(prevProps, prevState) {
@@ -27,7 +30,7 @@ class HomeScreen extends Component {
 		//If we have new videos, they will be aded to the end.
 		if (prevProps.videos !== videos) this.setState({ videos, loading: false });
 
-		if (prevProps.loggedUser !== loggedUser) await getVideos();
+		if (prevProps.loggedUser !== loggedUser) await getVideos(loggedUser && loggedUser.id);
 	}
 
 	videoChanged = e => {
@@ -72,14 +75,20 @@ class HomeScreen extends Component {
 		else this.resumeVideo();
 	};
 
+	onCloseLoginModal = () => this.setState({ showLoginModal: false });
+
+	onShowLoginModal = () => this.setState({ showLoginModal: true });
+
 	render() {
-		const { videos, listHeight, loading, scrollEnabled } = this.state;
+		const { videos, listHeight, loading, scrollEnabled, showLoginModal } = this.state;
 
 		if (loading) return null;
 
 		return (
 			<React.Fragment>
 				<NavigationEvents onDidFocus={this.resumeVideo} onDidBlur={this.pauseVideo} />
+
+				<LoginOrSignupHomeScreen modalVisible={showLoginModal} onCloseModal={this.onCloseLoginModal} />
 				<FlatList
 					data={videos}
 					renderItem={this.renderVideoItem}
@@ -113,6 +122,7 @@ class HomeScreen extends Component {
 				onPauseVideo={this.pauseVideo}
 				onResumeVideo={this.resumeVideo}
 				onShowComments={this.onShowComments}
+				onShowLoginModal={this.onShowLoginModal}
 				{...this.props}
 			/>
 		);

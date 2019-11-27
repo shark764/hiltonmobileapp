@@ -1,7 +1,7 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, Dimensions } from 'react-native';
 import { Input, Button, CheckBox } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/Feather';
+import { Header } from 'react-navigation-stack';
 import { connect } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { fonts, colors } from '../../../config/constants';
@@ -9,6 +9,8 @@ import { Loader } from '../../commons/Loader';
 import { userLoginWithEmail } from '../../../redux/actions/authActions';
 import Form from '../../commons/Form';
 import AlertMessages from '../../commons/AlertMessages';
+
+const { width: widthScreen } = Dimensions.get('window');
 
 class LoginScreen extends Form {
 	state = {
@@ -20,8 +22,8 @@ class LoginScreen extends Form {
 	fromScreen = '';
 
 	componentDidMount() {
-		this.fromScreen = this.props.navigation.getParam('fromScreen');
-		console.log(this.fromScreen);
+		const { navigation } = this.props;
+		this.fromScreen = navigation ? navigation.getParam('fromScreen') : '';
 	}
 
 	onRemberMePress = () => this.setState({ rememberMe: !this.state.rememberMe });
@@ -30,12 +32,15 @@ class LoginScreen extends Form {
 		const user = { ...this.state.data };
 		const { rememberMe } = this.state;
 		this.setState({ loading: true });
-		const result = await this.props.userLoginWithEmail(user, rememberMe, 'Profile');
+		const result = await this.props.userLoginWithEmail(user, rememberMe, this.fromScreen);
 
 		//If login fails, we show an error, if not, the redux action will redirect to home
 		if (!result.success) {
 			AlertMessages.error(result.message, undefined, undefined, 50);
 			this.setState({ loading: false });
+		} else {
+			const { onCloseModal } = this.props;
+			if (onCloseModal) onCloseModal();
 		}
 	};
 
@@ -47,13 +52,11 @@ class LoginScreen extends Form {
 			<KeyboardAwareScrollView
 				keyboardShouldPersistTaps="handled"
 				keyboardDismissMode="on-drag"
-				style={{ flex: 1, margin: 16, marginTop: 20 }}
+				style={{ flex: 1, marginTop: 20, paddingHorizontal: 20, width: widthScreen }}
 				contentContainerStyle={{ alignItems: 'center' }}
+				keyboardVerticalOffset={Header.HEIGHT}
 			>
-				<Text style={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 17, color: '#2F2F2F' }}>
-					Log in to GrapeVine
-				</Text>
-				<View style={{ width: '100%', marginTop: 35 }}>
+				<View style={{ width: '100%' }}>
 					<Input
 						placeholder="Email Address"
 						placeholderTextColor="#D9D9D9"
@@ -83,7 +86,7 @@ class LoginScreen extends Form {
 						value={data['password']}
 					/>
 				</View>
-				<View style={{ width: '100%', marginTop: 10 }}>
+				<View style={{ width: '100%', marginTop: 0 }}>
 					<CheckBox
 						title="Remember me?"
 						checkedColor={colors.MAIN}
@@ -94,7 +97,7 @@ class LoginScreen extends Form {
 					/>
 				</View>
 
-				<View style={{ marginTop: 10 }}>
+				<View style={{ marginTop: 0 }}>
 					<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 13, color: colors.MAIN }}>
 						Forgot your password?
 					</Text>
@@ -115,53 +118,6 @@ class LoginScreen extends Form {
 					)}
 					<Loader show={loading} />
 				</View>
-				<View style={{ width: '100%', marginVertical: 40, justifyContent: 'center', alignItems: 'center' }}>
-					<LineSeparator style={{ marginVertical: 0 }} />
-					<Text
-						style={{
-							position: 'absolute',
-							left: '50%',
-							top: '50%',
-							marginTop: -8,
-							marginLeft: -15,
-							backgroundColor: '#fff',
-							width: 'auto',
-							paddingHorizontal: 10,
-							alignSelf: 'center',
-							fontFamily: fonts.OPENSANS_REGULAR,
-							fontSize: 12,
-							color: '#A2A2A2'
-						}}
-					>
-						OR
-					</Text>
-				</View>
-				<View
-					style={{
-						width: '100%',
-						marginTop: 10,
-						flexDirection: 'row',
-						justifyContent: 'center',
-						alignItems: 'center'
-					}}
-				>
-					<View
-						style={{
-							width: 36,
-							height: 36,
-							borderRadius: 18,
-							backgroundColor: colors.MAIN,
-							marginRight: 20,
-							justifyContent: 'center',
-							alignItems: 'center'
-						}}
-					>
-						<Icon color="#fff" size={20} name="phone" />
-					</View>
-					<Text style={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 15, color: '#606060' }}>
-						Login via phone number
-					</Text>
-				</View>
 			</KeyboardAwareScrollView>
 		);
 	}
@@ -181,7 +137,8 @@ const styles = {
 		paddingHorizontal: 17,
 		fontFamily: fonts.OPENSANS_REGULAR,
 		fontSize: 14,
-		color: '#898989'
+		color: '#898989',
+		marginLeft: -10
 	},
 	inputContainer: {
 		borderBottomWidth: 0

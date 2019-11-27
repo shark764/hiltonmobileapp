@@ -8,6 +8,7 @@ import { getTrandingVideos, doSearch } from '../../redux/actions/searchActions';
 
 class SearchScreen extends Component {
 	state = { searchQuery: '' };
+	typingTimer = null;
 
 	async componentDidMount() {
 		await this.props.getTrandingVideos();
@@ -16,7 +17,14 @@ class SearchScreen extends Component {
 
 	onChangeText = async searchQuery => {
 		this.setState({ searchQuery });
-		if (searchQuery) await this.props.doSearch(searchQuery);
+
+		if (this.typingTimer) return;
+
+		this.typingTimer = setTimeout(async () => {
+			this.typingTimer = null;
+			const { searchQuery: search } = this.state;
+			if (search) await this.props.doSearch(search);
+		}, 100);
 	};
 
 	onSubmitSearch = () => {};

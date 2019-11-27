@@ -4,7 +4,6 @@ import { fonts, colors } from '../../../config/constants';
 import { Button } from 'react-native-elements';
 import DatePicker from '../../commons/DateTimePicker';
 import { Input } from 'react-native-elements';
-
 import { Header } from 'react-navigation-stack';
 import ModalPopup from '../../commons/ModalPopup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -20,23 +19,15 @@ class EmailRegistrationScreen extends Form {
 	state = {
 		data: {
 			email: '',
-			full_name: '',
-			bio: '',
 			username: '',
-			birth_date: '',
 			password: '',
-			confirmPassword: '',
 			avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
 		},
 		// data: {
 		// 	email: 'david6@email.com',
-		// 	full_name: 'DAvid Abrego',
-		// 	bio: 'my bio',
 		// 	username: 'david6',
-		// 	birth_date: '01/01/2000',
 		// 	password: '1234',
-		// 	confirmPassword: '1234',
-		// 	avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
+		//// 	avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
 		// },
 		showDialog: false,
 		dialogTitle: '',
@@ -46,12 +37,13 @@ class EmailRegistrationScreen extends Form {
 	fromScreen = '';
 
 	componentDidMount() {
-		this.fromScreen = this.props.navigation.getParam('fromScreen');
-		console.log(this.fromScreen);
+		const { navigation } = this.props;
+		this.fromScreen = navigation ? navigation.getParam('fromScreen') : '';
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		this.fromScreen = this.props.navigation.getParam('fromScreen');
+		const { navigation } = this.props;
+		this.fromScreen = navigation ? navigation.getParam('fromScreen') : '';
 	}
 
 	doSubmit = async () => {
@@ -64,13 +56,15 @@ class EmailRegistrationScreen extends Form {
 		if (!result.success) {
 			AlertMessages.error(result.message);
 			this.setState({ loading: false });
+		} else {
+			const { onCloseModal } = this.props;
+			if (onCloseModal) onCloseModal();
 		}
 	};
 
 	showModal = option => {
 		const dialogTitle = option === 'terms' ? 'Terms of use' : 'Privacy Policy';
 		this.setState({ showDialog: true, dialogTitle });
-		console.log(option);
 	};
 
 	hideModal = () => {
@@ -93,7 +87,7 @@ class EmailRegistrationScreen extends Form {
 			>
 				<View style={{ width: '100%', marginTop: 20 }}>
 					<Input
-						label="Email Address"
+						//label="Email Address"
 						placeholder="Email Address"
 						placeholderTextColor="#D9D9D9"
 						autoCapitalize="none"
@@ -104,40 +98,24 @@ class EmailRegistrationScreen extends Form {
 						labelStyle={styles.label}
 						value={data['email']}
 						onChangeText={text => this.onInputChange(text, 'email')}
-						onSubmitEditing={e => this.handleInputSubmit(e, 'full_name')}
-					/>
-				</View>
-				<View style={{ width: '100%', marginTop: 20 }}>
-					<Input
-						label="Full Name"
-						placeholder="Full Name"
-						placeholderTextColor="#D9D9D9"
-						errorMessage={inputErrors['full_name']}
-						autoCapitalize="words"
-						autoCompleteType="off"
-						inputContainerStyle={styles.inputContainer}
-						inputStyle={styles.input}
-						labelStyle={styles.label}
-						ref={input => (this.rawInputs['full_name'] = input)}
-						onChangeText={text => this.onInputChange(text, 'full_name')}
 						onSubmitEditing={e => this.handleInputSubmit(e, 'username')}
-						value={data['full_name']}
 					/>
 				</View>
+
 				<View style={{ width: '100%', marginTop: 20 }}>
 					<View
 						style={{
 							backgroundColor: colors.MAIN,
-							padding: 8,
-							paddingHorizontal: 15,
+							justifyContent: 'center',
+							alignItems: 'center',
 							color: '#fff',
 							position: 'absolute',
-							top: 35,
-							left: 10,
+							top: 0,
+							//left: 10,
 							borderTopLeftRadius: 10,
 							borderBottomLeftRadius: 10,
-							width: 'auto',
-							height: 44,
+							width: 45,
+							height: 45,
 							zIndex: 100
 						}}
 					>
@@ -152,7 +130,7 @@ class EmailRegistrationScreen extends Form {
 						</Text>
 					</View>
 					<Input
-						label="Username"
+						//label="Username"
 						placeholder="Username"
 						placeholderTextColor="#D9D9D9"
 						autoCapitalize="none"
@@ -162,45 +140,15 @@ class EmailRegistrationScreen extends Form {
 						inputStyle={[styles.input, { paddingLeft: 60 }]}
 						labelStyle={styles.label}
 						onChangeText={text => this.onInputChange(text, 'username')}
+						onSubmitEditing={e => this.handleInputSubmit(e, 'password')}
 						ref={input => (this.rawInputs['username'] = input)}
 						value={data['username']}
 					/>
 				</View>
-				<View style={{ width: '100%', paddingLeft: 10, marginTop: 20 }}>
-					<DatePicker
-						style={styles.datePicker}
-						date={data['birth_date']}
-						mode="date"
-						placeholder="Birthday"
-						label="Birthday"
-						format="MM/DD/YYYY"
-						showIcon={false}
-						errorMessage={inputErrors['birth_date']}
-						customStyles={styles.datePickerCustom}
-						onDateChange={(e, date) => this.onInputChange(date, 'birth_date')}
-					/>
-				</View>
+
 				<View style={{ width: '100%', marginTop: 20 }}>
 					<Input
-						label="Bio"
-						placeholder="Bio"
-						placeholderTextColor="#D9D9D9"
-						errorMessage={inputErrors['bio']}
-						secureTextEntry
-						multiline
-						maxLength={100}
-						inputContainerStyle={styles.inputContainer}
-						inputStyle={[styles.input, { height: 80 }]}
-						labelStyle={styles.label}
-						ref={input => (this.rawInputs['bio'] = input)}
-						onChangeText={text => this.onInputChange(text, 'bio')}
-						onSubmitEditing={e => this.handleInputSubmit(e, 'password')}
-						value={data['bio']}
-					/>
-				</View>
-				<View style={{ width: '100%', marginTop: 20 }}>
-					<Input
-						label="Password"
+						//label="Password"
 						placeholder="Password"
 						placeholderTextColor="#D9D9D9"
 						errorMessage={inputErrors['password']}
@@ -210,25 +158,10 @@ class EmailRegistrationScreen extends Form {
 						labelStyle={styles.label}
 						ref={input => (this.rawInputs['password'] = input)}
 						onChangeText={text => this.onInputChange(text, 'password')}
-						onSubmitEditing={e => this.handleInputSubmit(e, 'confirmPassword')}
 						value={data['password']}
 					/>
 				</View>
-				<View style={{ width: '100%', marginTop: 20 }}>
-					<Input
-						label="Confirm Password"
-						placeholder="Confirm Password"
-						placeholderTextColor="#D9D9D9"
-						errorMessage={inputErrors['confirmPassword']}
-						secureTextEntry
-						inputContainerStyle={styles.inputContainer}
-						inputStyle={styles.input}
-						labelStyle={styles.label}
-						onChangeText={text => this.onInputChange(text, 'confirmPassword')}
-						ref={input => (this.rawInputs['confirmPassword'] = input)}
-						value={data['confirmPassword']}
-					/>
-				</View>
+
 				<View style={{ alignItems: 'center', flexDirection: 'row', marginTop: 20 }}>
 					<Text style={{ textAlign: 'center' }}>
 						<Text style={{ fontFamily: fonts.OPENSANS_REGULAR, fontSize: 12, color: '#555555' }}>
@@ -307,7 +240,6 @@ export default connect(mapstateToProps, { createUser })(EmailRegistrationScreen)
 
 const styles = {
 	scrollContainer: {
-		padding: 16,
 		width: '100%'
 	},
 	input: {
@@ -317,11 +249,12 @@ const styles = {
 		borderWidth: 1,
 		borderColor: '#dddddd',
 		borderRadius: 10,
-		paddingVertical: 11,
-		paddingHorizontal: 17,
+		//paddingVertical: 10,
+		paddingHorizontal: 14,
 		fontFamily: fonts.OPENSANS_REGULAR,
 		fontSize: 14,
-		color: '#898989'
+		color: '#898989',
+		marginLeft: -10
 	},
 	inputContainer: {
 		borderBottomWidth: 0

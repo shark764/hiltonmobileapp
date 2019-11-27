@@ -1,4 +1,5 @@
 import * as types from '../types';
+import apiServices from '../../services/apiServices';
 
 export const getTrandingVideos = () => async dispatch => {
 	const videos = [
@@ -77,99 +78,11 @@ export const getTrandingVideos = () => async dispatch => {
 	dispatch({ type: types.GET_TRANDING_VIDEOS, payload: videos });
 };
 
-export const doSearch = query => async dispatch => {
-	const results = [
-		{
-			id: 1,
-			image: 'https://secure.gravatar.com/avatar/cf36a722597adb2e6d3b3c199bf7a51b?s=46&d=identicon',
-			handle: '@davidrenji',
-			fullName: 'Jason xyz',
-			followers: '12.2M',
-			laughs: '120M',
-			views: '200M',
-			following: false
-		},
-		{
-			id: 2,
-			image: 'https://mario.nintendo.com/assets/img/home/intro/mario-pose2.png',
-			handle: '@mar87',
-			fullName: 'Mario Bross',
-			followers: '2K',
-			laughs: '23K',
-			views: '27.4K',
-			following: false
-		},
-		{
-			id: 3,
-			image: 'http://www.sweatpantsgaming.com/wp-content/uploads/2019/01/Samus-Super-Smash-Bros-Ultimate.png',
-			handle: '@mega63',
-			fullName: 'Megaman X',
-			followers: '34M',
-			laughs: '84.3M',
-			views: '3,837M',
-			following: true
-		},
-		{
-			id: 4,
-			image: 'https://secure.gravatar.com/avatar/cf36a722597adb2e6d3b3c199bf7a51b?s=46&d=identicon',
-			handle: '@davidrenji',
-			fullName: 'Jason xyz',
-			followers: '12.2M',
-			laughs: '120M',
-			views: '200M',
-			following: false
-		},
-		{
-			id: 5,
-			image: 'https://mario.nintendo.com/assets/img/home/intro/mario-pose2.png',
-			handle: '@mar87',
-			fullName: 'Mario Bross',
-			followers: '2K',
-			laughs: '23K',
-			views: '27.4K',
-			following: false
-		},
-		{
-			id: 6,
-			image: 'http://www.sweatpantsgaming.com/wp-content/uploads/2019/01/Samus-Super-Smash-Bros-Ultimate.png',
-			handle: '@mega63',
-			fullName: 'Megaman X',
-			followers: '34M',
-			laughs: '84.3M',
-			views: '3,837M',
-			following: true
-		},
-		{
-			id: 7,
-			image: 'https://secure.gravatar.com/avatar/cf36a722597adb2e6d3b3c199bf7a51b?s=46&d=identicon',
-			handle: '@davidrenji',
-			fullName: 'Jason xyz',
-			followers: '12.2M',
-			laughs: '120M',
-			views: '200M'
-		},
-		{
-			id: 8,
-			image: 'https://mario.nintendo.com/assets/img/home/intro/mario-pose2.png',
-			handle: '@mar87',
-			fullName: 'Mario Bross',
-			followers: '2K',
-			laughs: '23K',
-			views: '27.4K'
-		},
-		{
-			id: 9,
-			image: 'http://www.sweatpantsgaming.com/wp-content/uploads/2019/01/Samus-Super-Smash-Bros-Ultimate.png',
-			handle: '@mega63',
-			fullName: 'Megaman X',
-			followers: '34M',
-			laughs: '84.3M',
-			views: '3,837M'
-		}
-	];
+export const doSearch = searchQuery => async dispatch => {
+	const response = await apiServices.searchProfiles(searchQuery);
+	const profiles = response.data.data.data;
+	
+	if (response.success) dispatch({ type: types.GET_SEARCH_RESULTS, payload: profiles });
 
-	dispatch({
-		type: types.GET_SEARCH_RESULTS,
-		payload: results
-	});
+	return response;
 };

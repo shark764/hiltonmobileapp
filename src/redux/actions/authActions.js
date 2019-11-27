@@ -21,8 +21,8 @@ export const userLoginWithEmail = (user, rememberMe, redirectTo) => async dispat
 		AlertMessages.success(response.message);
 
 		dispatch({ type: types.USER_LOGGED_IN_SUCCESS, payload: loggedUser });
-		console.log('redirectTo', redirectTo);
-		goToRootRouteFromChild(redirectTo, 'Home');
+		
+		if (redirectTo) goToRootRouteFromChild(redirectTo, 'Home');
 	}
 
 	return response;

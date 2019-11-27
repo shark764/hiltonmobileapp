@@ -6,7 +6,6 @@ export default class Form extends Component {
 	inputErrors = {};
 
 	onInputChange = (value, field) => {
-		//console.log(value, field);
 		const data = { ...this.state.data };
 		data[field] = value;
 		this.setState({ data });
@@ -19,7 +18,6 @@ export default class Form extends Component {
 		Object.keys(data).forEach(key => {
 			const isValid = this.validateField(key, data[key]);
 			hasErrors = hasErrors || !isValid;
-			console.log(hasErrors);
 		});
 		return !hasErrors;
 	};

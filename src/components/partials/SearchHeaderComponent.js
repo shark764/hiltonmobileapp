@@ -40,7 +40,7 @@ export default class SearchHeaderComponent extends Component {
 						fontFamily: fonts.OPENSANS_REGULAR
 					}}
 					onChangeText={onChangeText}
-					onSubmitEditing={onSubmitSearch}
+					//onSubmitEditing={onSubmitSearch}
 					value={value}
 				/>
 			</View>

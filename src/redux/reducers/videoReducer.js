@@ -17,9 +17,8 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			const { laughs } = payload;
 			tempVideos = [...state.videosInfo];
 			tempVideo = tempVideos.find(v => v.id === payload.videoId);
-			console.log('Total laughs', laughs);
 			tempVideo.laughs = laughs;
-			tempVideo.laughed = true;
+			tempVideo.already_like = true;
 			return { ...state, videosInfo: tempVideos };
 
 		case types.VIDEO_WAS_VIEWED_SUCCESS:
@@ -58,7 +57,7 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			//tempComments = [...state.comments];
 			//tempComments[payload.id_video] = [payload, ...tempComments[payload.id_video]];
 			//return { ...state, videosInfo: videosTemp, comments: tempComments };
-			return { ...state}
+			return { ...state };
 		default:
 			return state;
 	}
