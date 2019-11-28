@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* GrapeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* GrapeTests.m */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
@@ -22,6 +21,7 @@
 		45D0F31A83F14419A3B4E6B4 /* OpenSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D34927CF087C414EACFA7686 /* OpenSans-BoldItalic.ttf */; };
 		5451CB3E2207B98E3790229E /* libPods-Grape.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D02D4A13E44B0E0258DF270 /* libPods-Grape.a */; };
 		630659C92378E4CD002E1F4E /* LottieFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630659C82378E4CD002E1F4E /* LottieFix.swift */; };
+		63A36ADE238F78DA007753B1 /* libRNVideoEditor.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63A36ADC238F774D007753B1 /* libRNVideoEditor.a */; };
 		752303CB312A41F7BAB99F6E /* OpenSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 38D8B67D4800429B9A25C342 /* OpenSans-LightItalic.ttf */; };
 		960C5820F654441D8CE95466 /* OpenSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 84899DA34B8944E1808E1ABC /* OpenSans-Italic.ttf */; };
 		9E50848AE571478D83F4059D /* OpenSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A06566E85FF341C8A4631A6F /* OpenSans-ExtraBold.ttf */; };
@@ -47,6 +47,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 2D02E47A1E0B4A5D006451C7;
 			remoteInfo = "Grape-tvOS";
+		};
+		63A36ADB238F774D007753B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 63A36AD7238F774D007753B1 /* RNVideoEditor.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNVideoEditor;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -84,6 +91,7 @@
 		630659C72378E4CC002E1F4E /* Grape-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Grape-Bridging-Header.h"; sourceTree = "<group>"; };
 		630659C82378E4CD002E1F4E /* LottieFix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieFix.swift; sourceTree = "<group>"; };
 		6368B71066C740E28BEF4693 /* Roboto_medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Roboto_medium.ttf; path = "../node_modules/native-base/Fonts/Roboto_medium.ttf"; sourceTree = "<group>"; };
+		63A36AD7238F774D007753B1 /* RNVideoEditor.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVideoEditor.xcodeproj; path = "../node_modules/react-native-video-editor/ios/RNVideoEditor.xcodeproj"; sourceTree = "<group>"; };
 		6484BE68E55745FEA26A411A /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/native-base/Fonts/Feather.ttf"; sourceTree = "<group>"; };
 		65B47A5DD08E44BDAEFECDB5 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		6BA769C56829497FA1D9CDCC /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/native-base/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
@@ -124,6 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63A36ADE238F78DA007753B1 /* libRNVideoEditor.a in Frameworks */,
 				5451CB3E2207B98E3790229E /* libPods-Grape.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -242,9 +251,18 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		63A36AD8238F774D007753B1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				63A36ADC238F774D007753B1 /* libRNVideoEditor.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				63A36AD7238F774D007753B1 /* RNVideoEditor.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -403,6 +421,12 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 63A36AD8238F774D007753B1 /* Products */;
+					ProjectRef = 63A36AD7238F774D007753B1 /* RNVideoEditor.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* Grape */,
@@ -412,6 +436,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		63A36ADC238F774D007753B1 /* libRNVideoEditor.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNVideoEditor.a;
+			remoteRef = 63A36ADB238F774D007753B1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		00E356EC1AD99517003FC87E /* Resources */ = {

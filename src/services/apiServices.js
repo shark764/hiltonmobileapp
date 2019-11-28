@@ -1,5 +1,6 @@
 import httpService from './httpService';
 import Upload from 'react-native-background-upload';
+import AlertMessages from '../components/commons/AlertMessages';
 
 const DEFAULT_RESPONSE = { data: null, success: false, message: '' };
 
@@ -221,8 +222,10 @@ export default apiServices = {
 					response.data = data.responseBody;
 					response.responseCode = data.responseCode;
 					response.success = true;
+					AlertMessages.success('Video was uploaded successfully');
 				});
 				console.log('End of "then" of upload video');
+				response.success = true;
 			})
 			.catch(err => {
 				console.log('Upload error!', err);
