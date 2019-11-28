@@ -12,7 +12,9 @@ export default class SearchResultComponent extends Component {
 		item.following = !item.following;
 	};
 
-	onResultPress = () => {};
+	onResultPress = user => {
+		this.props.navigation.push('GeneralProfile', { user });
+	};
 
 	render() {
 		const { searchResults } = this.props;
@@ -40,7 +42,7 @@ export default class SearchResultComponent extends Component {
 
 	renderItem = ({ item: user }) => {
 		return (
-			<TouchableOpacity onPress={this.onResultPress}>
+			<TouchableOpacity onPress={() => this.onResultPress(user)}>
 				<View
 					style={{
 						flexDirection: 'row',

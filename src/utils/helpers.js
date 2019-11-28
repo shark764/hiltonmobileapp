@@ -65,6 +65,18 @@ export const shareVideo = async videoUrl => {
 	}
 };
 
+//************************************************************************************************
+//To build the url of the video and add it to the object
+//************************************************************************************************
+export const getVideosWithUrlField = videos => {
+	if (!videos) return;
+	return videos.map(video => {
+		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
+		console.log(video.url);
+		return video;
+	});
+};
+
 export const goToRootRouteFromChild = (parentRoute, rootRoute) => {
 	try {
 		//Redirect to Home Process

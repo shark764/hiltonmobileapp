@@ -285,12 +285,12 @@ class ProfileScreen extends Component {
 							<Progress.Bar progress={0.45} height={14} width={width * 0.7} color="#404040" />
 						</View>
 					</View>
-					<View style={{ paddingTop: 10 }}>
+					<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
 						<View style={{ flexDirection: 'row' }}>
 							<View style={profileStyle.profileContainer}>
 								<Image source={{ uri: loggedUser.avatar }} style={profileStyle.profilePhoto} />
 							</View>
-							<View style={{ flex: 2, paddingTop: 20 }}>
+							<View style={{ flex: 2, marginTop: 5, marginLeft: 10 }}>
 								<Text style={profileStyle.userName}>@{loggedUser.username}</Text>
 								<Text style={profileStyle.bioInfo}>{loggedUser.bio}</Text>
 							</View>

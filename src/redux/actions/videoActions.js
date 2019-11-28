@@ -2,6 +2,7 @@ import * as types from '../types';
 import apiServices from '../../services/apiServices';
 import { globals } from '../../config/constants';
 import AlertMessages from '../../components/commons/AlertMessages';
+import { getVideosWithUrlField } from '../../utils/helpers';
 
 export const getVideos = userId => async dispatch => {
 	const response = await apiServices.getHomeVideos(userId);
@@ -9,6 +10,25 @@ export const getVideos = userId => async dispatch => {
 	const videos = getVideosWithUrlField(response.data);
 
 	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: videos });
+};
+
+export const getTrendingVideos = userId => async dispatch => {
+	const response = await apiServices.getHomeVideos(userId);
+
+	let videos = getVideosWithUrlField(response.data);
+	videos = addThumbnail(videos);
+
+	dispatch({ type: types.GET_TRANDING_VIDEOS, payload: videos });
+};
+
+export const getVideosByUser = (userId, loggedUserId) => async dispatch => {
+	const response = await apiServices.getVideosByUser(userId, loggedUserId);
+
+	let videos = getVideosWithUrlField(response.data);
+	videos = addThumbnail(videos);
+
+	//dispatch({ type: types.GET_USER_VIDEOS, payload: videos });
+	return videos;
 };
 
 export const videoLaughed = (videoId, userId) => async dispatch => {
@@ -25,7 +45,7 @@ export const videoLaughed = (videoId, userId) => async dispatch => {
 
 export const videoWasViewed = (videoId, userId) => async dispatch => {
 	const response = await apiServices.videoWasViewed(videoId, userId);
-	
+	console.log(response);
 	if (response.success) dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
 };
 
@@ -64,15 +84,12 @@ export const postVideoInBackground = videoToUpload => async dispatch => {
 	if (response.success) dispatch({ type: types.POST_VIDEO_SUCCESS, payload: response.data });
 	else AlertMessages.error(response.message);
 };
-//******************************************************************************************* */
-//Helper functions
 
-//To build the url of the video and add it to the object
-const getVideosWithUrlField = videos => {
-	if (!videos) return;
-	return videos.map(video => {
-		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
-		console.log(video.url);
+//TODO:
+//Temporal function
+const addThumbnail = videos =>
+	videos.map(video => {
+		video.thumbnail =
+			'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnm5J_F7bcAJiIFd4UcmVTUWxjJk2e24EHJRqMQCsegfWqLTQe&s';
 		return video;
 	});
-};

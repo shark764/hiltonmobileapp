@@ -32,6 +32,7 @@ import LoginScreen from './src/components/screens/SignUp/LoginScreen';
 import LocalStorage from './src/services/LocalStorage';
 import appJson from './app.json';
 import NavigationService from './src/services/NavigationService';
+import GeneralProfile from './src/components/screens/GeneralProfile';
 
 export default class App extends Component {
 	componentDidMount() {
@@ -115,6 +116,9 @@ const SearchStack = createStackNavigator(
 		SingleVideoPlayer: {
 			screen: SingleVideoScreen,
 			navigationOptions: { header: null }
+		},
+		GeneralProfile: {
+			screen: GeneralProfile
 		}
 	},
 	{
@@ -157,12 +161,17 @@ ProfileStack.navigationOptions = ({ navigation }) => {
 
 //To Hide the bottom tab navigation in all screens except the first one
 SearchStack.navigationOptions = ({ navigation }) => {
-	if (navigation.state.index > 0) return { tabBarVisible: false };
+	//console.log(navigation);
+	const routeName = navigation.state.routes[0].routeName;
+	const screensWithHiddenBottomBar = ['SingleVideoPlayer'];
+	console.log(routeName);
+	if (screensWithHiddenBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
 	return { tabBarVisible: true };
 };
 
 CameraStack.navigationOptions = ({ navigation }) => {
 	const routeName = navigation.state.routes[0].routeName;
+	console.log(routeName);
 	const screensWithHiddenBottomBar = ['Camera', 'CameraRoll', 'PostVideo'];
 	if (screensWithHiddenBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
 	return { tabBarVisible: true };

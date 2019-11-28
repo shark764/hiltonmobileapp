@@ -21,6 +21,23 @@ export default apiServices = {
 
 		return response;
 	},
+	async getVideosByUser(userId, loggedUserId = null, status = 'published', videosPerPage = 30) {
+		const response = { ...DEFAULT_RESPONSE };
+
+		try {
+			let endPoint = `user/${userId}/videos`;
+			if (loggedUserId) endPoint += `?id_user=${loggedUserId}`;
+
+			const { data } = await httpService.get(endPoint);
+
+			response.data = data.data;
+			response.success = true;
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
+		}
+
+		return response;
+	},
 	async videoWasViewed(videoId, userId) {
 		const response = { ...DEFAULT_RESPONSE };
 		const dataToSend = {
@@ -205,6 +222,7 @@ export default apiServices = {
 					response.responseCode = data.responseCode;
 					response.success = true;
 				});
+				console.log('End of "then" of upload video');
 			})
 			.catch(err => {
 				console.log('Upload error!', err);

@@ -4,14 +4,16 @@ import { connect } from 'react-redux';
 import SearchHeaderComponent from '../partials/SearchHeaderComponent';
 import SearchResultComponent from '../partials/SearchResultComponent';
 import SearchBodyComponent from '../partials/SearchBodyComponent';
-import { getTrandingVideos, doSearch } from '../../redux/actions/searchActions';
+import { doSearch } from '../../redux/actions/searchActions';
+import { getTrendingVideos } from '../../redux/actions/videoActions';
 
 class SearchScreen extends Component {
 	state = { searchQuery: '' };
 	typingTimer = null;
 
 	async componentDidMount() {
-		await this.props.getTrandingVideos();
+		const { loggedUser } = this.props;
+		await this.props.getTrendingVideos(loggedUser && loggedUser.id);
 		await this.props.doSearch();
 	}
 
@@ -49,9 +51,10 @@ class SearchScreen extends Component {
 	}
 }
 
-const mapStateToProps = ({ search: { trendingVideos, searchResults } }) => ({
+const mapStateToProps = ({ search: { trendingVideos, searchResults }, auth }) => ({
 	trendingVideos,
-	searchResults
+	searchResults,
+	loggedUser: auth.loggedUser
 });
 
-export default connect(mapStateToProps, { getTrandingVideos, doSearch })(SearchScreen);
+export default connect(mapStateToProps, { getTrendingVideos, doSearch })(SearchScreen);

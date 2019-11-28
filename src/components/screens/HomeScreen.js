@@ -111,6 +111,7 @@ class HomeScreen extends Component {
 	}
 	renderVideoItem = ({ item: video, index: page }) => {
 		const { listHeight, currentPage } = this.state;
+
 		const userLeftVideo = currentPage !== page;
 		return (
 			<VideoElement
