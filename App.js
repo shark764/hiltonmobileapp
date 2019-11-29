@@ -153,7 +153,7 @@ const CameraStack = createStackNavigator(
 //To Hide the bottom tab navigation in all screens except
 //the first one (LoginOrSignup) and the second one (Profile)
 ProfileStack.navigationOptions = ({ navigation }) => {
-	const routeName = navigation.state.routes[0].routeName;
+	const { routeName } = navigation.state.routes[navigation.state.index];
 	const screensWithBottomBar = ['LoginOrSignup', 'EmailRegistration', 'Login', 'Profile'];
 	if (!screensWithBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
 	return { tabBarVisible: true };
@@ -162,16 +162,16 @@ ProfileStack.navigationOptions = ({ navigation }) => {
 //To Hide the bottom tab navigation in all screens except the first one
 SearchStack.navigationOptions = ({ navigation }) => {
 	//console.log(navigation);
-	const routeName = navigation.state.routes[0].routeName;
+	const { routeName } = navigation.state.routes[navigation.state.index];
 	const screensWithHiddenBottomBar = ['SingleVideoPlayer'];
-	console.log(routeName);
+
 	if (screensWithHiddenBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
 	return { tabBarVisible: true };
 };
 
 CameraStack.navigationOptions = ({ navigation }) => {
-	const routeName = navigation.state.routes[0].routeName;
-	console.log(routeName);
+	const { routeName } = navigation.state.routes[navigation.state.index];
+
 	const screensWithHiddenBottomBar = ['Camera', 'CameraRoll', 'PostVideo'];
 	if (screensWithHiddenBottomBar.includes(routeName)) return { tabBarVisible: false, headerMode: 'none' };
 	return { tabBarVisible: true };

@@ -109,7 +109,7 @@ class PostVideoScreen extends Component {
 			await this.props.postVideoInBackground(options);
 		}
 
-		if(videoSegment.length > 2){
+		if(videoSegment.length > 1){
 			RNVideoEditor.merge(
 				videoSegment.map(item => item.url),
 				(results) => {

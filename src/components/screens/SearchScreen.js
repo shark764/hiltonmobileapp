@@ -51,9 +51,9 @@ class SearchScreen extends Component {
 	}
 }
 
-const mapStateToProps = ({ search: { trendingVideos, searchResults }, auth }) => ({
-	trendingVideos,
-	searchResults,
+const mapStateToProps = ({ search, videos, auth }) => ({
+	trendingVideos: videos.trendingVideos,
+	searchResults: search.searchResults,
 	loggedUser: auth.loggedUser
 });
 

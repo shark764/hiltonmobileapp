@@ -172,13 +172,13 @@ class CameraScreen extends Component {
 		}
 		CameraRoll.getPhotos({
 			first: 10,
-			groupTypes: 'All',
+			//groupTypes: 'All',
 			assetType: 'Videos'
 		})
 			.then(data => {
-				//console.log("it works....");
+				//console.log('it works....', data.edges);
 				//console.log(`The data is : ${JSON.stringify(data.edges)}`)
-				this.props.navigation.push('CameraRoll', { cameraRollItems: JSON.stringify(data.edges) });
+				this.props.navigation.push('CameraRoll', { cameraRollItems: data.edges });
 				//this.props.navigation.navigate('CameraRoll',{cameraRollItems: JSON.stringify(data.edges)})
 			})
 			.catch(e => console.warn(e));
@@ -198,39 +198,40 @@ class CameraScreen extends Component {
 	}
 
 	render() {
+		const { feedbackSegment } = this.state;
 		return (
 			<Container style={cameraStyle.container}>
 				<NavigationEvents onDidFocus={this.chekIfLogged} />
-				{!this.state.feedbackSegment ? (
-					<CameraElement
-						reference={ref => {
-							this.setCameraReference(ref);
-						}}
-						progress={this.state.progress}
-						goBack={() => this.goBack()}
-						//flipCamera={() => this.flipCamera()}
-						getVideosRoll={() => this.getVideosRoll()} //TODO: actually isn't working...
-						startRecording={() => this.startRecording()}
-						stopRecording={() => this.stopRecording()}
-						videoSegments={this.state.videoSegment}
-						redoVideo={() => this.redoVideo()}
-						compileVideo={() => this.compileVideo()}
-						continue={this.state.continue}
-						continueToPost={() => this.continueToPost()}
-						processing={this.state.processing}
-						compile={this.state.progress >= MIN_VIDEO_SIZE / 100 ? 1 : 0}
-					/>
-				) : (
-					<FeedbackVideo
-						source={this.state.currentSegment}
-						goBack={() => this.goBack()}
-						redoVideo={() => this.redoVideo()}
-						compileVideo={() => this.compileVideo()}
-						continueToPost={() => this.continueToPost()}
-						continue={this.state.continue}
-						progress={this.state.progress}
-					/>
-				)}
+
+				<CameraElement
+					reference={ref => {
+						this.setCameraReference(ref);
+					}}
+					progress={this.state.progress}
+					goBack={() => this.goBack()}
+					//flipCamera={() => this.flipCamera()}
+					getVideosRoll={() => this.getVideosRoll()} //TODO: actually isn't working...
+					startRecording={() => this.startRecording()}
+					stopRecording={() => this.stopRecording()}
+					videoSegments={this.state.videoSegment}
+					redoVideo={() => this.redoVideo()}
+					compileVideo={() => this.compileVideo()}
+					continue={this.state.continue}
+					continueToPost={() => this.continueToPost()}
+					processing={this.state.processing}
+					compile={this.state.progress >= MIN_VIDEO_SIZE / 100 ? 1 : 0}
+					hideCamera={feedbackSegment}
+				/>
+
+				<FeedbackVideo
+					source={this.state.currentSegment}
+					goBack={() => this.goBack()}
+					redoVideo={() => this.redoVideo()}
+					compileVideo={() => this.compileVideo()}
+					continueToPost={() => this.continueToPost()}
+					continue={this.state.continue}
+					progress={this.state.progress}
+				/>
 			</Container>
 		);
 	}

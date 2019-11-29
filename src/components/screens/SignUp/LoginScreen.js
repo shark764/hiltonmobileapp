@@ -5,7 +5,7 @@ import { Header } from 'react-navigation-stack';
 import { connect } from 'react-redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { fonts, colors } from '../../../config/constants';
-import { Loader } from '../../commons/Loader';
+import Loader from '../../commons/Loader';
 import { userLoginWithEmail } from '../../../redux/actions/authActions';
 import Form from '../../commons/Form';
 import AlertMessages from '../../commons/AlertMessages';

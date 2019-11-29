@@ -36,13 +36,14 @@ export default class CameraElement extends Component {
 
 	render() {
 		console.log(this.state);
+		const { hideCamera } = this.props;
 		return (
 			<RNCamera
 				ref={ref => {
 					this.camera = ref;
 					this.props.reference(this.camera);
 				}}
-				style={cameraStyle.preview}
+				style={[cameraStyle.preview, { display: hideCamera ? 'none' : 'flex' }]}
 				type={this.state.cameraType}
 				mirrorImage={this.state.mirrorMode}
 				flashMode={RNCamera.Constants.FlashMode.on}

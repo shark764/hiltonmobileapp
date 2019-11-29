@@ -5,6 +5,10 @@ import { fonts } from '../../config/constants';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default class SearchBodyComponent extends Component {
+	onVideoChanged = video => {
+		onVideoChanged(video);
+	};
+
 	onThumbnailPress = video => {
 		this.props.navigation.push('SingleVideoPlayer', { video });
 	};

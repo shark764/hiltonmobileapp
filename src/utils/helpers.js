@@ -72,7 +72,7 @@ export const getVideosWithUrlField = videos => {
 	if (!videos) return;
 	return videos.map(video => {
 		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
-		console.log(video.url);
+		//console.log(video.url);
 		return video;
 	});
 };

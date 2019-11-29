@@ -34,6 +34,11 @@ export default class SingleVideoScreen extends Component {
 		this.setState({ safeAreaPadding: height });
 	};
 
+	onVideoChanged = video => {
+		const { onVideoChanged } = this.props;
+		onVideoChanged(video);
+	};
+
 	render() {
 		const video = this.props.navigation.getParam('video');
 		const { playVideo, safeAreaPadding } = this.state;

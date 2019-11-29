@@ -116,7 +116,7 @@ class HomeScreen extends Component {
 		return (
 			<VideoElement
 				key={video.id}
-				video={video}
+				video={{ ...video }}
 				play={this.playVideo(page)}
 				userLeftVideo={userLeftVideo}
 				height={listHeight}
@@ -130,6 +130,6 @@ class HomeScreen extends Component {
 	};
 }
 
-const mapstateToProps = ({ videos, auth }) => ({ videos: videos.videosInfo, loggedUser: auth.loggedUser });
+const mapstateToProps = ({ videos, auth }) => ({ videos: videos.homeVideos, loggedUser: auth.loggedUser });
 
 export default connect(mapstateToProps, { getVideos, getLoggedUser })(HomeScreen);

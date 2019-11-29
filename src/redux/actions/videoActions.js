@@ -27,8 +27,7 @@ export const getVideosByUser = (userId, loggedUserId) => async dispatch => {
 	let videos = getVideosWithUrlField(response.data);
 	videos = addThumbnail(videos);
 
-	//dispatch({ type: types.GET_USER_VIDEOS, payload: videos });
-	return videos;
+	dispatch({ type: types.GET_USER_VIDEOS, payload: videos });
 };
 
 export const videoLaughed = (videoId, userId) => async dispatch => {
@@ -46,7 +45,10 @@ export const videoLaughed = (videoId, userId) => async dispatch => {
 export const videoWasViewed = (videoId, userId) => async dispatch => {
 	const response = await apiServices.videoWasViewed(videoId, userId);
 	console.log(response);
-	if (response.success) dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
+	if (response.success) {
+		dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
+		return response.data;
+	}
 };
 
 export const getVideoComments = (videoId, userId) => async dispatch => {

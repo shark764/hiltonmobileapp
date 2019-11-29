@@ -27,6 +27,7 @@
 		"react-native": "0.61.4",
 		"react-native-background-upload": "^5.1.0",
 		"react-native-camera": "git+https://git@github.com/react-native-community/react-native-camera.git",
+		"react-native-convert-ph-asset": "^1.0.3",
 		"react-native-datepicker": "^1.7.2",
 		"react-native-elements": "^1.2.6",
 		"react-native-fs": "^2.16.1",

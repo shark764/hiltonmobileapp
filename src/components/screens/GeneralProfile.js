@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, Image, Dimensions, FlatList, TouchableOpacity } from 'react-native';
-import { Container, Content } from 'native-base';
+import { Content } from 'native-base';
 import { Button } from 'react-native-elements';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import AsyncStorage from '@react-native-community/async-storage';
 import { fonts, colors } from '../../config/constants';
 import { profileStyle } from '../../assets/styles/profileStyle';
 import { connect } from 'react-redux';
@@ -23,58 +22,25 @@ class GeneralProfile extends Component {
 		super(props);
 
 		this.state = {
-			videos: [],
 			user: props.navigation.getParam('user')
 		};
-		this._isMounted = false;
 	}
 
 	async componentDidMount() {
-		this._isMounted = true;
-		if (this._isMounted) {
-			const { loggedUser } = this.props;
-			const { user } = this.state;
+		const { loggedUser } = this.props;
+		const { user } = this.state;
 
-			const videos = await this.props.getVideosByUser(user.id, loggedUser.id);
-			this.setState({ videos });
-		}
-	}
-
-	componentWillUnmount() {
-		this._isMounted = false;
+		await this.props.getVideosByUser(user.id, loggedUser.id);
 	}
 
 	onThumbnailPress = video => {
 		this.props.navigation.push('SingleVideoPlayer', { video });
 	};
 
-	renderMyVideos() {
-		const { videos } = this.props;
-		if (!videos) return null;
-
-		return videos.map((video, index) => {
-			return (
-				<TouchableOpacity onPress={() => this.onThumbnailPress(video)}>
-					<View
-						key={video.id}
-						style={[
-							{ width: screenWidth / 3 },
-							{ height: screenWidth / 2 },
-							{ marginBottom: 2 },
-							index % 3 !== 0 ? { paddingLeft: 2 } : { paddingLeft: 0 }
-						]}
-					>
-						<Image style={profileStyle.image} source={{ uri: video.thumbnail }}></Image>
-					</View>
-				</TouchableOpacity>
-			);
-		});
-	}
-
 	render() {
-		//const { videos } = this.props;
-		const { user, videos } = this.state;
-		console.log(videos);
+		const { user } = this.state;
+		const { videos } = this.props;
+
 		return (
 			<View style={profileStyle.container}>
 				<Content>
@@ -155,7 +121,6 @@ class GeneralProfile extends Component {
 							<FeatherIcon name="video" size={26} color={colors.MAIN} />
 						</View>
 
-						{/* <View style={profileStyle.rowsThumbnails}>{this.renderMyVideos()}</View> */}
 						<FlatList
 							data={videos}
 							renderItem={this.renderItem}
@@ -188,6 +153,6 @@ class GeneralProfile extends Component {
 	);
 }
 
-const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
+const mapStateToProps = ({ auth, videos }) => ({ loggedUser: auth.loggedUser, videos: videos.userVideos });
 
 export default connect(mapStateToProps, { getVideosByUser })(GeneralProfile);

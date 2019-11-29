@@ -19,6 +19,7 @@ const videoElementsHeight = 280;
 
 class VideoElement extends PureComponent {
 	state = {
+		video: null,
 		follow: true,
 		laughed: false,
 		showComments: false,
@@ -33,6 +34,7 @@ class VideoElement extends PureComponent {
 
 	componentDidMount() {
 		const { video, loggedUser } = this.props;
+		this.setState({ video });
 		// console.log(this.props.userLeftVideo, video.id);
 		if (!this.props.userLeftVideo) this.createTimerForViewVideo();
 	}
@@ -42,6 +44,10 @@ class VideoElement extends PureComponent {
 		// console.log('video ', video.id, 'did update', this.state.loaded);
 		// console.log('condition ', prevProps.userLeftVideo, userLeftVideo);
 		// console.log('condition2 ', this.firstVideoViewed, userLeftVideo);
+
+		//If we have new videos, they will be aded to the end.
+		if (prevProps.video !== video) this.setState({ video });
+
 		if (!prevProps.userLeftVideo && userLeftVideo) {
 			clearTimeout(this.viewTimeout);
 			this.viewTimeout = null;
@@ -51,15 +57,22 @@ class VideoElement extends PureComponent {
 	}
 
 	createTimerForViewVideo = () => {
-		const { video, loggedUser } = this.props;
+		const { video, loggedUser, onVideoChanged } = this.props;
 		const { loaded } = this.state;
 		if (!loggedUser || !loaded) return;
-		console.log('E: ', video.id, loggedUser, loaded);
+		//console.log('E: ', video.id, loggedUser, loaded);
 		// console.log('Entered video', video.id);
 		this.firstVideoViewed = true;
 
-		this.viewTimeout = setTimeout(() => {
-			this.props.videoWasViewed(video.id, loggedUser.id);
+		this.viewTimeout = setTimeout(async () => {
+			const response = await this.props.videoWasViewed(video.id, loggedUser.id);
+			if (response) {
+				console.log(response.views);
+				const videoModified = { ...video };
+				videoModified.views = response.views;
+				this.setState({ video: videoModified });
+				//onVideoChanged(video);
+			}
 		}, globals.VIDEO_VIEW_TIME);
 	};
 
@@ -120,10 +133,11 @@ class VideoElement extends PureComponent {
 	hideLaughAnimation = () => this.setState({ laughed: false });
 
 	render() {
-		const { video, height, play, onPauseVideo, onResumeVideo, isSingleVideo } = this.props;
-		const { laughed, showComments, loaded, loadedVideoError, showDialog } = this.state;
-
+		const { height, play, onPauseVideo, onResumeVideo, isSingleVideo } = this.props;
+		const { video, laughed, showComments, loaded, loadedVideoError, showDialog } = this.state;
 		const elementsViewHeight = showComments ? screenHeight - globals.NAVBAR_HEIGHT : videoElementsHeight;
+
+		if (!video) return null;
 
 		return (
 			<View style={[styles.mainContainer, { height }]}>

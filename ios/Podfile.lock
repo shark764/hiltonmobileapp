@@ -246,6 +246,8 @@ PODS:
     - React-Core
   - RNCAsyncStorage (1.6.3):
     - React
+  - RNConvertPhAsset (1.0.3):
+    - React
   - RNDateTimePicker (2.1.0):
     - React
   - RNFS (2.16.1):
@@ -298,6 +300,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
+  - RNConvertPhAsset (from `../node_modules/react-native-convert-ph-asset`)
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -379,6 +382,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/rn-fetch-blob"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-community/async-storage"
+  RNConvertPhAsset:
+    :path: "../node_modules/react-native-convert-ph-asset"
   RNDateTimePicker:
     :path: "../node_modules/@react-native-community/datetimepicker"
   RNFS:
@@ -430,6 +435,7 @@ SPEC CHECKSUMS:
   ReactCommon: a6a294e7028ed67b926d29551aa9394fd989c24c
   rn-fetch-blob: f525a73a78df9ed5d35e67ea65e79d53c15255bc
   RNCAsyncStorage: 6b57de0f6cb0dcfd17521af1681fa39001d3efff
+  RNConvertPhAsset: 6ccaf96acc60fc0cba2218a80291970ce21cbd8c
   RNDateTimePicker: 68e542a59ff1b73563744145bfc45c2b88a3deea
   RNFS: 795866388a01de4e470f3b1041a99cf20a343844
   RNGestureHandler: a4ddde1ffc6e590c8127b8b7eabfdade45475c74
@@ -438,6 +444,6 @@ SPEC CHECKSUMS:
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: ba3d99dbee6c15ea6bbe3783d1f0cb1ffb79af0f
 
-PODFILE CHECKSUM: a72bbe2678211b29fc21618c248e242a2c7c2035
+PODFILE CHECKSUM: 3375f0305e3b1176001549f77edb0457deda44a0
 
 COCOAPODS: 1.8.4

@@ -9,7 +9,7 @@ import ModalPopup from '../../commons/ModalPopup';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { createUser } from '../../../redux/actions/userActions';
 import { connect } from 'react-redux';
-import { Loader } from '../../commons/Loader';
+import Loader from '../../commons/Loader';
 import AlertMessages from '../../commons/AlertMessages';
 import Form from '../../commons/Form';
 
