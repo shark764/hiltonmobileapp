@@ -114,7 +114,7 @@ class PostVideoScreen extends Component {
 			if(this.state.saveVideo){
 				await CameraRoll.saveToCameraRoll(temp,"video");
 			}
-
+			console.log(`options : ${JSON.stringify(options)}`)
 			await this.props.postVideoInBackground(options);
 		  
 	}
