@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Dimensions, PermissionsAndroid } from 'react-native';
 import { Container } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
+import RNVideoEditor from 'react-native-video-editor';
 import CameraRoll from '@react-native-community/cameraroll';
 import { connect } from 'react-redux';
 import { NavigationEvents } from 'react-navigation';
@@ -10,8 +11,6 @@ import { cameraStyle } from '../../assets/styles/cameraStyle';
 import CameraElement from '../partials/CameraElement';
 import FeedbackVideo from '../partials/FeedbackVideo';
 import { goToRootRouteFromSibling } from '../../utils/helpers';
-
-const { height, width } = Dimensions.get('window');
 
 const checkAndroidPermission = async () => {
 	try {
@@ -157,13 +156,29 @@ class CameraScreen extends Component {
 	}
 
 	async continueToPost() {
+		let { videoSegment } = this.state;
 		if (this.state.currentSegment) this.compileVideo();
 
 		if (this.state.continue) {
-			//---------------> need to send all the videos to the endpoint to start processing and join all the splitted videos
-			await AsyncStorage.setItem('videoToPost', JSON.stringify(this.state.videoSegment));
-			this.props.navigation.push('PostVideo');
-		} else console.log('nothing to save or post');
+			if(videoSegment.length===1){
+				this.props.navigation.navigate('PostVideo',{videoToPost : videoSegment[0].url,
+																										duration : videoSegment[0].realTime / 1000});
+			}
+			if(videoSegment.length > 1){
+				RNVideoEditor.merge(
+					videoSegment.map(item => item.url),
+					(results) => {
+						console.error('Error: ' + results);
+					},
+					async (results, file) => {
+						console.log('Success : ' + results + " file: " + file);
+						this.props.navigation.navigate('PostVideo',{videoToPost : file,
+																												duration : videoSegment[videoSegment.length - 1].realTime / 1000});
+					}
+				);
+			}
+		} else 
+			console.log('nothing to save or post');
 	}
 
 	async getVideosRoll() {
