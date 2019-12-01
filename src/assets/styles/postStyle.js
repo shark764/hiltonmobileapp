@@ -103,7 +103,8 @@ export const postStyle = {
         alignSelf: 'center',
         margin: 10,
         width: (width * 0.80),
-        height: (height * 0.08)
+        height: (height * 0.08),
+        marginTop:(height * 0.27)
     },
     postTextButton:{
         fontFamily:fonts.OPENSANS_BOLD,

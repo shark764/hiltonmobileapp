@@ -17,9 +17,9 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { Container } from 'native-base';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Video from 'react-native-video';
+import CameraRoll from "@react-native-community/cameraroll"
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
-import RNVideoEditor from 'react-native-video-editor';
 import {  colors } from '../../config/constants';
 import { postStyle } from '../../assets/styles/postStyle';
 import { goToRootRouteFromChild } from '../../utils/helpers';
@@ -43,6 +43,7 @@ class PostVideoScreen extends Component {
 		super(props);
 		this.state = {
 			url_video: '',
+			duration:0,
 			paused: false,
 			boostOption: false,
 			saveVideo: false,
@@ -53,7 +54,8 @@ class PostVideoScreen extends Component {
 			postOnTwitter: false,
 			description: '',
 			isPostingVideo: false,
-			videoComplete:''
+			videoComplete:'',
+			enableShare: false
 		};
 	}
 
@@ -67,65 +69,53 @@ class PostVideoScreen extends Component {
 		goToRootRouteFromChild('Camera', 'Profile');
 	}
 
-	async componentDidMount() {
-		let videoSegment = await AsyncStorage.getItem('videoToPost');
-		videoSegment = JSON.parse(videoSegment);
-		let lastSegment = videoSegment[videoSegment.length - 1];
-		this.setState({ url_video: lastSegment.url, paused: false });
-		console.log(this.state.url_video);
+	componentDidMount() {
+		let url_video = this.props.navigation.getParam('videoToPost', 'empty')
+
+		let duration = this.props.navigation.getParam('duration', 0)
+		//console.log(`this.props.navigation.getParam VideoToPost : ${url_video} and duration : ${duration}`)
+
+		this.setState({ url_video, 
+										duration,
+										paused: false });
 	}
 
 	async uploadSegments() {
 		const { loggedUser } = this.props;
-		let videoSegment = await AsyncStorage.getItem('videoToPost');
-		videoSegment = JSON.parse(videoSegment);
-		let lastSegment = videoSegment[videoSegment.length - 1];
-		//let video_name = lastSegment.url.split('/');
-		let { description } = this.state;
+		let { description,url_video } = this.state;
 
 		//console.log(`video name : ${lastSegment.url}  ===>  ${lastSegment.url.replace("file://", "")}`);
 
 		let options = {
 			url: ENDPOINT,
-			path: '',//(Platform.OS === 'android'?lastSegment.url.replace("file://", ""):lastSegment.url),//joinedSegments
+			path: url_video,//(Platform.OS === 'android'?lastSegment.url.replace("file://", ""):lastSegment.url),//joinedSegments
 			method: 'POST',
 			field: 'video',
 			type: 'multipart',
-			maxRetries: 2,
 			headers: {
 				"content-type": "multipart/form-data",
 			  },
 			parameters: {
 				'title' : description || 'no title',
 				'description' : description || 'no description',
-				'duration' : `${parseInt(lastSegment.realTime / 1000)}`,
-				'id_user' : `${loggedUser.id}`
+				'duration' : `${parseInt(this.state.duration)}`,
+				'id_user' : `${loggedUser.id}`,
+				'allow_comments' : `${this.state.allowComment}`
 				}
-		  }
+			}
+			
+			if (Platform.OS === 'android') {//only android support this optional values
+				options.maxRetries = 2;
+				options.notification = {
+																enabled: true
+															 }
+			}
+			let temp = 'file://'+url_video;
+			if(this.state.saveVideo){
+				await CameraRoll.saveToCameraRoll(temp,"video");
+			}
 
-		if(videoSegment.length===1){
-			options.path = videoSegment[0].url;
-			console.log(options);
 			await this.props.postVideoInBackground(options);
-		}
-
-		if(videoSegment.length > 1){
-			RNVideoEditor.merge(
-				videoSegment.map(item => item.url),
-				(results) => {
-					console.error('Error: ' + results);
-				},
-				async (results, file) => {
-					console.log('Success : ' + results + " file: " + file);
-					options.path = file;
-					console.log(options);
-					await this.props.postVideoInBackground(options);
-					
-				}
-			);
-		}
-
-		  //await this.props.postVideoInBackground(options);
 		  
 	}
 
@@ -169,7 +159,7 @@ class PostVideoScreen extends Component {
 					<View style={postStyle.leftSide}>
 						{this.state.url_video ? (
 							<Video
-								source={{ uri: this.state.url_video }} // Can be a URL or a local file.
+								source={{ uri: `file://${this.state.url_video}` }} // Can be a URL or a local file.
 								repeat
 								paused={this.state.paused}
 								style={postStyle.rightSide}
@@ -243,64 +233,68 @@ class PostVideoScreen extends Component {
 				</View>
 				{
 					//************SHARE********** */
+					this.state.enableShare?
+						<View>
+							<View style={postStyle.subtitleRow}>
+								<Text style={postStyle.subtitleText}>Share</Text>
+							</View>
+							<ScrollView>
+								<View style={postStyle.normalRow}>
+									<View>
+										<Text style={postStyle.itemText}>Facebook</Text>
+									</View>
+									<View>
+										<ToggleSwitch
+											isOn={this.state.postOnFacebook}
+											onColor="#4CD964"
+											offColor={colors.SOFT_GRAY}
+											onToggle={() => this.setState({ postOnFacebook: !this.state.postOnFacebook })}
+										/>
+									</View>
+								</View>
+								<View style={postStyle.normalRow}>
+									<View>
+										<Text style={postStyle.itemText}>Instagram Story</Text>
+									</View>
+									<View>
+										<ToggleSwitch
+											isOn={this.state.postOnIGstory}
+											onColor="#4CD964"
+											offColor={colors.SOFT_GRAY}
+											onToggle={() => this.setState({ postOnIGstory: !this.state.postOnIGstory })}
+										/>
+									</View>
+								</View>
+								<View style={postStyle.normalRow}>
+									<View>
+										<Text style={postStyle.itemText}>Instagram Post</Text>
+									</View>
+									<View>
+										<ToggleSwitch
+											isOn={this.state.postOnIGpost}
+											onColor="#4CD964"
+											offColor={colors.SOFT_GRAY}
+											onToggle={() => this.setState({ postOnIGpost: !this.state.postOnIGpost })}
+										/>
+									</View>
+								</View>
+								<View style={postStyle.normalRow}>
+									<View>
+										<Text style={postStyle.itemText}>Twitter</Text>
+									</View>
+									<View>
+										<ToggleSwitch
+											isOn={this.state.postOnTwitter}
+											onColor="#4CD964"
+											offColor={colors.SOFT_GRAY}
+											onToggle={() => this.setState({ postOnTwitter: !this.state.postOnTwitter })}
+										/>
+									</View>
+								</View>
+							</ScrollView>
+						</View>
+					:null
 				}
-				<View style={postStyle.subtitleRow}>
-					<Text style={postStyle.subtitleText}>Share</Text>
-				</View>
-				<ScrollView>
-					<View style={postStyle.normalRow}>
-						<View>
-							<Text style={postStyle.itemText}>Facebook</Text>
-						</View>
-						<View>
-							<ToggleSwitch
-								isOn={this.state.postOnFacebook}
-								onColor="#4CD964"
-								offColor={colors.SOFT_GRAY}
-								onToggle={() => this.setState({ postOnFacebook: !this.state.postOnFacebook })}
-							/>
-						</View>
-					</View>
-					<View style={postStyle.normalRow}>
-						<View>
-							<Text style={postStyle.itemText}>Instagram Story</Text>
-						</View>
-						<View>
-							<ToggleSwitch
-								isOn={this.state.postOnIGstory}
-								onColor="#4CD964"
-								offColor={colors.SOFT_GRAY}
-								onToggle={() => this.setState({ postOnIGstory: !this.state.postOnIGstory })}
-							/>
-						</View>
-					</View>
-					<View style={postStyle.normalRow}>
-						<View>
-							<Text style={postStyle.itemText}>Instagram Post</Text>
-						</View>
-						<View>
-							<ToggleSwitch
-								isOn={this.state.postOnIGpost}
-								onColor="#4CD964"
-								offColor={colors.SOFT_GRAY}
-								onToggle={() => this.setState({ postOnIGpost: !this.state.postOnIGpost })}
-							/>
-						</View>
-					</View>
-					<View style={postStyle.normalRow}>
-						<View>
-							<Text style={postStyle.itemText}>Twitter</Text>
-						</View>
-						<View>
-							<ToggleSwitch
-								isOn={this.state.postOnTwitter}
-								onColor="#4CD964"
-								offColor={colors.SOFT_GRAY}
-								onToggle={() => this.setState({ postOnTwitter: !this.state.postOnTwitter })}
-							/>
-						</View>
-					</View>
-				</ScrollView>
 				
 					<TouchableOpacity style={postStyle.postButton} onPress={() => this.postVideo()}>
 						<View style={{ alignSelf: 'center', paddingTop: 4 }}>
