@@ -159,9 +159,10 @@ class CameraScreen extends Component {
 		let { videoSegment } = this.state;
 		if (this.state.currentSegment) this.compileVideo();
 
+		let temp = videoSegment[0].url.split("file://");
 		if (this.state.continue) {
 			if(videoSegment.length===1){
-				this.props.navigation.navigate('PostVideo',{videoToPost : videoSegment[0].url,
+				this.props.navigation.navigate('PostVideo',{videoToPost : temp[1],
 																										duration : videoSegment[0].realTime / 1000});
 			}
 			if(videoSegment.length > 1){
