@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { Text, View, FlatList, Image, Dimensions, TouchableOpacity } from 'react-native';
 import { fonts } from '../../config/constants';
+import { setSingleVideoToPlay } from '../../redux/actions/videoActions';
+import { connect } from 'react-redux';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-export default class SearchBodyComponent extends Component {
-	onVideoChanged = video => {
-		onVideoChanged(video);
-	};
-
-	onThumbnailPress = video => {
-		this.props.navigation.push('SingleVideoPlayer', { video });
+class SearchBodyComponent extends Component {
+	onThumbnailPress = async video => {
+		const { navigation, setSingleVideoToPlay } = this.props;
+		await setSingleVideoToPlay(video);
+		navigation.push('SingleVideoPlayer');
 	};
 
 	render() {
@@ -57,3 +57,5 @@ export default class SearchBodyComponent extends Component {
 		</TouchableOpacity>
 	);
 }
+
+export default connect(null, { setSingleVideoToPlay })(SearchBodyComponent);

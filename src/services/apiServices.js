@@ -1,16 +1,22 @@
 import httpService from './httpService';
 import Upload from 'react-native-background-upload';
 import AlertMessages from '../components/commons/AlertMessages';
+import { globals } from '../config/constants';
 
 const DEFAULT_RESPONSE = { data: null, success: false, message: '' };
 
 export default apiServices = {
-	async getHomeVideos(userId = null, status = 'published', videosPerPage = 30) {
+	async getHomeVideos(
+		userId = null,
+		status = 'published',
+		videosPerPage = globals.VIDEOS_TO_FETCH_PER_PAGE,
+		page = 1
+	) {
 		const response = { ...DEFAULT_RESPONSE };
 
 		try {
-			let endPoint = `videos/${status}/${videosPerPage}`;
-			if (userId) endPoint += `?id_user=${userId}`;
+			let endPoint = `videos/${status}/${videosPerPage}?page=${page}`;
+			if (userId) endPoint += `&id_user=${userId}`;
 
 			const { data } = await httpService.get(endPoint);
 
@@ -58,12 +64,12 @@ export default apiServices = {
 
 		return response;
 	},
-	async getVideoComments(videoId, userId) {
+	async getVideoComments(videoId, userId, page = 1) {
 		const response = { ...DEFAULT_RESPONSE };
-
+		console.log('Calling comments api for video ', videoId);
 		try {
-			let endPoint = `video/${videoId}/comments`;
-			if (userId) endPoint += `?id_user=${userId}`;
+			let endPoint = `video/${videoId}/comments?page=${page}`;
+			if (userId) endPoint += `&id_user=${userId}`;
 
 			const { data } = await httpService.get(endPoint);
 			response.data = data.data;

@@ -29,7 +29,7 @@ export const profileStyle = {
 		justifyContent: 'flex-start'
 	},
 	followersContainer: {
-		paddingTop: 20,
+		paddingTop: 10,
 		paddingBottom: 10,
 		flexDirection: 'row',
 		justifyContent: 'space-around',

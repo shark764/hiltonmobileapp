@@ -4,12 +4,12 @@ import { globals } from '../../config/constants';
 import AlertMessages from '../../components/commons/AlertMessages';
 import { getVideosWithUrlField } from '../../utils/helpers';
 
-export const getVideos = userId => async dispatch => {
-	const response = await apiServices.getHomeVideos(userId);
+export const getVideos = (userId, page = 1) => async dispatch => {
+	const response = await apiServices.getHomeVideos(userId, undefined, undefined, page);
 
 	const videos = getVideosWithUrlField(response.data);
-
-	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: videos });
+	const merge = page > 1;
+	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: { videos, merge } });
 };
 
 export const getTrendingVideos = userId => async dispatch => {
@@ -44,20 +44,26 @@ export const videoLaughed = (videoId, userId) => async dispatch => {
 
 export const videoWasViewed = (videoId, userId) => async dispatch => {
 	const response = await apiServices.videoWasViewed(videoId, userId);
-	console.log(response);
+
 	if (response.success) {
 		dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
 		return response.data;
 	}
 };
 
-export const getVideoComments = (videoId, userId) => async dispatch => {
-	const response = await apiServices.getVideoComments(videoId, userId);
+export const setSingleVideoToPlay = video => async dispatch => {
+	dispatch({ type: types.SET_SINGLE_VIDEO_TO_PLAY, payload: video });
+};
+
+export const getVideoComments = (videoId, userId, page = 1) => async dispatch => {
+	const response = await apiServices.getVideoComments(videoId, userId, page);
 	let comments = response.data;
 
 	if (comments) comments = comments.sort((a, b) => b.created - a.created);
 
-	if (response.success) dispatch({ type: types.GET_VIDEO_COMMENTS, payload: { videoId, comments } });
+	const merge = page > 1;
+
+	if (response.success) dispatch({ type: types.GET_VIDEO_COMMENTS, payload: { videoId, comments, merge } });
 	return response;
 };
 
@@ -71,9 +77,10 @@ export const postVideoComment = (videoId, userId, comment) => async dispatch => 
 export const commentLiked = (comment, userId, liked) => async dispatch => {
 	const response = await apiServices.commentLiked(comment.id, userId, liked);
 
-	if (response.success)
-		dispatch({ type: types.COMMENT_LIKED_SUCCESS, payload: { comment, likes: response.data.total, liked } });
-	else if (!response.message.includes('code 400')) {
+	if (response.success) {
+		const likes = response.data.total;
+		dispatch({ type: types.COMMENT_LIKED_SUCCESS, payload: { comment, likes, liked } });
+	} else if (!response.message.includes('code 400')) {
 		AlertMessages.error(response.message);
 	}
 

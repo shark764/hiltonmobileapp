@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, RefreshControl, View } from 'react-native';
 import { NavigationEvents } from 'react-navigation';
 import VideoElement from '../partials/VideoElement';
 import { connect } from 'react-redux';
 import { getVideos } from '../../redux/actions/videoActions';
 import { getLoggedUser } from '../../redux/actions/authActions';
 import LoginOrSignupHomeScreen from './SignUp/LoginOrSignupHomeScreen';
+import Loader from '../commons/Loader';
+import { globals } from '../../config/constants';
+import { getShowHideStyle } from '../../utils/helpers';
 
 class HomeScreen extends Component {
 	state = {
 		videos: [],
-		currentPage: 0,
+		currentVideoPage: 0, //To control the pages (videos)
+		currentApiPage: 1, //To control the pages (videos returned) by the api
 		listHeight: 0,
 		isFocused: true,
 		loading: true,
@@ -19,9 +23,9 @@ class HomeScreen extends Component {
 	};
 
 	async componentDidMount() {
-		const { loggedUser } = this.props;
-		await this.props.getLoggedUser();
-		await this.props.getVideos(loggedUser && loggedUser.id);
+		const { getLoggedUser } = this.props;
+		await getLoggedUser();
+		await this.onRefresh();
 	}
 
 	async componentDidUpdate(prevProps, prevState) {
@@ -33,15 +37,40 @@ class HomeScreen extends Component {
 		if (prevProps.loggedUser !== loggedUser) await getVideos(loggedUser && loggedUser.id);
 	}
 
+	onRefresh = async () => {
+		this.setState({ loading: true, currentApiPage: 1 });
+		this.getNewData(1); //for page 1
+	};
+
+	getNewData = async page => {
+		const { loggedUser, getVideos } = this.props;
+		const { currentApiPage, currentVideoPage } = this.state;
+
+		//If contructor called this, then page = 1
+		//If Flat list reached end limit, then page is undefined.
+		if (!page) {
+			//There is a bug in the Flat list, it calls onEndReached when rendering,
+			//So to avoid getting the data twice when loading the screen
+			//We get out if we are in the first video.
+			if (currentVideoPage == 0) return;
+
+			page = currentApiPage + 1;
+			this.setState({ currentApiPage: page });
+		}
+
+		//console.log('Getting home videos for page', page);
+		await getVideos(loggedUser && loggedUser.id, page);
+	};
+
 	videoChanged = e => {
-		const { listHeight } = this.state;
+		const { listHeight, currentVideoPage } = this.state;
 
 		var offset = e.nativeEvent.contentOffset;
 		if (offset) {
 			var page = Math.round(offset.y / listHeight);
 
-			if (this.state.currentPage != page) {
-				this.setState({ currentPage: page });
+			if (currentVideoPage != page) {
+				this.setState({ currentVideoPage: page });
 			}
 		}
 	};
@@ -52,9 +81,9 @@ class HomeScreen extends Component {
 	};
 
 	playVideo = videoPage => {
-		const { currentPage } = this.state;
+		const { currentVideoPage } = this.state;
 		const { isFocused } = this.state;
-		const isPlaying = isFocused && videoPage === currentPage;
+		const isPlaying = isFocused && videoPage === currentVideoPage;
 		return isPlaying;
 	};
 
@@ -82,14 +111,13 @@ class HomeScreen extends Component {
 	render() {
 		const { videos, listHeight, loading, scrollEnabled, showLoginModal } = this.state;
 
-		if (loading) return null;
-
 		return (
-			<React.Fragment>
+			<View style={{ flex: 1 }}>
 				<NavigationEvents onDidFocus={this.resumeVideo} onDidBlur={this.pauseVideo} />
 
 				<LoginOrSignupHomeScreen modalVisible={showLoginModal} onCloseModal={this.onCloseLoginModal} />
 				<FlatList
+					style={getShowHideStyle(!loading)}
 					data={videos}
 					renderItem={this.renderVideoItem}
 					keyExtractor={item => item.id.toString()}
@@ -97,26 +125,31 @@ class HomeScreen extends Component {
 					showsVerticalScrollIndicator={false}
 					initialNumToRender={5}
 					nestedScrollEnabled
-					onMomentumScrollEnd={this.videoChanged}
-					onLayout={this.onLayoutList}
 					scrollEnabled={scrollEnabled}
 					getItemLayout={(data, index) => ({
 						length: listHeight,
 						offset: listHeight * index,
 						index
 					})}
+					refreshControl={<RefreshControl refreshing={false} onRefresh={this.onRefresh} />}
+					onEndReachedThreshold={globals.LIMIT_TO_FETCH_VIDEOS} //To load more content when we are x videos away from the end
+					onMomentumScrollEnd={this.videoChanged}
+					onLayout={this.onLayoutList}
+					onEndReached={() => this.getNewData()}
 				/>
-			</React.Fragment>
+				<Loader show={loading} style={{ marginTop: '60%' }} />
+			</View>
 		);
 	}
 	renderVideoItem = ({ item: video, index: page }) => {
-		const { listHeight, currentPage } = this.state;
+		const { listHeight, currentVideoPage } = this.state;
 
-		const userLeftVideo = currentPage !== page;
+		const userLeftVideo = currentVideoPage !== page;
 		return (
 			<VideoElement
 				key={video.id}
-				video={{ ...video }}
+				//video={{ ...video }}
+				video={video}
 				play={this.playVideo(page)}
 				userLeftVideo={userLeftVideo}
 				height={listHeight}

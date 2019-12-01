@@ -7,7 +7,8 @@ import { fonts, colors } from '../../config/constants';
 import { profileStyle } from '../../assets/styles/profileStyle';
 import { connect } from 'react-redux';
 import { numberAbbreviate } from '../../utils/helpers';
-import { getVideosByUser } from '../../redux/actions/videoActions';
+import { getVideosByUser, setSingleVideoToPlay } from '../../redux/actions/videoActions';
+import Loader from '../commons/Loader';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -22,7 +23,8 @@ class GeneralProfile extends Component {
 		super(props);
 
 		this.state = {
-			user: props.navigation.getParam('user')
+			user: props.navigation.getParam('user'),
+			loading: true
 		};
 	}
 
@@ -33,94 +35,102 @@ class GeneralProfile extends Component {
 		await this.props.getVideosByUser(user.id, loggedUser.id);
 	}
 
-	onThumbnailPress = video => {
-		this.props.navigation.push('SingleVideoPlayer', { video });
+	componentDidUpdate(prevProps, prevState) {
+		const { videos } = this.props;
+
+		if (prevProps.videos !== videos) {
+			this.setState({ loading: false });
+		}
+	}
+
+	onThumbnailPress = async video => {
+		const { navigation, setSingleVideoToPlay } = this.props;
+		await setSingleVideoToPlay(video);
+		navigation.push('SingleVideoPlayer');
 	};
 
 	render() {
-		const { user } = this.state;
+		const { user, loading } = this.state;
 		const { videos } = this.props;
 
 		return (
 			<View style={profileStyle.container}>
-				<Content>
-					<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
-						<View style={{ flexDirection: 'row' }}>
-							<View style={profileStyle.profileContainer}>
-								<Image source={{ uri: user.avatar }} style={profileStyle.profilePhoto} />
-							</View>
-							<View style={{ flex: 2, marginTop: 5, marginLeft: 10 }}>
-								<Text style={profileStyle.userName}>{user.full_name}</Text>
-								<Text style={profileStyle.bioInfo}>{user.bio}</Text>
-							</View>
+				<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
+					<View style={{ flexDirection: 'row' }}>
+						<View style={profileStyle.profileContainer}>
+							<Image source={{ uri: user.avatar }} style={profileStyle.profilePhoto} />
 						</View>
-
-						<View style={{ flexDirection: 'row', marginTop: 20 }}>
-							<Button
-								containerStyle={{ flex: 1 }}
-								buttonStyle={{
-									backgroundColor: colors.MAIN,
-									paddingHorizontal: 13,
-									paddingVertical: 10,
-									borderRadius: 6
-								}}
-								titleStyle={{ fontSize: 11, fontFamily: fonts.OPENSANS_BOLD, color: '#fff' }}
-								title="Follow"
-								onPress={this.handleFollow}
-							/>
-							<Button
-								containerStyle={{ flex: 1, marginHorizontal: 10 }}
-								buttonStyle={{
-									backgroundColor: '#FFF',
-									paddingHorizontal: 13,
-									paddingVertical: 9,
-									borderRadius: 6,
-									borderWidth: 1,
-									borderColor: '#D8D8D8'
-								}}
-								titleStyle={{ fontSize: 11, fontFamily: fonts.OPENSANS_BOLD, color: '#575555' }}
-								title="Message"
-								onPress={this.handleSubmit}
-							/>
-							<Button
-								containerStyle={{}}
-								buttonStyle={{
-									backgroundColor: '#FFF',
-									padding: 7,
-									borderRadius: 6,
-									borderWidth: 1,
-									borderColor: '#D8D8D8'
-								}}
-								icon={<FeatherIcon name="user" size={20} color="#2F2F2F" />}
-								onPress={this.handleSubmit}
-							/>
-						</View>
-
-						<View style={{ flex: 3 }}>
-							<View style={profileStyle.followersContainer}>
-								<View style={{ alignItems: 'center' }}>
-									<Text style={profileStyle.statsFollowers}>
-										{numberAbbreviate(user.followers, 1)}
-									</Text>
-									<Text style={profileStyle.statsDescription}>Followers</Text>
-								</View>
-								<View style={{ alignItems: 'center' }}>
-									<Text style={profileStyle.statsFollowers}>{numberAbbreviate(user.laughs, 1)}</Text>
-									<Text style={profileStyle.statsDescription}>Laughs</Text>
-								</View>
-								<View style={{ alignItems: 'center' }}>
-									<Text style={profileStyle.statsFollowers}>{numberAbbreviate(user.views, 1)}</Text>
-									<Text style={profileStyle.statsDescription}>Views</Text>
-								</View>
-							</View>
+						<View style={{ flex: 2, marginTop: 5, marginLeft: 10 }}>
+							<Text style={profileStyle.userName}>{user.full_name}</Text>
+							<Text style={profileStyle.bioInfo}>{user.bio}</Text>
 						</View>
 					</View>
 
-					<View style={{ borderTopWidth: 1, borderColor: '#e7e7e7' }}>
-						<View style={[profileStyle.thumbnails, { borderBottomWidth: 2, borderColor: colors.MAIN }]}>
-							<FeatherIcon name="video" size={26} color={colors.MAIN} />
-						</View>
+					<View style={{ flexDirection: 'row', marginTop: 10 }}>
+						<Button
+							containerStyle={{ flex: 1 }}
+							buttonStyle={{
+								backgroundColor: colors.MAIN,
+								paddingHorizontal: 13,
+								paddingVertical: 10,
+								borderRadius: 6
+							}}
+							titleStyle={{ fontSize: 11, fontFamily: fonts.OPENSANS_BOLD, color: '#fff' }}
+							title="Follow"
+							onPress={this.handleFollow}
+						/>
+						<Button
+							containerStyle={{ flex: 1, marginHorizontal: 10 }}
+							buttonStyle={{
+								backgroundColor: '#FFF',
+								paddingHorizontal: 13,
+								paddingVertical: 9,
+								borderRadius: 6,
+								borderWidth: 1,
+								borderColor: '#D8D8D8'
+							}}
+							titleStyle={{ fontSize: 11, fontFamily: fonts.OPENSANS_BOLD, color: '#575555' }}
+							title="Message"
+							onPress={this.handleSubmit}
+						/>
+						<Button
+							containerStyle={{}}
+							buttonStyle={{
+								backgroundColor: '#FFF',
+								padding: 7,
+								borderRadius: 6,
+								borderWidth: 1,
+								borderColor: '#D8D8D8'
+							}}
+							icon={<FeatherIcon name="user" size={20} color="#2F2F2F" />}
+							onPress={this.handleSubmit}
+						/>
+					</View>
 
+					<View style={{}}>
+						<View style={profileStyle.followersContainer}>
+							<View style={{ alignItems: 'center' }}>
+								<Text style={profileStyle.statsFollowers}>{numberAbbreviate(user.followers, 1)}</Text>
+								<Text style={profileStyle.statsDescription}>Followers</Text>
+							</View>
+							<View style={{ alignItems: 'center' }}>
+								<Text style={profileStyle.statsFollowers}>{numberAbbreviate(user.laughs, 1)}</Text>
+								<Text style={profileStyle.statsDescription}>Laughs</Text>
+							</View>
+							<View style={{ alignItems: 'center' }}>
+								<Text style={profileStyle.statsFollowers}>{numberAbbreviate(user.views, 1)}</Text>
+								<Text style={profileStyle.statsDescription}>Views</Text>
+							</View>
+						</View>
+					</View>
+				</View>
+
+				<View style={{ flex: 1, borderTopWidth: 1, borderColor: '#e7e7e7' }}>
+					<View style={[profileStyle.thumbnails, { borderBottomWidth: 2, borderColor: colors.MAIN }]}>
+						<FeatherIcon name="video" size={26} color={colors.MAIN} />
+					</View>
+					<Loader show={loading} />
+					<View style={{ flex: 1 }}>
 						<FlatList
 							data={videos}
 							renderItem={this.renderItem}
@@ -133,7 +143,7 @@ class GeneralProfile extends Component {
 							}}
 						/>
 					</View>
-				</Content>
+				</View>
 			</View>
 		);
 	}
@@ -155,4 +165,4 @@ class GeneralProfile extends Component {
 
 const mapStateToProps = ({ auth, videos }) => ({ loggedUser: auth.loggedUser, videos: videos.userVideos });
 
-export default connect(mapStateToProps, { getVideosByUser })(GeneralProfile);
+export default connect(mapStateToProps, { getVideosByUser, setSingleVideoToPlay })(GeneralProfile);

@@ -6,15 +6,24 @@ import SearchResultComponent from '../partials/SearchResultComponent';
 import SearchBodyComponent from '../partials/SearchBodyComponent';
 import { doSearch } from '../../redux/actions/searchActions';
 import { getTrendingVideos } from '../../redux/actions/videoActions';
+import Loader from '../commons/Loader';
 
 class SearchScreen extends Component {
-	state = { searchQuery: '' };
+	state = { searchQuery: '', loading: true };
 	typingTimer = null;
 
 	async componentDidMount() {
 		const { loggedUser } = this.props;
 		await this.props.getTrendingVideos(loggedUser && loggedUser.id);
 		await this.props.doSearch();
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		const { trendingVideos } = this.props;
+
+		if (prevProps.trendingVideos !== trendingVideos) {
+			this.setState({ loading: false });
+		}
 	}
 
 	onChangeText = async searchQuery => {
@@ -32,20 +41,25 @@ class SearchScreen extends Component {
 	onSubmitSearch = () => {};
 
 	render() {
-		const { trendingVideos } = this.props;
-		const { searchResults } = this.props;
-		const { searchQuery } = this.state;
+		const { trendingVideos, searchResults } = this.props;
+		const { searchQuery, loading } = this.state;
+
 		return (
 			<SafeAreaView style={{ flex: 1, backgroundColor: '#F7F7F7' }}>
-				<SearchHeaderComponent
-					value={searchQuery}
-					onSubmitSearch={this.onSubmitSearch}
-					onChangeText={this.onChangeText}
-				/>
+				<Loader show={loading} style={{ marginTop: '60%' }} />
+				{!loading && (
+					<React.Fragment>
+						<SearchHeaderComponent
+							value={searchQuery}
+							onSubmitSearch={this.onSubmitSearch}
+							onChangeText={this.onChangeText}
+						/>
 
-				{!searchQuery && <SearchBodyComponent trendingVideos={trendingVideos} {...this.props} />}
+						{!searchQuery && <SearchBodyComponent trendingVideos={trendingVideos} {...this.props} />}
 
-				{!!searchQuery && <SearchResultComponent searchResults={searchResults} {...this.props} />}
+						{!!searchQuery && <SearchResultComponent searchResults={searchResults} {...this.props} />}
+					</React.Fragment>
+				)}
 			</SafeAreaView>
 		);
 	}

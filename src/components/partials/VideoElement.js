@@ -57,7 +57,7 @@ class VideoElement extends PureComponent {
 	}
 
 	createTimerForViewVideo = () => {
-		const { video, loggedUser, onVideoChanged } = this.props;
+		const { video, loggedUser } = this.props;
 		const { loaded } = this.state;
 		if (!loggedUser || !loaded) return;
 		//console.log('E: ', video.id, loggedUser, loaded);
@@ -67,11 +67,9 @@ class VideoElement extends PureComponent {
 		this.viewTimeout = setTimeout(async () => {
 			const response = await this.props.videoWasViewed(video.id, loggedUser.id);
 			if (response) {
-				console.log(response.views);
 				const videoModified = { ...video };
 				videoModified.views = response.views;
 				this.setState({ video: videoModified });
-				//onVideoChanged(video);
 			}
 		}, globals.VIDEO_VIEW_TIME);
 	};
