@@ -32,11 +32,11 @@ export default apiServices = {
 		const response = { ...DEFAULT_RESPONSE };
 
 		try {
-			let endPoint = `user/${userId}/videos`;
-			if (loggedUserId) endPoint += `?id_user=${loggedUserId}`;
+			let endPoint = `user/${userId}/videos?status=published`;
+			if (loggedUserId) endPoint += `&id_user=${loggedUserId}`;
 
 			const { data } = await httpService.get(endPoint);
-
+			console.log(data);
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {

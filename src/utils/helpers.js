@@ -71,8 +71,10 @@ export const shareVideo = async videoUrl => {
 export const getVideosWithUrlField = videos => {
 	if (!videos) return;
 	return videos.map(video => {
-		video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
-		//console.log(video.url);
+		//video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
+		video.url = globals.VIDEOS_SERVER_URL + video.media.video;
+		video.thumbnail = globals.VIDEOS_SERVER_URL + video.media.thumb;
+		//console.log(video);
 		return video;
 	});
 };

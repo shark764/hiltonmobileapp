@@ -16,7 +16,6 @@ export const getTrendingVideos = userId => async dispatch => {
 	const response = await apiServices.getHomeVideos(userId);
 
 	let videos = getVideosWithUrlField(response.data);
-	videos = addThumbnail(videos);
 
 	dispatch({ type: types.GET_TRANDING_VIDEOS, payload: videos });
 };
@@ -25,7 +24,6 @@ export const getVideosByUser = (userId, loggedUserId) => async dispatch => {
 	const response = await apiServices.getVideosByUser(userId, loggedUserId);
 
 	let videos = getVideosWithUrlField(response.data);
-	videos = addThumbnail(videos);
 
 	dispatch({ type: types.GET_USER_VIDEOS, payload: videos });
 };
@@ -46,6 +44,7 @@ export const videoWasViewed = (videoId, userId) => async dispatch => {
 	const response = await apiServices.videoWasViewed(videoId, userId);
 
 	if (response.success) {
+		console.log(response);
 		dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
 		return response.data;
 	}
@@ -96,9 +95,9 @@ export const postVideoInBackground = videoToUpload => async dispatch => {
 
 //TODO:
 //Temporal function
-const addThumbnail = videos =>
-	videos.map(video => {
-		video.thumbnail =
-			'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnm5J_F7bcAJiIFd4UcmVTUWxjJk2e24EHJRqMQCsegfWqLTQe&s';
-		return video;
-	});
+// const addThumbnail = videos =>
+// 	videos.map(video => {
+// 		video.thumbnail =
+// 			'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnm5J_F7bcAJiIFd4UcmVTUWxjJk2e24EHJRqMQCsegfWqLTQe&s';
+// 		return video;
+// 	});

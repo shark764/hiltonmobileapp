@@ -69,14 +69,10 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 				return v.id === payload.videoId ? { ...v, ...propsToUpdate } : v;
 			});
 
-			//GENERAL PROFILE VIDEOS (another way to do it without map)
-			if (state.userVideos.length > 0) {
-				tempVideos = [...state.userVideos];
-				tempVideo = tempVideos.find(v => v.id === payload.videoId);
-				tempVideo.views = payload.data.views;
-				tempVideo.rewatches = payload.data.rewatches;
-				returnObj.userVideos = [...tempVideos];
-			}
+			//GENERAL PROFILE VIDEOS
+			returnObj.userVideos = state.userVideos.map(v => {
+				return v.id === payload.videoId ? { ...v, ...propsToUpdate } : v;
+			});
 
 			return returnObj;
 		case types.GET_VIDEO_COMMENTS:

@@ -52,7 +52,7 @@ class GeneralProfile extends Component {
 	render() {
 		const { user, loading } = this.state;
 		const { videos } = this.props;
-
+		console.log(videos);
 		return (
 			<View style={profileStyle.container}>
 				<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
