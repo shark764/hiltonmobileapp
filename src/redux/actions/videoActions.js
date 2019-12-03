@@ -93,6 +93,13 @@ export const postVideoInBackground = videoToUpload => async dispatch => {
 	else AlertMessages.error(response.message);
 };
 
+export const postVideo = videoToUpload => async dispatch => {
+	const response = await apiServices.postVideo(videoToUpload);
+
+	if (response.success) dispatch({ type: types.POST_VIDEO_SUCCESS, payload: response.data });
+	else AlertMessages.error(response.message);
+};
+
 //TODO:
 //Temporal function
 // const addThumbnail = videos =>
