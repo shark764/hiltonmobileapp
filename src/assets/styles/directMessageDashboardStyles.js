@@ -15,12 +15,18 @@ export const directMessageDashboardStyles = {
 		width: '100%'
 	},
 	commentUserImage: {
+		width: '100%',
+		height: '100%',
+		borderRadius: 20
+	},
+	commentUserImageContainer: {
 		width: 40,
 		height: 40,
+		alignItems: 'center',
 		borderRadius: 20,
 		borderWidth: 1,
-		alignItems: 'center',
-		borderColor: '#2F2F2F'
+		borderColor: '#2F2F2F',
+		overflow: 'hidden'
 	},
 	commentCenterContainer: {
 		paddingLeft: 10,

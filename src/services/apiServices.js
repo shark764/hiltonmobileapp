@@ -167,6 +167,25 @@ export default apiServices = {
 
 		return response;
 	},
+	async updateUser(user) {
+		const response = { ...DEFAULT_RESPONSE };
+
+		try {
+			const endPoint = `user/${user.id}`;
+			const dataToSend = {
+				data: user
+			};
+
+			const { data } = await httpService.patch(endPoint, dataToSend);
+			response.data = data.data;
+			response.success = true;
+			response.message = 'Profile information was saved successfully!';
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
+		}
+
+		return response;
+	},
 	async loginUserWithEmail({ email, password }) {
 		const response = { ...DEFAULT_RESPONSE };
 
@@ -187,6 +206,22 @@ export default apiServices = {
 		} catch (error) {
 			response.message = error.message || 'Unable to connect to the api';
 			if (error.message.indexOf('code 400') !== -1) response.message = 'Invalid email or password';
+		}
+
+		return response;
+	},
+	async getUserData(userId) {
+		const response = { ...DEFAULT_RESPONSE };
+
+		try {
+			const endPoint = `user/${userId}`;
+
+			const { data } = await httpService.get(endPoint);
+
+			response.data = data.data;
+			response.success = true;
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
 		}
 
 		return response;
@@ -223,7 +258,7 @@ export default apiServices = {
 			//const { data } = httpService.post(endPoint, dataToSend);
 			httpService.post(endPoint, dataToSend);
 			//console.log('Video was uploaded...', data);
-			response.data = null//data;
+			response.data = null; //data;
 			response.success = true;
 		} catch (error) {
 			response.message = error.message || 'Unable to connect to the api';

@@ -24,12 +24,18 @@ export const directMessageStyles = {
 		justifyContent: 'flex-end'
 	},
 	messageUserImage: {
+		width: '100%',
+		height: '100',
+		borderRadius: 20
+	},
+	messageUserImageContainer: {
 		width: 40,
 		height: 40,
 		borderRadius: 20,
 		borderWidth: 1,
 		borderColor: '#e3e3e3',
-		alignItems: 'center'
+		alignItems: 'center',
+		overflow: 'hidden'
 	},
 	messageContainer: {
 		paddingLeft: 10,

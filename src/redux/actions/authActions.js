@@ -2,10 +2,22 @@ import * as types from '../types';
 import apiServices from '../../services/apiServices';
 import AlertMessages from '../../components/commons/AlertMessages';
 import LocalStorage from '../../services/LocalStorage';
-import { goToRootRouteFromChild } from '../../utils/helpers';
+import { goToRootRouteFromChild, setUserAvatarUrl } from '../../utils/helpers';
 
 export const getLoggedUser = () => async dispatch => {
-	const loggedUser = await LocalStorage.getObject('loggedUser');
+	let loggedUser = await LocalStorage.getObject('loggedUser');
+
+	//If there's an user object saved in the local storage,
+	//then we call the api to update the user info
+	if (loggedUser) {
+		const response = await apiServices.getUserData(loggedUser.id);
+
+		if (response.success) {
+			loggedUser = setUserAvatarUrl(response.data);
+
+			LocalStorage.setObject('loggedUser', loggedUser);
+		}
+	}
 
 	dispatch({ type: types.USER_LOGGED_IN_SUCCESS, payload: loggedUser });
 };

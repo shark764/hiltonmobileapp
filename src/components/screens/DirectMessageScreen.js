@@ -141,13 +141,15 @@ class DirectMessageScreen extends Component {
 
 	renderOtherMessageItem = message => (
 		<View style={styles.messageItemContainer}>
-			<Image
-				source={{
-					uri: message.user.img
-				}}
-				resizeMode="contain"
-				style={styles.messageUserImage}
-			/>
+			<View style={styles.messageUserImageContainer}>
+				<Image
+					source={{
+						uri: message.user.img
+					}}
+					resizeMode="contain"
+					style={styles.messageUserImage}
+				/>
+			</View>
 			<View style={styles.messageContainer}>
 				<View style={{}}>
 					<Text style={styles.messageText}>{message.message}</Text>
@@ -162,7 +164,4 @@ const mapStateToProps = ({ directMessages, user }) => ({
 	loggedUser: user.loggedUser
 });
 
-export default connect(
-	mapStateToProps,
-	{ getMessages }
-)(DirectMessageScreen);
+export default connect(mapStateToProps, { getMessages })(DirectMessageScreen);

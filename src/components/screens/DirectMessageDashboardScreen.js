@@ -51,13 +51,15 @@ class DirectMessageDashboardScreen extends Component {
 				}}
 			>
 				<View style={styles.commentItemContainer}>
-					<Image
-						source={{
-							uri: dashboardMessages.user.img
-						}}
-						resizeMode="contain"
-						style={styles.commentUserImage}
-					/>
+					<View style={styles.commentUserImageContainer}>
+						<Image
+							source={{
+								uri: dashboardMessages.user.img
+							}}
+							resizeMode="contain"
+							style={styles.commentUserImage}
+						/>
+					</View>
 					<View style={styles.commentCenterContainer}>
 						<View style={{ flexDirection: 'row' }}>
 							<Text style={styles.commentUerHandleText}>{dashboardMessages.user.handle}</Text>
@@ -73,7 +75,4 @@ class DirectMessageDashboardScreen extends Component {
 
 const mapStateToProps = ({ directMessages }) => ({ dashboardMessages: directMessages.dashboard });
 
-export default connect(
-	mapStateToProps,
-	{ getDashboardMessages }
-)(DirectMessageDashboardScreen);
+export default connect(mapStateToProps, { getDashboardMessages })(DirectMessageDashboardScreen);

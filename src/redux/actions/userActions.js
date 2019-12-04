@@ -31,3 +31,23 @@ export const uploadAvatar = (image, loggedUser) => async dispatch => {
 		await dispatch({ type: types.USER_UPDATED_SUCCESS, payload: user });
 	} else AlertMessages.error(response.message);
 };
+
+export const updateUser = user => async dispatch => {
+	const response = await apiServices.updateUser(user);
+
+	if (response.success) {
+		const localUser = await LocalStorage.getObject('loggedUser');
+
+		//Update local user is it was remembered
+		if (localUser) {
+			user = { ...localUser, user };
+			await LocalStorage.setObject('loggedUser', user);
+		}
+
+		await dispatch({ type: types.USER_UPDATED_SUCCESS, payload: user });
+
+		AlertMessages.success(response.message);
+	} else AlertMessages.error(response.message);
+
+	return response;
+};

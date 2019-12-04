@@ -13,7 +13,7 @@ import Form from '../../commons/Form';
 import DatePicker from '../../commons/DateTimePicker';
 import ImagePicker from 'react-native-image-picker';
 import AlertMessages from '../../commons/AlertMessages';
-import { uploadAvatar } from '../../../redux/actions/userActions';
+import { uploadAvatar, updateUser } from '../../../redux/actions/userActions';
 
 const screenHeight = Math.round(Dimensions.get('window').height);
 const screenWidth = Math.round(Dimensions.get('window').width);
@@ -112,12 +112,13 @@ class ProfileSettingsScreen extends Form {
 	};
 
 	doSubmit = async () => {
-		const user = { ...this.state.data };
-
 		this.setState({ loading: true });
-		const result = await this.props.createUser(user);
 
-		//If create user fails, we show an error, if not, the redux action will redirect to home
+		const { loggedUser, updateUser } = this.props;
+		const user = { id: loggedUser.id, ...this.state.data };
+
+		const result = await updateUser(user);
+
 		if (!result.success) {
 			AlertMessages.error(result.message);
 			this.setState({ loading: false });
@@ -162,7 +163,10 @@ class ProfileSettingsScreen extends Form {
 								borderRadius: screenWidth / 2
 							}}
 						/>
-						<TouchableOpacity onPress={this.uploadImage}>
+						<TouchableOpacity
+							onPress={this.uploadImage}
+							style={{ position: 'absolute', right: 0, bottom: 0 }}
+						>
 							<View
 								style={{
 									width: 40,
@@ -172,10 +176,7 @@ class ProfileSettingsScreen extends Form {
 									borderWidth: 1,
 									borderColor: '#FFFFFF',
 									justifyContent: 'center',
-									alignItems: 'center',
-									position: 'absolute',
-									right: 0,
-									bottom: 0
+									alignItems: 'center'
 								}}
 							>
 								<IconFeather name={'plus'} size={30} color={'#fff'} />
@@ -282,7 +283,7 @@ class ProfileSettingsScreen extends Form {
 
 const mapStateToProps = ({ user }) => ({ loggedUser: user.loggedUser });
 
-export default connect(mapStateToProps, { uploadAvatar })(ProfileSettingsScreen);
+export default connect(mapStateToProps, { uploadAvatar, updateUser })(ProfileSettingsScreen);
 
 const styles = {
 	scrollContainer: {
