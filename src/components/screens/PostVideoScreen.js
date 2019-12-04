@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 import {  colors } from '../../config/constants';
 import { postStyle } from '../../assets/styles/postStyle';
 import { goToRootRouteFromChild } from '../../utils/helpers';
-import { getVideos,postVideoInBackground } from '../../redux/actions/videoActions';
+import { getVideos,postVideoInBackground,postVideo } from '../../redux/actions/videoActions';
 const {  width } = Dimensions.get('window');
 
 const checkAndroidPermission = async () => {
@@ -110,12 +110,29 @@ class PostVideoScreen extends Component {
 																enabled: true
 															 }
 			}
-			let temp = 'file://'+url_video;
+			
+			//let temp = 'file://'+url_video;
 			if(this.state.saveVideo){
-				await CameraRoll.saveToCameraRoll(temp,"video");
+				await CameraRoll.saveToCameraRoll(`file://${url_video}`,"video");
 			}
 			console.log(`options : ${JSON.stringify(options)}`)
-			await this.props.postVideoInBackground(options);
+			//await this.props.postVideoInBackground(options);
+
+			let name = url_video.split("/")
+			console.log(`ALLOW_COMMENTING : ${this.state.allowComment}`)
+			const data = new FormData();
+			data.append('title', description || 'no title');
+			data.append('description', description || 'no description');
+			data.append('duration', parseInt(this.state.duration));
+			data.append('id_user', loggedUser.id); //-------->change the user
+			data.append('allow_comments',this.state.allowComment);
+			data.append('video', {
+				uri: `file://${url_video}`,
+				type: 'video/mp4',
+				name: name[name.length - 1]
+			});
+
+			await this.props.postVideo(data);
 		  
 	}
 
@@ -310,4 +327,4 @@ class PostVideoScreen extends Component {
 
 const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
 
-export default connect(mapStateToProps, { getVideos,postVideoInBackground })(PostVideoScreen);
+export default connect(mapStateToProps, { getVideos,postVideoInBackground,postVideo })(PostVideoScreen);

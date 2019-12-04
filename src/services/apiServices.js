@@ -196,9 +196,10 @@ export default apiServices = {
 		try {
 			const endPoint = `video`;
 			console.log('Uploading video...');
-			const { data } = await httpService.post(endPoint, dataToSend);
-			console.log('Video was uploaded...', data);
-			response.data = data;
+			//const { data } = httpService.post(endPoint, dataToSend);
+			httpService.post(endPoint, dataToSend);
+			//console.log('Video was uploaded...', data);
+			response.data = null//data;
 			response.success = true;
 		} catch (error) {
 			response.message = error.message || 'Unable to connect to the api';
