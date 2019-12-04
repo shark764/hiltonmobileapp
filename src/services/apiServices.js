@@ -36,7 +36,7 @@ export default apiServices = {
 			if (loggedUserId) endPoint += `&id_user=${loggedUserId}`;
 
 			const { data } = await httpService.get(endPoint);
-			console.log(data);
+			//console.log(data);
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {
@@ -187,6 +187,30 @@ export default apiServices = {
 		} catch (error) {
 			response.message = error.message || 'Unable to connect to the api';
 			if (error.message.indexOf('code 400') !== -1) response.message = 'Invalid email or password';
+		}
+
+		return response;
+	},
+	async uploadAvatar(image, loggedUser) {
+		const response = { ...DEFAULT_RESPONSE };
+
+		try {
+			const endPoint = `user/${loggedUser.id}/avatar`;
+
+			const dataToSend = new FormData();
+			dataToSend.append('avatar', {
+				uri: `file://${image.uri}`,
+				type: image.type,
+				name: image.fileName
+			});
+
+			const { data } = await httpService.post(endPoint, dataToSend);
+
+			response.data = data;
+			response.success = true;
+			console.log('response api', response);
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
 		}
 
 		return response;

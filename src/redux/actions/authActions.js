@@ -15,13 +15,14 @@ export const userLoginWithEmail = (user, rememberMe, redirectTo) => async dispat
 
 	if (response.success) {
 		await LocalStorage.setValue('token', response.data.token);
-		const loggedUser = response.data.user;
+		const loggedUser = setUserAvatarUrl(response.data.user);
+
 		if (rememberMe) await LocalStorage.setObject('loggedUser', loggedUser);
 
 		AlertMessages.success(response.message);
 
 		dispatch({ type: types.USER_LOGGED_IN_SUCCESS, payload: loggedUser });
-		
+
 		if (redirectTo) goToRootRouteFromChild(redirectTo, 'Home');
 	}
 

@@ -189,7 +189,7 @@ class CommentsScreen extends Component {
 						>
 							<Image
 								source={{
-									uri: loggedUser.avatar || '/'
+									uri: (loggedUser && loggedUser.avatar) || '/'
 								}}
 								style={styles.currentUserImage}
 							/>
@@ -251,11 +251,11 @@ class CommentsScreen extends Component {
 	};
 }
 
-const mapStateToProps = ({ videos, auth }, { video }) => {
+const mapStateToProps = ({ videos, user }, { video }) => {
 	let comments = videos.videoComments[video.id];
 	return {
 		comments,
-		loggedUser: auth.loggedUser
+		loggedUser: user.loggedUser
 	};
 };
 

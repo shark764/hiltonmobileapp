@@ -65,10 +65,10 @@ class SearchScreen extends Component {
 	}
 }
 
-const mapStateToProps = ({ search, videos, auth }) => ({
+const mapStateToProps = ({ search, videos, user }) => ({
 	trendingVideos: videos.trendingVideos,
 	searchResults: search.searchResults,
-	loggedUser: auth.loggedUser
+	loggedUser: user.loggedUser
 });
 
 export default connect(mapStateToProps, { getTrendingVideos, doSearch })(SearchScreen);

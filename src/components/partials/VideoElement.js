@@ -40,10 +40,7 @@ class VideoElement extends PureComponent {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		const { userLeftVideo, video, loggedUser } = this.props;
-		// console.log('video ', video.id, 'did update', this.state.loaded);
-		// console.log('condition ', prevProps.userLeftVideo, userLeftVideo);
-		// console.log('condition2 ', this.firstVideoViewed, userLeftVideo);
+		const { userLeftVideo, video } = this.props;
 
 		//If we have new videos, they will be aded to the end.
 		if (prevProps.video !== video) this.setState({ video });
@@ -59,13 +56,14 @@ class VideoElement extends PureComponent {
 	createTimerForViewVideo = () => {
 		const { video, loggedUser } = this.props;
 		const { loaded } = this.state;
-		if (!loggedUser || !loaded) return;
+		if (!loaded) return;
 		//console.log('E: ', video.id, loggedUser, loaded);
 		// console.log('Entered video', video.id);
 		this.firstVideoViewed = true;
 
+		const userId = (loggedUser && loggedUser.id) || 0;
 		this.viewTimeout = setTimeout(async () => {
-			const response = await this.props.videoWasViewed(video.id, loggedUser.id);
+			const response = await this.props.videoWasViewed(video.id, userId);
 			if (response) {
 				const videoModified = { ...video };
 				videoModified.views = response.views;
@@ -212,6 +210,6 @@ class VideoElement extends PureComponent {
 	}
 }
 
-const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
+const mapStateToProps = ({ user }) => ({ loggedUser: user.loggedUser });
 
 export default connect(mapStateToProps, { videoLaughed, videoWasViewed })(VideoElement);

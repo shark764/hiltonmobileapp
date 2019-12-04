@@ -163,6 +163,6 @@ class HomeScreen extends Component {
 	};
 }
 
-const mapstateToProps = ({ videos, auth }) => ({ videos: videos.homeVideos, loggedUser: auth.loggedUser });
+const mapstateToProps = ({ videos, user }) => ({ videos: videos.homeVideos, loggedUser: user.loggedUser });
 
 export default connect(mapstateToProps, { getVideos, getLoggedUser })(HomeScreen);

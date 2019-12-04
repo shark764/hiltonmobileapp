@@ -256,12 +256,12 @@ class ProfileScreen extends Component {
 			<Container style={profileStyle.container}>
 				<Header style={profileStyle.header}>
 					<Left>
-						<Ionicon name="md-settings" style={{ fontSize: 25 }} onPress={() => this.goToSettings()} />
+						<Ionicon name="md-settings" size={30} onPress={() => this.goToSettings()} />
 					</Left>
 					<Right>
 						<Ionicon
 							name="md-paper-plane"
-							style={{ fontSize: 25 }}
+							style={{ fontSize: 30 }}
 							onPress={() => this.goToDirectMessages()}
 						/>
 					</Right>
@@ -370,6 +370,6 @@ class ProfileScreen extends Component {
 	}
 }
 
-const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
+const mapStateToProps = ({ user }) => ({ loggedUser: user.loggedUser });
 
 export default connect(mapStateToProps, null)(ProfileScreen);

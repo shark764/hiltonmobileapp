@@ -200,6 +200,6 @@ class BoostingScreen extends Component {
 	}
 }
 
-const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
+const mapStateToProps = ({ user }) => ({ loggedUser: user.loggedUser });
 
 export default connect(mapStateToProps, null)(BoostingScreen);

@@ -163,6 +163,6 @@ class GeneralProfile extends Component {
 	);
 }
 
-const mapStateToProps = ({ auth, videos }) => ({ loggedUser: auth.loggedUser, videos: videos.userVideos });
+const mapStateToProps = ({ user, videos }) => ({ loggedUser: user.loggedUser, videos: videos.userVideos });
 
 export default connect(mapStateToProps, { getVideosByUser, setSingleVideoToPlay })(GeneralProfile);

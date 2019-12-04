@@ -157,9 +157,9 @@ class DirectMessageScreen extends Component {
 	);
 }
 
-const mapStateToProps = ({ directMessages, auth }) => ({
+const mapStateToProps = ({ directMessages, user }) => ({
 	messages: directMessages.messages,
-	loggedUser: auth.loggedUser
+	loggedUser: user.loggedUser
 });
 
 export default connect(

@@ -101,29 +101,28 @@ class VideoActions extends Component {
 					<Text style={[styles.actionCounters, { marginTop: 0 }]}>
 						{numberAbbreviate(videoItem.shares, 1)}
 					</Text>
-					{loggedUser && loggedUser.id === videoItem.user.id && (
-						<React.Fragment>
-							<Icon
-								name="eye"
-								size={30}
-								color={'#fff'}
-								style={{
-									textShadowColor: '#000000',
-									textShadowOffset: { width: 0.3, height: 0.3 },
-									textShadowRadius: 1
-								}}
-							/>
-							<Text style={[styles.actionCounters, { marginTop: 0, marginBottom: 0 }]}>
-								{numberAbbreviate(videoItem.views, 1)}
-							</Text>
-						</React.Fragment>
-					)}
+
+					<React.Fragment>
+						<Icon
+							name="eye"
+							size={30}
+							color={'#fff'}
+							style={{
+								textShadowColor: '#000000',
+								textShadowOffset: { width: 0.3, height: 0.3 },
+								textShadowRadius: 1
+							}}
+						/>
+						<Text style={[styles.actionCounters, { marginTop: 0, marginBottom: 0 }]}>
+							{numberAbbreviate(videoItem.views, 1)}
+						</Text>
+					</React.Fragment>
 				</View>
 			</LinearGradient>
 		);
 	}
 }
 
-const mapStateToProps = ({ auth }) => ({ loggedUser: auth.loggedUser });
+const mapStateToProps = ({ user }) => ({ loggedUser: user.loggedUser });
 
 export default connect(mapStateToProps, null)(VideoActions);

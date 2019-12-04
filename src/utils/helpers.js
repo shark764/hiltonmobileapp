@@ -7,6 +7,7 @@ import AlertMessages from '../components/commons/AlertMessages';
 import { Platform } from 'react-native';
 import { StackActions, NavigationActions } from 'react-navigation';
 import NavigationService from '../services/NavigationService';
+import { PermissionsAndroid } from 'react-native';
 
 //************************************************************************************************
 //This is used to return an object with the display property based on a truthy
@@ -71,12 +72,19 @@ export const shareVideo = async videoUrl => {
 export const getVideosWithUrlField = videos => {
 	if (!videos) return;
 	return videos.map(video => {
-		//video.url = globals.VIDEOS_SERVER_URL + `videos/${video.user.id}/${video.path}`;
-		video.url = globals.VIDEOS_SERVER_URL + video.media.video;
-		video.thumbnail = globals.VIDEOS_SERVER_URL + video.media.thumb;
+		//video.url = globals.MEDIA_SERVER_URL + `videos/${video.user.id}/${video.path}`;
+		video.url = globals.MEDIA_SERVER_URL + video.media.video;
+		video.thumbnail = globals.MEDIA_SERVER_URL + video.media.thumb;
 		//console.log(video);
 		return video;
 	});
+};
+
+export const setUserAvatarUrl = user => {
+	if (!user) return user;
+
+	user.avatar = globals.MEDIA_SERVER_URL + `/avatars/${user.id}/${user.avatar}`;
+	return user;
 };
 
 export const goToRootRouteFromChild = (parentRoute, rootRoute) => {
@@ -111,4 +119,24 @@ export const numberAbbreviate = (number, precision) => {
 		.toString()
 		.toUpperCase();
 	return formatted;
+};
+
+export const requestCameraPermission = async () => {
+	try {
+		const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+			title: 'Cool Photo App Camera Permission',
+			message: 'Cool Photo App needs access to your camera ' + 'so you can take awesome pictures.',
+			buttonNeutral: 'Ask Me Later',
+			buttonNegative: 'Cancel',
+			buttonPositive: 'OK'
+		});
+		if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+			return true;
+		} else {
+			return false;
+		}
+	} catch (err) {
+		return false;
+		console.warn(err);
+	}
 };

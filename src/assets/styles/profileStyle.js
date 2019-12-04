@@ -12,7 +12,8 @@ export const profileStyle = {
 		paddingTop: 30,
 		paddingBottom: 10,
 		paddingLeft: 10,
-		backgroundColor: 'white'
+		backgroundColor: 'white',
+		height: 70
 	},
 	price: {
 		fontSize: 10,

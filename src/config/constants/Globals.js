@@ -6,7 +6,7 @@ export const globals = {
 	VIEWS_SLIDER_START: 100000,
 	VIEW_SLIDER_END: 10000000000,
 	API_URL: 'http://ec2co-ecsel-e7kzz6bjzpwo-1247028944.us-east-2.elb.amazonaws.com/',
-	VIDEOS_SERVER_URL: 'http://d14c4q4c1n80wo.cloudfront.net',
+	MEDIA_SERVER_URL: 'http://d14c4q4c1n80wo.cloudfront.net',
 	VIDEO_VIEW_TIME: 3000, //3 Seconds,
 	SUPPORTED_ORIENTATIONS: ['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right'],
 	VIDEOS_TO_FETCH_PER_PAGE: 10,
