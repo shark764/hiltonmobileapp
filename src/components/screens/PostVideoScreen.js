@@ -101,37 +101,35 @@ class PostVideoScreen extends Component {
 				allow_comments: `${this.state.allowComment}`
 			}
 		};
+			if (Platform.OS === 'android') {//only android support this optional values
+				options.maxRetries = 2;
+				options.notification = {
+																enabled: true
+															 }
+			}
+			
+			//let temp = 'file://'+url_video;
+			if(this.state.saveVideo){
+				await CameraRoll.saveToCameraRoll(`file://${url_video}`,"video");
+			}
+			console.log(`options : ${JSON.stringify(options)}`)
+			await this.props.postVideoInBackground(options);
+/*
+			let name = url_video.split("/")
+			const data = new FormData();
+			data.append('title', description || 'no title');
+			data.append('description', description || 'no description');
+			data.append('duration', parseInt(this.state.duration));
+			data.append('id_user', loggedUser.id); //-------->change the user
+			data.append('allow_comments',this.state.allowComment);
+			data.append('video', {
+				uri: `file://${url_video}`,
+				type: 'video/mp4',
+				name: name[name.length - 1]
+			});
 
-		if (Platform.OS === 'android') {
-			//only android support this optional values
-			options.maxRetries = 2;
-			options.notification = {
-				enabled: true
-			};
-		}
-
-		//let temp = 'file://'+url_video;
-		if (this.state.saveVideo) {
-			await CameraRoll.saveToCameraRoll(`file://${url_video}`, 'video');
-		}
-		console.log(`options : ${JSON.stringify(options)}`);
-		//await this.props.postVideoInBackground(options);
-
-		let name = url_video.split('/');
-		console.log(`ALLOW_COMMENTING : ${this.state.allowComment}`);
-		const data = new FormData();
-		data.append('title', description || 'no title');
-		data.append('description', description || 'no description');
-		data.append('duration', parseInt(this.state.duration));
-		data.append('id_user', loggedUser.id); //-------->change the user
-		data.append('allow_comments', this.state.allowComment);
-		data.append('video', {
-			uri: `file://${url_video}`,
-			type: 'video/mp4',
-			name: name[name.length - 1]
-		});
-
-		await this.props.postVideo(data);
+			await this.props.postVideo(data);
+	*/
 	}
 
 	async postVideo() {
