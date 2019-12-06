@@ -9,7 +9,8 @@ export const globals = {
 	MEDIA_SERVER_URL: 'http://d14c4q4c1n80wo.cloudfront.net',
 	VIDEO_VIEW_TIME: 3000, //3 Seconds,
 	SUPPORTED_ORIENTATIONS: ['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right'],
-	VIDEOS_TO_FETCH_PER_PAGE: 10,
+	VIDEOS_TO_FETCH_PER_PAGE: 50,
 	LIMIT_TO_FETCH_VIDEOS: 2,
+	LIMIT_TO_FETCH_VIDEOS_PREVIEW: 1,
 	LIMIT_TO_FETCH_COMMENTS: 50
 };

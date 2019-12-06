@@ -9,9 +9,5 @@ import 'react-native-gesture-handler';
 
 YellowBox.ignoreWarnings(['`-[RCTRootView cancelTouches]` is deprecated and will be deleted soon.']);
 //console.disableYellowBox = true;
-console.log('hey', __DEV__);
-if (__DEV__) {
-	import('./src/utils/ReactotronConfig').then(() => console.log('Reactotron Configured'));
-}
 
 AppRegistry.registerComponent(appName, () => App);

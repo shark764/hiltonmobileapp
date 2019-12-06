@@ -11,9 +11,8 @@ export const getLoggedUser = () => async dispatch => {
 	//then we call the api to update the user info
 	if (loggedUser) {
 		const response = await apiServices.getUserData(loggedUser.id);
-
 		if (response.success) {
-			loggedUser = setUserAvatarUrl(response.data);
+			loggedUser = response.data;
 
 			LocalStorage.setObject('loggedUser', loggedUser);
 		}
@@ -27,7 +26,7 @@ export const userLoginWithEmail = (user, rememberMe, redirectTo) => async dispat
 
 	if (response.success) {
 		await LocalStorage.setValue('token', response.data.token);
-		const loggedUser = setUserAvatarUrl(response.data.user);
+		const loggedUser = response.data.user;
 
 		if (rememberMe) await LocalStorage.setObject('loggedUser', loggedUser);
 

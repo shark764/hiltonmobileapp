@@ -35,7 +35,6 @@ class VideoElement extends PureComponent {
 	componentDidMount() {
 		const { video, loggedUser } = this.props;
 		this.setState({ video });
-		// console.log(this.props.userLeftVideo, video.id);
 		if (!this.props.userLeftVideo) this.createTimerForViewVideo();
 	}
 
@@ -57,8 +56,7 @@ class VideoElement extends PureComponent {
 		const { video, loggedUser } = this.props;
 		const { loaded } = this.state;
 		if (!loaded) return;
-		//console.log('E: ', video.id, loggedUser, loaded);
-		// console.log('Entered video', video.id);
+
 		this.firstVideoViewed = true;
 
 		const userId = (loggedUser && loggedUser.id) || 0;
@@ -73,8 +71,6 @@ class VideoElement extends PureComponent {
 	};
 
 	videoOnLoad = () => {
-		const { video, loggedUser } = this.props;
-		// console.log('Video loaded', video.id);
 		this.setState({ loaded: true });
 	};
 

@@ -28,15 +28,43 @@ export default apiServices = {
 
 		return response;
 	},
-	async getVideosByUser(userId, loggedUserId = null, status = 'published', videosPerPage = 30) {
+	async getTrendingVideos(
+		userId = null,
+		status = 'published',
+		videosPerPage = globals.VIDEOS_TO_FETCH_PER_PAGE,
+		page = 1
+	) {
 		const response = { ...DEFAULT_RESPONSE };
 
 		try {
-			let endPoint = `user/${userId}/videos?status=published`;
+			let endPoint = `videos/${status}/${videosPerPage}?page=${page}`;
+			if (userId) endPoint += `&id_user=${userId}`;
+
+			const { data } = await httpService.get(endPoint);
+
+			response.data = data.data;
+			response.success = true;
+		} catch (error) {
+			response.message = error.message || 'Unable to connect to the api';
+		}
+
+		return response;
+	},
+	async getVideosByUser(
+		userId,
+		loggedUserId = null,
+		status = 'published',
+		videosPerPage = globals.VIDEOS_TO_FETCH_PER_PAGE,
+		page = 1
+	) {
+		const response = { ...DEFAULT_RESPONSE };
+
+		try {
+			let endPoint = `user/${userId}/videos?status=${status}&page=${page}`;
 			if (loggedUserId) endPoint += `&id_user=${loggedUserId}`;
 
 			const { data } = await httpService.get(endPoint);
-			//console.log(data);
+			
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {
@@ -66,7 +94,7 @@ export default apiServices = {
 	},
 	async getVideoComments(videoId, userId, page = 1) {
 		const response = { ...DEFAULT_RESPONSE };
-		console.log('Calling comments api for video ', videoId);
+		
 		try {
 			let endPoint = `video/${videoId}/comments?page=${page}`;
 			if (userId) endPoint += `&id_user=${userId}`;
@@ -92,7 +120,7 @@ export default apiServices = {
 
 		try {
 			const endPoint = `comments`;
-
+			
 			const { data } = await httpService.post(endPoint, dataToSend);
 
 			response.data = data.data;
@@ -175,7 +203,7 @@ export default apiServices = {
 			const dataToSend = {
 				data: user
 			};
-
+			
 			const { data } = await httpService.patch(endPoint, dataToSend);
 			response.data = data.data;
 			response.success = true;
@@ -243,8 +271,8 @@ export default apiServices = {
 
 			response.data = data;
 			response.success = true;
-			console.log('response api', response);
 		} catch (error) {
+			
 			response.message = error.message || 'Unable to connect to the api';
 		}
 
@@ -269,34 +297,38 @@ export default apiServices = {
 	async postVideoInBackground(dataToSend) {
 		const response = { ...DEFAULT_RESPONSE };
 
-		Upload.startUpload(dataToSend)
-			.then(uploadId => {
-				console.log('Upload started');
-				Upload.addListener('progress', uploadId, data => {
-					console.log(`Progress: ${data.progress}%`);
-				});
-				Upload.addListener('error', uploadId, data => {
-					console.log(`Error: ${data.error} % ${JSON.stringify(data)}`);
-				});
-				Upload.addListener('cancelled', uploadId, data => {
-					console.log(`Cancelled!`);
-				});
-				Upload.addListener('completed', uploadId, data => {
-					// data includes responseCode: number and responseBody: Object
-					console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`);
-					console.log('Completed!');
-					response.data = data.responseBody;
-					response.responseCode = data.responseCode;
-					response.success = true;
-					AlertMessages.success('Video was uploaded successfully');
-				});
-				console.log('End of "then" of upload video');
-				response.success = true;
-			})
-			.catch(err => {
-				console.log('Upload error!', err);
-				response.message = error.message || 'Unable to connect to the api';
+		console.log('DataToSend', dataToSend);
+		try {
+			const uploadId = await Upload.startUpload(dataToSend);
+			let uploadFinished = false;
+
+			Upload.addListener('progress', uploadId, data => {
+				console.log(`Progress: ${data.progress}%`);
+				if (data.progress > 1 && uploadFinished) Upload.cancelUpload(uploadId);
+				if (data.progress >= 100) uploadFinished = true;
 			});
+
+			Upload.addListener('error', uploadId, data => {
+				console.log(`Error: ${data.error} % ${JSON.stringify(data)}`);
+			});
+
+			Upload.addListener('cancelled', uploadId, data => {
+				console.log(`Cancelled second request!`);
+				if (uploadFinished) AlertMessages.success('Video was uploaded, it will be available in a moment');
+			});
+
+			Upload.addListener('completed', uploadId, data => {
+				// data includes responseCode: number and responseBody: Object
+				console.log(`responseCode : ${data.responseCode}  and   responseBody : ${data.responseBody}`);
+				console.log('Completed!');
+				AlertMessages.success('Video was uploaded, it will be available in a moment');
+			});
+			response.success = true;
+		} catch (error) {
+			console.log('Upload error!', error);
+			response.message = error.message || 'Unable to connect to the api';
+		}
+
 		return response;
 	},
 	async searchProfiles(searchQuery) {

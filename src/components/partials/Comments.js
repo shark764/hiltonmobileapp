@@ -48,10 +48,8 @@ class CommentsScreen extends Component {
 		const { video, comments, getVideoComments, show, loggedUser } = this.props;
 		const { loading, loadingNewData } = this.state;
 
-		//console.log('Condition', show, !comments);
 		if (show && !comments && !loading) {
 			const userId = loggedUser ? loggedUser.id : null;
-			console.log('Loading comments for video ', video.id);
 			await this.onRefresh();
 		}
 
@@ -81,7 +79,6 @@ class CommentsScreen extends Component {
 			this.setState({ currentApiPage: page, loadingNewData: true });
 		}
 
-		console.log('Getting comments for page', page);
 		await getVideoComments(video.id, userId, page);
 	};
 
@@ -99,14 +96,13 @@ class CommentsScreen extends Component {
 
 	onSubmitMessage = async () => {
 		const { currentComment } = this.state;
-		const { loggedUser, video } = this.props;
+		const { loggedUser, video, postVideoComment } = this.props;
 
 		if (!currentComment) return;
 
-		await this.props.postVideoComment(video.id, loggedUser.id, currentComment);
 		this.setState({ currentComment: '' });
+		await postVideoComment(video.id, loggedUser.id, currentComment);
 		this.commentsScroll.scrollTo({ y: 0 });
-		//video.comments++;
 	};
 
 	showHideView = async () => {
@@ -129,8 +125,9 @@ class CommentsScreen extends Component {
 	render() {
 		const { currentComment, heightBounceValue, loading, loadingNewData } = this.state;
 		const { comments, loggedUser, isSingleVideo, video, show } = this.props;
-
+		const allowComments = loggedUser && show && video.allow_comments;
 		let newMarginBottom = {};
+
 		if (isSingleVideo) newMarginBottom = { marginBottom: 15 };
 
 		return (
@@ -184,9 +181,7 @@ class CommentsScreen extends Component {
 							</View>
 						</ScrollView>
 
-						<View
-							style={[styles.addCommentContainer, newMarginBottom, getShowHideStyle(loggedUser && show)]}
-						>
+						<View style={[styles.addCommentContainer, newMarginBottom, getShowHideStyle(allowComments)]}>
 							<Image
 								source={{
 									uri: (loggedUser && loggedUser.avatar) || '/'

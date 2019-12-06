@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { View, Text, Image, Dimensions, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, Image, Dimensions, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { Content } from 'native-base';
 import { Button } from 'react-native-elements';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-import { fonts, colors } from '../../config/constants';
+import { fonts, colors, globals } from '../../config/constants';
 import { profileStyle } from '../../assets/styles/profileStyle';
 import { connect } from 'react-redux';
 import { numberAbbreviate } from '../../utils/helpers';
@@ -24,15 +24,13 @@ class GeneralProfile extends Component {
 
 		this.state = {
 			user: props.navigation.getParam('user'),
-			loading: true
+			loading: true,
+			flatListAlreadyLoaded: false
 		};
 	}
 
 	async componentDidMount() {
-		const { loggedUser } = this.props;
-		const { user } = this.state;
-
-		await this.props.getVideosByUser(user.id, loggedUser.id);
+		await this.onRefresh();
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -43,6 +41,27 @@ class GeneralProfile extends Component {
 		}
 	}
 
+	onRefresh = async () => {
+		this.setState({ loading: true });
+		this.getNewData(1); //for page 1
+	};
+
+	getNewData = async page => {
+		const { loggedUser, getVideosByUser, videos } = this.props;
+		const { flatListAlreadyLoaded } = this.state;
+
+		if (page !== 1) {
+			//FlatList has an issue, it executes onEndReached when loading. To avoid it, we use a flag
+			if (!flatListAlreadyLoaded) {
+				this.setState({ flatListAlreadyLoaded: true });
+				return;
+			}
+			page = Math.ceil(videos.length / globals.VIDEOS_TO_FETCH_PER_PAGE) + 1;
+		}
+
+		await getVideosByUser(loggedUser && loggedUser.id, page);
+	};
+
 	onThumbnailPress = async video => {
 		const { navigation, setSingleVideoToPlay } = this.props;
 		await setSingleVideoToPlay(video);
@@ -52,7 +71,7 @@ class GeneralProfile extends Component {
 	render() {
 		const { user, loading } = this.state;
 		const { videos } = this.props;
-		console.log(videos);
+
 		return (
 			<View style={profileStyle.container}>
 				<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
@@ -141,6 +160,9 @@ class GeneralProfile extends Component {
 								alignContent: 'space-between',
 								marginBottom: 1.5
 							}}
+							refreshControl={<RefreshControl refreshing={false} onRefresh={this.onRefresh} />}
+							onEndReachedThreshold={globals.LIMIT_TO_FETCH_VIDEOS_PREVIEW} //To load more content when we are x videos away from the end
+							onEndReached={this.getNewData}
 						/>
 					</View>
 				</View>
@@ -154,7 +176,7 @@ class GeneralProfile extends Component {
 				<Image
 					style={{
 						width: screenWidth / 3 - 1.5,
-						height: screenHeight / 4.5
+						height: screenHeight / 4
 					}}
 					source={{ uri: video.thumbnail }}
 				/>

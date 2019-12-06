@@ -12,20 +12,20 @@ export const getVideos = (userId, page = 1) => async dispatch => {
 	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: { videos, merge } });
 };
 
-export const getTrendingVideos = userId => async dispatch => {
-	const response = await apiServices.getHomeVideos(userId);
+export const getTrendingVideos = (userId, page = 1) => async dispatch => {
+	const response = await apiServices.getTrendingVideos(userId, undefined, undefined, page);
 
 	let videos = getVideosWithUrlField(response.data);
-
-	dispatch({ type: types.GET_TRANDING_VIDEOS, payload: videos });
+	const merge = page > 1;
+	dispatch({ type: types.GET_TRANDING_VIDEOS, payload: { videos, merge } });
 };
 
-export const getVideosByUser = (userId, loggedUserId) => async dispatch => {
-	const response = await apiServices.getVideosByUser(userId, loggedUserId);
+export const getVideosByUser = (userId, loggedUserId, page = 1) => async dispatch => {
+	const response = await apiServices.getVideosByUser(userId, loggedUserId, undefined, undefined, page);
 
 	let videos = getVideosWithUrlField(response.data);
-
-	dispatch({ type: types.GET_USER_VIDEOS, payload: videos });
+	const merge = page > 1;
+	dispatch({ type: types.GET_USER_VIDEOS, payload: { videos, merge } });
 };
 
 export const videoLaughed = (videoId, userId) => async dispatch => {
@@ -44,7 +44,6 @@ export const videoWasViewed = (videoId, userId) => async dispatch => {
 	const response = await apiServices.videoWasViewed(videoId, userId);
 
 	if (response.success) {
-		console.log(response);
 		dispatch({ type: types.VIDEO_WAS_VIEWED_SUCCESS, payload: { videoId, data: response.data } });
 		return response.data;
 	}

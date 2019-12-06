@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Text, View, FlatList, Image, Dimensions, TouchableOpacity } from 'react-native';
-import { fonts } from '../../config/constants';
+import { Text, View, FlatList, Image, Dimensions, TouchableOpacity, RefreshControl } from 'react-native';
+import { fonts, globals } from '../../config/constants';
 import { setSingleVideoToPlay } from '../../redux/actions/videoActions';
 import { connect } from 'react-redux';
 
@@ -14,7 +14,7 @@ class SearchBodyComponent extends Component {
 	};
 
 	render() {
-		const { trendingVideos } = this.props;
+		const { trendingVideos, onRefresh, getNewData } = this.props;
 		return (
 			<View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
 				<Text
@@ -38,6 +38,9 @@ class SearchBodyComponent extends Component {
 						alignContent: 'space-between',
 						marginBottom: 1.5
 					}}
+					refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} />}
+					onEndReachedThreshold={globals.LIMIT_TO_FETCH_VIDEOS_PREVIEW} //To load more content when we are x videos away from the end
+					onEndReached={() => getNewData()}
 				/>
 			</View>
 		);
@@ -49,7 +52,7 @@ class SearchBodyComponent extends Component {
 				<Image
 					style={{
 						width: screenWidth / 3 - 1.5,
-						height: screenHeight / 4.5
+						height: screenHeight / 4
 					}}
 					source={{ uri: video.thumbnail }}
 				/>

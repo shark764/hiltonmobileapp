@@ -22,7 +22,7 @@ class ProfileSettingsScreen extends Form {
 	static navigationOptions = () => ({ title: 'Edit Profile' });
 
 	state = {
-		data: { full_name: '', bio: '', birth_date: '', goalValue: 2000 },
+		data: { full_name: '', bio: '', birth_date: '', goal_value: 2000 },
 		loading: true,
 		imageToCrop: null
 	};
@@ -49,7 +49,7 @@ class ProfileSettingsScreen extends Form {
 
 	onGoalSlide = val => {
 		const data = { ...this.state.data };
-		data.goalValue = val;
+		data.goal_value = Math.floor(val);
 		this.setState({ data });
 	};
 
@@ -74,7 +74,7 @@ class ProfileSettingsScreen extends Form {
 					const imageToCrop = {
 						uri: response.uri,
 						type: response.type,
-						fileName: response.fileName,
+						fileName: response.fileName || Date.now().toString(),
 						width: response.width,
 						height: response.height
 					};
@@ -106,8 +106,9 @@ class ProfileSettingsScreen extends Form {
 
 		const image = { ...imageToCrop, uri: croppedImageUri };
 		this.setState({ imageToCrop: null, loading: true });
+
 		await uploadAvatar(image, loggedUser);
-		//this.setState({ loading: false });
+
 		//TODO: delete cropped image
 	};
 
@@ -117,18 +118,18 @@ class ProfileSettingsScreen extends Form {
 		const { loggedUser, updateUser } = this.props;
 		const user = { id: loggedUser.id, ...this.state.data };
 
-		const result = await updateUser(user);
+		const result = await updateUser(user, loggedUser);
 
 		if (!result.success) {
 			AlertMessages.error(result.message);
-			this.setState({ loading: false });
 		}
+		this.setState({ loading: false });
 	};
 
 	render() {
 		const { loggedUser } = this.props;
 		const { loading, data, imageToCrop } = this.state;
-		//console.log(loggedUser);
+		
 		return (
 			<SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
 				<Loader show={loading} />
@@ -193,11 +194,11 @@ class ProfileSettingsScreen extends Form {
 								Goal
 							</Text>
 							<Text style={{ fontFamily: fonts.OPENSANS_SEMI_BOLD, fontSize: 16, color: colors.MAIN }}>
-								${data.goalValue.toLocaleString()}
+								${data.goal_value.toLocaleString()}
 							</Text>
 						</View>
 						<Slider
-							value={data.goalValue}
+							value={data.goal_value}
 							onValueChange={this.onGoalSlide}
 							minimumValue={1}
 							maximumValue={10000}

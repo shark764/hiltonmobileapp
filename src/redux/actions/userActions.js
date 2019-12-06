@@ -21,7 +21,8 @@ export const uploadAvatar = (image, loggedUser) => async dispatch => {
 	const response = await apiServices.uploadAvatar(image, loggedUser);
 
 	if (response.success) {
-		const user = setUserAvatarUrl(response.data.data);
+		//const user = setUserAvatarUrl(response.data.data);
+		const user = response.data.data;
 
 		const localUser = await LocalStorage.getObject('loggedUser');
 
@@ -32,19 +33,21 @@ export const uploadAvatar = (image, loggedUser) => async dispatch => {
 	} else AlertMessages.error(response.message);
 };
 
-export const updateUser = user => async dispatch => {
-	const response = await apiServices.updateUser(user);
+export const updateUser = (dataToUpdate, loggedUser) => async dispatch => {
+	const response = await apiServices.updateUser(dataToUpdate);
 
 	if (response.success) {
 		const localUser = await LocalStorage.getObject('loggedUser');
-
+		let payload;
 		//Update local user is it was remembered
 		if (localUser) {
-			user = { ...localUser, user };
-			await LocalStorage.setObject('loggedUser', user);
+			payload = { ...localUser, ...dataToUpdate };
+			await LocalStorage.setObject('loggedUser', payload);
+		} else {
+			payload = { ...loggedUser, ...dataToUpdate };
 		}
 
-		await dispatch({ type: types.USER_UPDATED_SUCCESS, payload: user });
+		await dispatch({ type: types.USER_UPDATED_SUCCESS, payload });
 
 		AlertMessages.success(response.message);
 	} else AlertMessages.error(response.message);

@@ -7,15 +7,14 @@ import SearchBodyComponent from '../partials/SearchBodyComponent';
 import { doSearch } from '../../redux/actions/searchActions';
 import { getTrendingVideos } from '../../redux/actions/videoActions';
 import Loader from '../commons/Loader';
+import { globals } from '../../config/constants';
 
 class SearchScreen extends Component {
-	state = { searchQuery: '', loading: true };
+	state = { searchQuery: '', loading: true, flatListAlreadyLoaded: false };
 	typingTimer = null;
 
 	async componentDidMount() {
-		const { loggedUser } = this.props;
-		await this.props.getTrendingVideos(loggedUser && loggedUser.id);
-		await this.props.doSearch();
+		await this.onRefresh();
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -38,7 +37,26 @@ class SearchScreen extends Component {
 		}, 100);
 	};
 
-	onSubmitSearch = () => {};
+	onRefresh = async () => {
+		this.setState({ loading: true, currentApiPage: 1 });
+		this.getNewData(1); //for page 1
+	};
+
+	getNewData = async page => {
+		const { loggedUser, getTrendingVideos, trendingVideos } = this.props;
+		const { flatListAlreadyLoaded } = this.state;
+
+		if (page !== 1) {
+			//FlatList has an issue, it executes onEndReached when loading. To avoid it, we use a flag
+			if (!flatListAlreadyLoaded) {
+				this.setState({ flatListAlreadyLoaded: true });
+				return;
+			}
+			page = Math.ceil(trendingVideos.length / globals.VIDEOS_TO_FETCH_PER_PAGE) + 1;
+		}
+
+		await getTrendingVideos(loggedUser && loggedUser.id, page);
+	};
 
 	render() {
 		const { trendingVideos, searchResults } = this.props;
@@ -55,7 +73,14 @@ class SearchScreen extends Component {
 							onChangeText={this.onChangeText}
 						/>
 
-						{!searchQuery && <SearchBodyComponent trendingVideos={trendingVideos} {...this.props} />}
+						{!searchQuery && (
+							<SearchBodyComponent
+								trendingVideos={trendingVideos}
+								onRefresh={this.onRefresh}
+								getNewData={this.getNewData}
+								{...this.props}
+							/>
+						)}
 
 						{!!searchQuery && <SearchResultComponent searchResults={searchResults} {...this.props} />}
 					</React.Fragment>

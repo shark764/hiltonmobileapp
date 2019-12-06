@@ -13,10 +13,6 @@ class SingleVideoScreen extends Component {
 		playVideo: true
 	};
 
-	componentDidUpdate(prevProps, prevState) {
-		console.log('updated ', prevProps, this.props);
-	}
-
 	resumeVideo = () => {
 		this.setState({ playVideo: true });
 	};

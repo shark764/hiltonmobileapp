@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
-import { StatusBar, View, Text, StyleSheet, Image, Dimensions, FlatList } from 'react-native';
+import {
+	StatusBar,
+	View,
+	Text,
+	StyleSheet,
+	Image,
+	Dimensions,
+	FlatList,
+	TouchableOpacity,
+	RefreshControl
+} from 'react-native';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base';
 import CommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons'; //https://oblador.github.io/react-native-vector-icons/
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -7,11 +17,14 @@ import FontIcon from 'react-native-vector-icons/Fontisto';
 import AsyncStorage from '@react-native-community/async-storage';
 //import CardComponent from '../partials/CardComponent'
 import * as Progress from 'react-native-progress';
-import { fonts, colors } from '../../config/constants';
+import { fonts, colors, globals } from '../../config/constants';
 import { profileStyle } from '../../assets/styles/profileStyle';
 import { connect } from 'react-redux';
+import { getVideosByUser, setSingleVideoToPlay } from '../../redux/actions/videoActions';
+import Loader from '../commons/Loader';
+import { numberAbbreviate } from '../../utils/helpers';
 
-const { height, width } = Dimensions.get('window');
+const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
 class ProfileScreen extends Component {
 	constructor(props) {
@@ -19,83 +32,12 @@ class ProfileScreen extends Component {
 
 		this.state = {
 			activeIndex: 0,
-			my_images: [],
 			my_laughs: [],
-			profile_info: {},
-			url_video: []
+			loading: true,
+			flatListAlreadyLoaded: false
 		};
 		this._isMounted = false;
 	}
-
-	getImages = () => {
-		let { url_video } = this.state;
-		let my_images = [
-			{
-				id: 1,
-				url:
-					'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnm5J_F7bcAJiIFd4UcmVTUWxjJk2e24EHJRqMQCsegfWqLTQe&s'
-			},
-			{
-				id: 2,
-				url: 'https://i.ytimg.com/vi/VzfxsPPd1XY/maxresdefault.jpg'
-			},
-			{
-				id: 3,
-				url: 'https://qph.fs.quoracdn.net/main-qimg-2a3ea44dc8b0252a98a5ca5d65edf9b1.webp'
-			},
-			{
-				id: 4,
-				url:
-					'https://vignette.wikia.nocookie.net/injusticegodsamongus/images/5/52/Red_Arrow_4.jpg/revision/latest?cb=20130610053026'
-			},
-			{
-				id: 5,
-				url:
-					'https://img.purch.com/o/aHR0cDovL3d3dy5uZXdzYXJhbWEuY29tL2ltYWdlcy9pLzAwMC8yNjIvNjE4L2kwMi9GbGFzaF8xLmpwZw=='
-			},
-			{
-				id: 6,
-				url: 'https://images-na.ssl-images-amazon.com/images/I/81D%2BXXEnHBL._SY550_.jpg'
-			},
-			{
-				id: 7,
-				url:
-					'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRy2C4IW089Yyk1laXnV7MQ4FKD6h6LWyD7vYCw1WVV8O2LlWu&s'
-			},
-			{
-				id: 8,
-				url: 'http://media.comicbook.com/2016/05/scarlet-witch-powers-181506.jpg'
-			},
-			{
-				id: 9,
-				url: 'https://i.ebayimg.com/images/g/sKIAAOSwGjpXTMV2/s-l300.jpg'
-			},
-			{
-				id: 10,
-				url:
-					'https://data.junkee.com/wp-content/uploads/2016/02/deadpool-movie-2015-thumbs-up-mditd0fn2czy3ps40jx65quje2tgdkslj5zcgyqd4o.jpg'
-			},
-			{
-				id: 11,
-				url:
-					'https://www.trendsinternational.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/1/6/16528_-_carnage_-_classic.jpg'
-			},
-			{
-				id: 12,
-				url:
-					'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/spiderman-lead-1535732273.jpg?resize=480:*'
-			}
-		];
-		if (url_video) {
-			my_images.unshift({
-				id: 0,
-				url:
-					'https://embedwistia-a.akamaihd.net/deliveries/a95027e53ba655716cf130adc7a3cef8d3c2c53c.webp?image_crop_resized=1280x720' //url_video
-			});
-		}
-
-		this.setState({ my_images });
-	};
 
 	getLaughs = () => {
 		const my_laughs = [
@@ -155,48 +97,57 @@ class ProfileScreen extends Component {
 		this.setState({ my_laughs });
 	};
 
-	getProfileInfo = () => {
-		const profile_info = {
-			userId: '@chrispratt',
-			profilePhoto:
-				'https://content.swncdn.com/godvine/uploads/2017/01/image_1484237418_godupdates_actor_Chris_Pratt_shared_his_testimony_finding_god_at_grocery_fb.jpg',
-			bioInfo: 'Bio, description, etc...'
-		};
-		this.setState({ profile_info });
-	};
-
 	async componentDidMount() {
 		this._isMounted = true;
-		let url_video = await AsyncStorage.getItem('videoToPost');
-		url_video = JSON.parse(url_video);
 		if (this._isMounted) {
-			this.setState({ url_video, paused: false });
-			//console.log('..................................');
-			//console.log(this.state.url_video);
-			//console.log('..................................');
-			await this.getImages();
 			await this.getLaughs();
-			await this.getProfileInfo();
+			await this.onRefresh();
 		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		const { loggedUser } = this.props;
-		//console.log('fromProfile id update: ', loggedUser);
-		if (!loggedUser) this.props.navigation.replace('LoginOrSignup', { fromScreen: 'Profile' });
+		const { loggedUser, videos } = this.props;
+
+		if (!loggedUser) {
+			this.props.navigation.replace('LoginOrSignup', { fromScreen: 'Profile' });
+			return;
+		}
+
+		if (prevProps.videos !== videos) this.setState({ loading: false });
 	}
+
+	onRefresh = async () => {
+		this.setState({ loading: true });
+		this.getNewData(1); //for page 1
+	};
+
+	getNewData = async page => {
+		const { loggedUser, getVideosByUser, videos } = this.props;
+		const { flatListAlreadyLoaded } = this.state;
+
+		if (page !== 1) {
+			//FlatList has an issue, it executes onEndReached when loading. To avoid it, we use a flag
+			if (!flatListAlreadyLoaded) {
+				this.setState({ flatListAlreadyLoaded: true });
+				return;
+			}
+			page = Math.ceil(videos.length / globals.VIDEOS_TO_FETCH_PER_PAGE) + 1;
+		}
+		
+		await getVideosByUser(loggedUser && loggedUser.id, page);
+	};
 
 	componentWillUnmount() {
 		this._isMounted = false;
 	}
 
-	goToSettings() {
+	goToSettings = () => {
 		this.props.navigation.push('Settings');
-	}
+	};
 
-	goToDirectMessages() {
+	goToDirectMessages = () => {
 		this.props.navigation.push('DirectMessageDashboard');
-	}
+	};
 
 	segmentClicked(index) {
 		this.setState({
@@ -204,23 +155,47 @@ class ProfileScreen extends Component {
 		});
 	}
 
+	onThumbnailPress = async video => {
+		const { navigation, setSingleVideoToPlay } = this.props;
+		await setSingleVideoToPlay(video);
+		navigation.push('SingleVideoPlayer');
+	};
+
 	renderMyVideos() {
-		return this.state.my_images.map((image, index) => {
-			return (
-				<View
-					key={image.id}
-					style={[
-						{ width: width / 3 },
-						{ height: width / 2 },
-						{ marginBottom: 2 },
-						index % 3 !== 0 ? { paddingLeft: 2 } : { paddingLeft: 0 }
-					]}
-				>
-					<Image style={profileStyle.image} source={{ uri: image.url }}></Image>
-				</View>
-			);
-		});
+		const { videos } = this.props;
+
+		return (
+			<FlatList
+				data={videos}
+				renderItem={this.renderItem}
+				keyExtractor={item => item.id}
+				numColumns={3}
+				columnWrapperStyle={{
+					justifyContent: 'space-between',
+					alignContent: 'space-between',
+					marginBottom: 1.5
+				}}
+				refreshControl={<RefreshControl refreshing={false} onRefresh={this.onRefresh} />}
+				onEndReachedThreshold={globals.LIMIT_TO_FETCH_VIDEOS_PREVIEW} //To load more content when we are x videos away from the end
+				onEndReached={this.getNewData}
+			/>
+			
+		);
 	}
+
+	renderItem = ({ item: video }) => (
+		<TouchableOpacity onPress={() => this.onThumbnailPress(video)}>
+			<View>
+				<Image
+					style={{
+						width: screenWidth / 3 - 1.5,
+						height: screenHeight / 4
+					}}
+					source={{ uri: video.thumbnail }}
+				/>
+			</View>
+		</TouchableOpacity>
+	);
 
 	renderMyLaughs() {
 		return this.state.my_laughs.map((image, index) => {
@@ -228,8 +203,8 @@ class ProfileScreen extends Component {
 				<View
 					key={index}
 					style={[
-						{ width: width / 3 },
-						{ height: width / 2 },
+						{ width: screenWidth / 3 },
+						{ height: screenWidth / 2 },
 						{ marginBottom: 2 },
 						index % 3 !== 0 ? { paddingLeft: 2 } : { paddingLeft: 0 }
 					]}
@@ -242,7 +217,8 @@ class ProfileScreen extends Component {
 
 	renderSection(urls) {
 		if (this.state.activeIndex == 0) {
-			return <View style={profileStyle.rowsThumbnails}>{this.renderMyVideos()}</View>;
+			//return <View style={profileStyle.rowsThumbnails}>{this.renderMyVideos()}</View>;
+			return <View style={{ flex: 1 }}>{this.renderMyVideos()}</View>;
 		} else if (this.state.activeIndex == 1) {
 			return <View style={profileStyle.rowsThumbnails}>{this.renderMyLaughs()}</View>;
 		}
@@ -250,20 +226,17 @@ class ProfileScreen extends Component {
 
 	render() {
 		const { loggedUser } = this.props;
+		const { loading } = this.state;
 		if (!loggedUser) return null;
 
 		return (
 			<Container style={profileStyle.container}>
 				<Header style={profileStyle.header}>
 					<Left>
-						<Ionicon name="md-settings" size={30} onPress={() => this.goToSettings()} />
+						<Ionicon name="md-settings" size={30} onPress={this.goToSettings} />
 					</Left>
 					<Right>
-						<Ionicon
-							name="md-paper-plane"
-							style={{ fontSize: 30 }}
-							onPress={() => this.goToDirectMessages()}
-						/>
+						<Ionicon name="md-paper-plane" style={{ fontSize: 30 }} onPress={this.goToDirectMessages} />
 					</Right>
 				</Header>
 				<Content>
@@ -282,7 +255,7 @@ class ProfileScreen extends Component {
 							</View>
 						</View>
 						<View style={{ paddingLeft: 15, alignItems: 'center' }}>
-							<Progress.Bar progress={0.45} height={14} width={width * 0.7} color="#404040" />
+							<Progress.Bar progress={0.45} height={14} width={screenWidth * 0.7} color="#404040" />
 						</View>
 					</View>
 					<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
@@ -296,80 +269,60 @@ class ProfileScreen extends Component {
 							</View>
 						</View>
 
-						<View style={{ flex: 3 }}>
+						<View style={{}}>
 							<View style={profileStyle.followersContainer}>
 								<View style={{ alignItems: 'center' }}>
-									<Text style={profileStyle.statsFollowers}>9K</Text>
+									<Text style={profileStyle.statsFollowers}>
+										{numberAbbreviate(loggedUser.followers, 1)}
+									</Text>
 									<Text style={profileStyle.statsDescription}>Followers</Text>
 								</View>
 								<View style={{ alignItems: 'center' }}>
-									<Text style={profileStyle.statsFollowers}>12K</Text>
+									<Text style={profileStyle.statsFollowers}>
+										{numberAbbreviate(loggedUser.laughs, 1)}
+									</Text>
 									<Text style={profileStyle.statsDescription}>Laughs</Text>
 								</View>
 								<View style={{ alignItems: 'center' }}>
-									<Text style={profileStyle.statsFollowers}>128K</Text>
+									<Text style={profileStyle.statsFollowers}>
+										{numberAbbreviate(loggedUser.views, 1)}
+									</Text>
 									<Text style={profileStyle.statsDescription}>Views</Text>
 								</View>
 							</View>
-							{/*
-                              <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingTop: 10 }}>
-                                  <View style={{ flexDirection: 'row' }}>
-                                      <Button bordered dark style={{ flex: 3, marginLeft: 10, justifyContent: 'center', height: 30 }}>
-                                        <Text>Edit Profile</Text>
-                                      </Button>
-
-                                      <Button bordered dark style={{
-                                                                    flex: 1,
-                                                                    height: 30,
-                                                                    marginRight: 10, marginLeft: 5,
-                                                                    justifyContent: 'center'
-                                      }}>
-                                          <Icon name="settings" style={{ color: 'black' }}></Icon>
-                                      </Button>
-                                  </View>
-                              </View>
-                              */}
 						</View>
-					</View>
-
-					<View>
-						<View style={profileStyle.thumbnails}>
-							<Button
-								onPress={() => this.segmentClicked(0)}
-								transparent
-								active={this.state.activeIndex == 0}
-							>
-								<CommunityIcon
-									name="video-outline"
-									style={[
-										{ fontSize: 30 },
-										this.state.activeIndex == 0 ? { color: colors.MAIN } : { color: colors.GRAY }
-									]}
-								/>
-							</Button>
-							<Button
-								onPress={() => this.segmentClicked(1)}
-								transparent
-								active={this.state.activeIndex == 1}
-							>
-								<FontIcon
-									name="laughing"
-									style={[
-										{ fontSize: 30 },
-										this.state.activeIndex == 1 ? { color: colors.MAIN } : { color: colors.GRAY }
-									]}
-								/>
-							</Button>
-						</View>
-
-						{this.renderSection()}
 					</View>
 				</Content>
+				<View style={{ flex: 1, marginTop: -100 }}>
+					<View style={profileStyle.thumbnails}>
+						<Button onPress={() => this.segmentClicked(0)} transparent active={this.state.activeIndex == 0}>
+							<CommunityIcon
+								name="video-outline"
+								style={[
+									{ fontSize: 30 },
+									this.state.activeIndex == 0 ? { color: colors.MAIN } : { color: colors.GRAY }
+								]}
+							/>
+						</Button>
+						<Button onPress={() => this.segmentClicked(1)} transparent active={this.state.activeIndex == 1}>
+							<FontIcon
+								name="laughing"
+								style={[
+									{ fontSize: 30 },
+									this.state.activeIndex == 1 ? { color: colors.MAIN } : { color: colors.GRAY }
+								]}
+							/>
+						</Button>
+					</View>
+
+					<Loader show={loading} />
+					{!loading && this.renderSection()}
+				</View>
 			</Container>
 		);
 	}
 }
 
-const mapStateToProps = ({ user }) => ({ loggedUser: user.loggedUser });
+const mapStateToProps = ({ user, videos }) => ({ loggedUser: user.loggedUser, videos: videos.userVideos });
 
-export default connect(mapStateToProps, null)(ProfileScreen);
+export default connect(mapStateToProps, { getVideosByUser, setSingleVideoToPlay })(ProfileScreen);

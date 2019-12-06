@@ -12,9 +12,7 @@ import { getShowHideStyle } from '../../utils/helpers';
 
 class HomeScreen extends Component {
 	state = {
-		videos: [],
 		currentVideoPage: 0, //To control the pages (videos)
-		currentApiPage: 1, //To control the pages (videos returned) by the api
 		listHeight: 0,
 		isFocused: true,
 		loading: true,
@@ -32,33 +30,19 @@ class HomeScreen extends Component {
 		const { videos, loggedUser, getVideos } = this.props;
 
 		//If we have new videos, they will be aded to the end.
-		if (prevProps.videos !== videos) this.setState({ videos, loading: false });
+		if (prevProps.videos !== videos) this.setState({ loading: false });
 
 		if (prevProps.loggedUser !== loggedUser) await getVideos(loggedUser && loggedUser.id);
 	}
 
 	onRefresh = async () => {
-		this.setState({ loading: true, currentApiPage: 1 });
+		this.setState({ loading: true });
 		this.getNewData(1); //for page 1
 	};
 
 	getNewData = async page => {
-		const { loggedUser, getVideos } = this.props;
-		const { currentApiPage, currentVideoPage } = this.state;
-
-		//If contructor called this, then page = 1
-		//If Flat list reached end limit, then page is undefined.
-		if (!page) {
-			//There is a bug in the Flat list, it calls onEndReached when rendering,
-			//So to avoid getting the data twice when loading the screen
-			//We get out if we are in the first video.
-			if (currentVideoPage == 0) return;
-
-			page = currentApiPage + 1;
-			this.setState({ currentApiPage: page });
-		}
-
-		//console.log('Getting home videos for page', page);
+		const { loggedUser, getVideos, videos } = this.props;
+		if (page !== 1) page = Math.ceil(videos.length / globals.VIDEOS_TO_FETCH_PER_PAGE) + 1;
 		await getVideos(loggedUser && loggedUser.id, page);
 	};
 
@@ -109,7 +93,8 @@ class HomeScreen extends Component {
 	onShowLoginModal = () => this.setState({ showLoginModal: true });
 
 	render() {
-		const { videos, listHeight, loading, scrollEnabled, showLoginModal } = this.state;
+		const { listHeight, loading, scrollEnabled, showLoginModal } = this.state;
+		const { videos } = this.props;
 
 		return (
 			<View style={{ flex: 1 }}>
@@ -133,9 +118,9 @@ class HomeScreen extends Component {
 					})}
 					refreshControl={<RefreshControl refreshing={false} onRefresh={this.onRefresh} />}
 					onEndReachedThreshold={globals.LIMIT_TO_FETCH_VIDEOS} //To load more content when we are x videos away from the end
+					onEndReached={() => this.getNewData()}
 					onMomentumScrollEnd={this.videoChanged}
 					onLayout={this.onLayoutList}
-					onEndReached={() => this.getNewData()}
 				/>
 				<Loader show={loading} style={{ marginTop: '60%' }} />
 			</View>

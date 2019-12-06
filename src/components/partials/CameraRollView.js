@@ -23,7 +23,7 @@ import { cameraRollStyle } from '../../assets/styles/cameraRollStyle';
 import RNConvertPhAsset from 'react-native-convert-ph-asset';
 import Loader from '../commons/Loader';
 import { element } from 'prop-types';
-import { VideoPlayer, Trimmer } from 'react-native-video-processing';
+//import { VideoPlayer, Trimmer } from 'react-native-video-processing';
 
 const { height, width } = Dimensions.get('window');
 
@@ -91,7 +91,7 @@ export default class CameraRollView extends Component {
 
 	editThisVideo(url) {
 		console.log(`About to edit this video : ${url}`);
-		this.setState({videoSelected : url})
+		this.setState({ videoSelected: url });
 	}
 
 	renderCameraRollVideos() {
@@ -125,47 +125,50 @@ export default class CameraRollView extends Component {
 		});
 	}
 
-//video editing
-trimVideo() {
-	const options = {
-			startTime: 0,
-			endTime: 9,
-			quality: VideoPlayer.Constants.quality.QUALITY_1280x720, // iOS only
-			saveToCameraRoll: true, // default is false // iOS only
-			saveWithCurrentDate: true, // default is false // iOS only
-	};
-	this.videoPlayerRef.trim(options)
-			.then((newSource) => console.log(newSource))
-			.catch(console.warn);
-}
+	//video editing
+	// trimVideo() {
+	// 	const options = {
+	// 			startTime: 0,
+	// 			endTime: 9,
+	// 			quality: VideoPlayer.Constants.quality.QUALITY_1280x720, // iOS only
+	// 			saveToCameraRoll: true, // default is false // iOS only
+	// 			saveWithCurrentDate: true, // default is false // iOS only
+	// 	};
+	// 	this.videoPlayerRef.trim(options)
+	// 			.then((newSource) => console.log(newSource))
+	// 			.catch(console.warn);
+	// }
 
-compressVideo() {
-	const options = {
+	compressVideo() {
+		const options = {
 			width: 720,
 			height: 1280,
 			bitrateMultiplier: 3,
 			saveToCameraRoll: true, // default is false, iOS only
 			saveWithCurrentDate: true, // default is false, iOS only
 			minimumBitrate: 300000,
-			removeAudio: true, // default is false
-	};
-	this.videoPlayerRef.compress(options)
-			.then((newSource) => console.log(newSource))
+			removeAudio: true // default is false
+		};
+		this.videoPlayerRef
+			.compress(options)
+			.then(newSource => console.log(newSource))
 			.catch(console.warn);
-}
+	}
 
-getPreviewImageForSecond(second) {
-	const maximumSize = { width: 640, height: 1024 }; // default is { width: 1080, height: 1080 } iOS only
-	this.videoPlayerRef.getPreviewForSecond(second, maximumSize) // maximumSize is iOS only
-	.then((base64String) => console.log('This is BASE64 of image', base64String))
-	.catch(console.warn);
-}
+	getPreviewImageForSecond(second) {
+		const maximumSize = { width: 640, height: 1024 }; // default is { width: 1080, height: 1080 } iOS only
+		this.videoPlayerRef
+			.getPreviewForSecond(second, maximumSize) // maximumSize is iOS only
+			.then(base64String => console.log('This is BASE64 of image', base64String))
+			.catch(console.warn);
+	}
 
-getVideoInfo() {
-	this.videoPlayerRef.getVideoInfo()
-	.then((info) => console.log(info))
-	.catch(console.warn);
-}
+	getVideoInfo() {
+		this.videoPlayerRef
+			.getVideoInfo()
+			.then(info => console.log(info))
+			.catch(console.warn);
+	}
 
 	render() {
 		const { loading } = this.state;
@@ -182,10 +185,9 @@ getVideoInfo() {
 						<Text style={cameraRollStyle.title}> Camera Roll </Text>
 					</View>
 				</View>
-				{
-					this.state.videoSelected?
-						<ScrollView style={{padding: 10}}>
-                <VideoPlayer
+				{this.state.videoSelected ? (
+					<ScrollView style={{ padding: 10 }}>
+						{/* <VideoPlayer
                     ref={ref => this.videoPlayerRef = ref}
                     startTime={5}  // seconds
                     endTime={10}   // seconds
@@ -210,13 +212,14 @@ getVideoInfo() {
                     trackerColor={'green'} // iOS only
 										onChange={(e) => console.log(e.startTime, e.endTime)}
 										style={{paddingLeft: 10, paddingRight: 10}}
-                />
+                /> */}
 					</ScrollView>
-					:<ScrollView>
-					<View style={cameraRollStyle.rowsThumbnails}>{this.renderCameraRollVideos()}</View>
-					<Loader show={loading} style={{ marginTop: '60%' }} />
-				</ScrollView>
-				}
+				) : (
+					<ScrollView>
+						<View style={cameraRollStyle.rowsThumbnails}>{this.renderCameraRollVideos()}</View>
+						<Loader show={loading} style={{ marginTop: '60%' }} />
+					</ScrollView>
+				)}
 			</Container>
 		);
 	}

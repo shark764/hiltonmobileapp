@@ -24,10 +24,12 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			if (payload.merge) return { ...state, homeVideos: [...state.homeVideos, ...payload.videos] };
 			else return { ...state, homeVideos: payload.videos };
 		case types.GET_TRANDING_VIDEOS:
-			//TODO: Do the refresh and get new videos
-			return { ...state, trendingVideos: payload };
+			if (payload.merge) return { ...state, trendingVideos: [...state.trendingVideos, ...payload.videos] };
+			else return { ...state, trendingVideos: payload.videos };
 		case types.GET_USER_VIDEOS:
-			return { ...state, userVideos: payload };
+			if (payload.merge) return { ...state, userVideos: [...state.userVideos, ...payload.videos] };
+			else return { ...state, userVideos: payload.videos };
+
 		case types.SET_SINGLE_VIDEO_TO_PLAY:
 			return { ...state, singleVideoToPlay: payload };
 		case types.VIDEO_LAUGHED_SUCCESS:

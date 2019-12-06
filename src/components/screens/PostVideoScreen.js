@@ -47,7 +47,7 @@ class PostVideoScreen extends Component {
 			paused: false,
 			boostOption: false,
 			saveVideo: false,
-			allowComment: false,
+			allowComment: true,
 			postOnFacebook: false,
 			postOnIGstory: false,
 			postOnIGpost: false,
@@ -78,7 +78,7 @@ class PostVideoScreen extends Component {
 		this.setState({ url_video, duration, paused: false });
 	}
 
-	async uploadSegments() {
+	uploadSegments = async () => {
 		const { loggedUser } = this.props;
 		let { description, url_video } = this.state;
 
@@ -101,20 +101,22 @@ class PostVideoScreen extends Component {
 				allow_comments: `${this.state.allowComment}`
 			}
 		};
-			if (Platform.OS === 'android') {//only android support this optional values
-				options.maxRetries = 2;
-				options.notification = {
-																enabled: true
-															 }
-			}
-			
-			//let temp = 'file://'+url_video;
-			if(this.state.saveVideo){
-				await CameraRoll.saveToCameraRoll(`file://${url_video}`,"video");
-			}
-			console.log(`options : ${JSON.stringify(options)}`)
-			await this.props.postVideoInBackground(options);
-/*
+
+		if (Platform.OS === 'android') {
+			//only android support this optional values
+			options.maxRetries = 2;
+			options.notification = {
+				enabled: true
+			};
+		}
+
+		//let temp = 'file://'+url_video;
+		if (this.state.saveVideo) {
+			await CameraRoll.saveToCameraRoll(`file://${url_video}`, 'video');
+		}
+		console.log(`options : ${JSON.stringify(options)}`);
+		await this.props.postVideoInBackground(options);
+		/*
 			let name = url_video.split("/")
 			const data = new FormData();
 			data.append('title', description || 'no title');
@@ -130,9 +132,9 @@ class PostVideoScreen extends Component {
 
 			await this.props.postVideo(data);
 	*/
-	}
+	};
 
-	async postVideo() {
+	postVideo = async () => {
 		if (Platform.OS === 'android') {
 			await checkAndroidPermission();
 		}
@@ -143,11 +145,9 @@ class PostVideoScreen extends Component {
 		await this.uploadSegments();
 		console.log('segment uploaded');
 
-		//Load videos for home screen, at least for the demo
-		await this.props.getVideos();
 		this.setState({ isPostingVideo: false });
 		this.goForward();
-	}
+	};
 
 	render() {
 		const { isPostingVideo } = this.state;
@@ -311,7 +311,7 @@ class PostVideoScreen extends Component {
 					)}
 
 					<View style={postStyle.postButtonContainer}>
-						<TouchableOpacity style={postStyle.postButton} onPress={() => this.postVideo()}>
+						<TouchableOpacity style={postStyle.postButton} onPress={this.postVideo}>
 							<View style={{ alignSelf: 'center', paddingTop: 4 }}>
 								<Text style={postStyle.postTextButton}>Post Video</Text>
 							</View>
