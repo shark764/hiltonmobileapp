@@ -138,7 +138,9 @@ class CommentsScreen extends Component {
 
 		if (isSingleVideo) newMarginBottom = { marginBottom: 15 };
 
-		const avatarSource = imagesWithError.has(loggedUser.id) ? noUserImage : { uri: loggedUser.avatar };
+		const avatarSource = imagesWithError.has(loggedUser && loggedUser.id)
+			? noUserImage
+			: { uri: loggedUser && loggedUser.avatar || '/'};
 
 		return (
 			<Animated.View style={[styles.mainContainer, { height: heightBounceValue }]}>
@@ -194,7 +196,7 @@ class CommentsScreen extends Component {
 						<View style={[styles.addCommentContainer, newMarginBottom, getShowHideStyle(allowComments)]}>
 							<Image
 								source={avatarSource}
-								onError={() => this.onAvatarError(loggedUser.id)}
+								onError={() => this.onAvatarError(loggedUser && loggedUser.id)}
 								style={styles.currentUserImage}
 							/>
 
