@@ -1,21 +1,9 @@
 import React, { Component } from 'react';
-import {
-	StatusBar,
-	View,
-	Text,
-	StyleSheet,
-	Image,
-	Dimensions,
-	FlatList,
-	TouchableOpacity,
-	RefreshControl
-} from 'react-native';
+import { StatusBar, View, Text, Image, Dimensions, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base';
 import CommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons'; //https://oblador.github.io/react-native-vector-icons/
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import FontIcon from 'react-native-vector-icons/Fontisto';
-import AsyncStorage from '@react-native-community/async-storage';
-//import CardComponent from '../partials/CardComponent'
 import * as Progress from 'react-native-progress';
 import { fonts, colors, globals } from '../../config/constants';
 import { profileStyle } from '../../assets/styles/profileStyle';
@@ -23,6 +11,7 @@ import { connect } from 'react-redux';
 import { getVideosByUser, setSingleVideoToPlay } from '../../redux/actions/videoActions';
 import Loader from '../commons/Loader';
 import { numberAbbreviate } from '../../utils/helpers';
+import { noUserImage } from '../../assets/images';
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window');
 
@@ -34,7 +23,8 @@ class ProfileScreen extends Component {
 			activeIndex: 0,
 			my_laughs: [],
 			loading: true,
-			flatListAlreadyLoaded: false
+			flatListAlreadyLoaded: false,
+			avatarLoadError: false
 		};
 		this._isMounted = false;
 	}
@@ -125,6 +115,9 @@ class ProfileScreen extends Component {
 		const { loggedUser, getVideosByUser, videos } = this.props;
 		const { flatListAlreadyLoaded } = this.state;
 
+		//If not logged, then we dont need to make the request
+		if (!loggedUser) return;
+
 		if (page !== 1) {
 			//FlatList has an issue, it executes onEndReached when loading. To avoid it, we use a flag
 			if (!flatListAlreadyLoaded) {
@@ -133,8 +126,8 @@ class ProfileScreen extends Component {
 			}
 			page = Math.ceil(videos.length / globals.VIDEOS_TO_FETCH_PER_PAGE) + 1;
 		}
-		
-		await getVideosByUser(loggedUser && loggedUser.id, page);
+
+		await getVideosByUser(loggedUser.id, loggedUser.id, page, 'own');
 	};
 
 	componentWillUnmount() {
@@ -161,6 +154,10 @@ class ProfileScreen extends Component {
 		navigation.push('SingleVideoPlayer');
 	};
 
+	onAvatarError = () => {
+		this.setState({ avatarLoadError: true });
+	};
+
 	renderMyVideos() {
 		const { videos } = this.props;
 
@@ -171,7 +168,7 @@ class ProfileScreen extends Component {
 				keyExtractor={item => item.id}
 				numColumns={3}
 				columnWrapperStyle={{
-					justifyContent: 'space-between',
+					justifyContent: 'space-evenly',
 					alignContent: 'space-between',
 					marginBottom: 1.5
 				}}
@@ -179,7 +176,6 @@ class ProfileScreen extends Component {
 				onEndReachedThreshold={globals.LIMIT_TO_FETCH_VIDEOS_PREVIEW} //To load more content when we are x videos away from the end
 				onEndReached={this.getNewData}
 			/>
-			
 		);
 	}
 
@@ -226,8 +222,10 @@ class ProfileScreen extends Component {
 
 	render() {
 		const { loggedUser } = this.props;
-		const { loading } = this.state;
+		const { loading, avatarLoadError } = this.state;
 		if (!loggedUser) return null;
+
+		const avatarSource = avatarLoadError ? noUserImage : { uri: loggedUser.avatar };
 
 		return (
 			<Container style={profileStyle.container}>
@@ -261,7 +259,11 @@ class ProfileScreen extends Component {
 					<View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
 						<View style={{ flexDirection: 'row' }}>
 							<View style={profileStyle.profileContainer}>
-								<Image source={{ uri: loggedUser.avatar }} style={profileStyle.profilePhoto} />
+								<Image
+									source={avatarSource}
+									onError={this.onAvatarError}
+									style={profileStyle.profilePhoto}
+								/>
 							</View>
 							<View style={{ flex: 2, marginTop: 5, marginLeft: 10 }}>
 								<Text style={profileStyle.userName}>@{loggedUser.username}</Text>
@@ -323,6 +325,6 @@ class ProfileScreen extends Component {
 	}
 }
 
-const mapStateToProps = ({ user, videos }) => ({ loggedUser: user.loggedUser, videos: videos.userVideos });
+const mapStateToProps = ({ user, videos }) => ({ loggedUser: user.loggedUser, videos: videos.loggedUserVideos });
 
 export default connect(mapStateToProps, { getVideosByUser, setSingleVideoToPlay })(ProfileScreen);

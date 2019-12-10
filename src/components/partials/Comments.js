@@ -21,6 +21,7 @@ import { commentsStyles as styles } from '../../assets/styles';
 import { getVideoComments, postVideoComment, commentLiked } from '../../redux/actions/videoActions';
 import { getShowHideStyle, numberAbbreviate } from '../../utils/helpers';
 import Loader from '../commons/Loader';
+import { noUserImage } from '../../assets/images';
 
 const screenHeight = Math.round(Dimensions.get('window').height);
 const componentHeight = (screenHeight / 4) * 3 - globals.NAVBAR_HEIGHT * 2;
@@ -33,7 +34,8 @@ class CommentsScreen extends Component {
 			heightBounceValue: new Animated.Value(0), //This is the initial height of the view,
 			loading: false,
 			loadingNewData: false,
-			currentApiPage: 1
+			currentApiPage: 1,
+			imagesWithError: new Set()
 		};
 	}
 
@@ -122,13 +124,21 @@ class CommentsScreen extends Component {
 		return layoutMeasurement.height + contentOffset.y >= contentSize.height - globals.LIMIT_TO_FETCH_COMMENTS;
 	};
 
+	onAvatarError = userId => {
+		const imagesWithError = new Set(this.state.imagesWithError);
+		imagesWithError.add(userId);
+		this.setState({ imagesWithError });
+	};
+
 	render() {
-		const { currentComment, heightBounceValue, loading, loadingNewData } = this.state;
+		const { currentComment, heightBounceValue, loading, loadingNewData, imagesWithError } = this.state;
 		const { comments, loggedUser, isSingleVideo, video, show } = this.props;
 		const allowComments = loggedUser && show && video.allow_comments;
 		let newMarginBottom = {};
 
 		if (isSingleVideo) newMarginBottom = { marginBottom: 15 };
+
+		const avatarSource = imagesWithError.has(loggedUser.id) ? noUserImage : { uri: loggedUser.avatar };
 
 		return (
 			<Animated.View style={[styles.mainContainer, { height: heightBounceValue }]}>
@@ -183,9 +193,8 @@ class CommentsScreen extends Component {
 
 						<View style={[styles.addCommentContainer, newMarginBottom, getShowHideStyle(allowComments)]}>
 							<Image
-								source={{
-									uri: (loggedUser && loggedUser.avatar) || '/'
-								}}
+								source={avatarSource}
+								onError={() => this.onAvatarError(loggedUser.id)}
 								style={styles.currentUserImage}
 							/>
 

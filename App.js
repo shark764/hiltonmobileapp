@@ -36,9 +36,6 @@ import GeneralProfile from './src/components/screens/GeneralProfile';
 
 export default class App extends Component {
 	componentDidMount() {
-		if (__DEV__) {
-			import('./src/utils/ReactotronConfig').then(() => console.log('Reactotron Configured'));
-		}
 		LocalStorage.setAppName(appJson.name);
 	}
 

@@ -34,7 +34,7 @@ class SearchBodyComponent extends Component {
 					keyExtractor={item => item.id}
 					numColumns={3}
 					columnWrapperStyle={{
-						justifyContent: 'space-between',
+						justifyContent: 'space-evenly',
 						alignContent: 'space-between',
 						marginBottom: 1.5
 					}}

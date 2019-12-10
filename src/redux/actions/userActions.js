@@ -8,11 +8,20 @@ export const createUser = (user, redirectTo) => async dispatch => {
 
 	if (response.success) {
 		await dispatch({ type: types.ADD_USER_SUCCESS, payload: response.data });
+		const image = {
+			uri: '../../assets/images/no-image.png',
+			type: 'image/png',
+			fileName: Date.now().toString(),
+			width: 200,
+			height: 200
+		};
+
+		await uploadAvatar(image, response.data);
 
 		AlertMessages.success(response.message);
 
 		if (redirectTo) goToRootRouteFromChild(redirectTo, 'Home');
-	}
+	} else AlertMessages.error(response.message);
 
 	return response;
 };

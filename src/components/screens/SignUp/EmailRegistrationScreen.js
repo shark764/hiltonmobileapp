@@ -24,10 +24,10 @@ class EmailRegistrationScreen extends Form {
 			avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
 		},
 		// data: {
-		// 	email: 'david6@email.com',
-		// 	username: 'david6',
+		// 	email: 'david7@email.com',
+		// 	username: 'david7',
 		// 	password: '1234',
-		//// 	avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
+		// 	avatar: 'https://www.bsn.eu/wp-content/uploads/2016/12/user-icon-image-placeholder-300-grey.jpg'
 		// },
 		showDialog: false,
 		dialogTitle: '',
@@ -47,19 +47,15 @@ class EmailRegistrationScreen extends Form {
 	}
 
 	doSubmit = async () => {
+		const { onCloseModal, createUser } = this.props;
 		const user = { ...this.state.data };
 
 		this.setState({ loading: true });
-		const result = await this.props.createUser(user, this.fromScreen);
+		const result = await createUser(user, this.fromScreen);
 
-		//If create user fails, we show an error, if not, the redux action will redirect to home
-		if (!result.success) {
-			AlertMessages.error(result.message);
-			this.setState({ loading: false });
-		} else {
-			const { onCloseModal } = this.props;
-			if (onCloseModal) onCloseModal();
-		}
+		//If create user fails
+		if (!result.success) this.setState({ loading: false });
+		else if (onCloseModal) onCloseModal();
 	};
 
 	showModal = option => {

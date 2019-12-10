@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Text, View, FlatList, Image, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import { fonts, globals } from '../../config/constants';
+import { noUserImage } from '../../assets/images';
 
 export default class SearchResultComponent extends Component {
-	state = { following: false };
+	state = { following: false, imagesWithError: new Set() };
 
 	onFollow = item => {
 		const { following } = this.state;
@@ -14,6 +15,12 @@ export default class SearchResultComponent extends Component {
 
 	onResultPress = user => {
 		this.props.navigation.push('GeneralProfile', { user });
+	};
+
+	onImageError = userId => {
+		const imagesWithError = new Set(this.state.imagesWithError);
+		imagesWithError.add(userId);
+		this.setState({ imagesWithError });
 	};
 
 	render() {
@@ -41,6 +48,9 @@ export default class SearchResultComponent extends Component {
 	}
 
 	renderItem = ({ item: user }) => {
+		const { imagesWithError } = this.state;
+		const avatarSource = imagesWithError.has(user.id) ? noUserImage : { uri: user.avatar };
+
 		return (
 			<TouchableOpacity onPress={() => this.onResultPress(user)}>
 				<View
@@ -51,9 +61,8 @@ export default class SearchResultComponent extends Component {
 					}}
 				>
 					<Image
-						source={{
-							uri: user.avatar
-						}}
+						source={avatarSource}
+						onError={() => this.onImageError(user.id)}
 						resizeMode="contain"
 						style={{
 							width: 40,

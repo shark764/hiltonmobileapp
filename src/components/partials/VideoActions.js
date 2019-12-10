@@ -6,18 +6,26 @@ import IconFontAwesome from 'react-native-vector-icons/FontAwesome5';
 import { connect } from 'react-redux';
 import { homeStyles as styles } from '../../assets/styles';
 import { getShowHideStyle, numberAbbreviate } from '../../utils/helpers';
+import { noUserImage } from '../../assets/images';
 
 class VideoActions extends Component {
 	state = {
-		follow: true
+		follow: true,
+		avatarLoadError: false
 	};
 
 	onFollowPress = () => {
 		this.setState({ follow: !this.state.follow });
 	};
 
+	onAvatarError = () => {
+		this.setState({ avatarLoadError: true });
+	};
+
 	render() {
-		const { videoItem, showVideoInfo, onShowHideCommentsPress, onShareVideo, loggedUser } = this.props;
+		const { videoItem, showVideoInfo, onShowHideCommentsPress, onShareVideo } = this.props;
+		const { avatarLoadError } = this.state;
+		const avatarSource = avatarLoadError ? noUserImage : { uri: videoItem.user.avatar };
 
 		return (
 			<LinearGradient colors={['rgba(0, 0, 0,0)', 'rgba(0, 0, 0,0.4)']} style={styles.gradientContainer}>
@@ -25,9 +33,8 @@ class VideoActions extends Component {
 					<View style={styles.userImageContainer}>
 						<View style={styles.userImageContainer2}>
 							<Image
-								source={{
-									uri: videoItem.user.avatar || '/'
-								}}
+								source={avatarSource}
+								onError={this.onAvatarError}
 								resizeMode="contain"
 								style={styles.userImage}
 							/>

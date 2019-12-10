@@ -36,7 +36,7 @@ class HomeScreen extends Component {
 	}
 
 	onRefresh = async () => {
-		this.setState({ loading: true });
+		this.setState({ loading: true, currentVideoPage: 0 });
 		this.getNewData(1); //for page 1
 	};
 

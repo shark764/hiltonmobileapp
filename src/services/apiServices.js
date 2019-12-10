@@ -64,7 +64,7 @@ export default apiServices = {
 			if (loggedUserId) endPoint += `&id_user=${loggedUserId}`;
 
 			const { data } = await httpService.get(endPoint);
-			
+
 			response.data = data.data;
 			response.success = true;
 		} catch (error) {
@@ -94,7 +94,7 @@ export default apiServices = {
 	},
 	async getVideoComments(videoId, userId, page = 1) {
 		const response = { ...DEFAULT_RESPONSE };
-		
+
 		try {
 			let endPoint = `video/${videoId}/comments?page=${page}`;
 			if (userId) endPoint += `&id_user=${userId}`;
@@ -120,7 +120,7 @@ export default apiServices = {
 
 		try {
 			const endPoint = `comments`;
-			
+
 			const { data } = await httpService.post(endPoint, dataToSend);
 
 			response.data = data.data;
@@ -203,7 +203,7 @@ export default apiServices = {
 			const dataToSend = {
 				data: user
 			};
-			
+
 			const { data } = await httpService.patch(endPoint, dataToSend);
 			response.data = data.data;
 			response.success = true;
@@ -272,7 +272,6 @@ export default apiServices = {
 			response.data = data;
 			response.success = true;
 		} catch (error) {
-			
 			response.message = error.message || 'Unable to connect to the api';
 		}
 

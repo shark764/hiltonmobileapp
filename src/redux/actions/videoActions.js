@@ -6,7 +6,7 @@ import { getVideosWithUrlField } from '../../utils/helpers';
 
 export const getVideos = (userId, page = 1) => async dispatch => {
 	const response = await apiServices.getHomeVideos(userId, undefined, undefined, page);
-
+	//console.log(response.data[0].user);
 	const videos = getVideosWithUrlField(response.data);
 	const merge = page > 1;
 	if (response.success) dispatch({ type: types.GET_VIDEOS, payload: { videos, merge } });
@@ -20,12 +20,14 @@ export const getTrendingVideos = (userId, page = 1) => async dispatch => {
 	dispatch({ type: types.GET_TRANDING_VIDEOS, payload: { videos, merge } });
 };
 
-export const getVideosByUser = (userId, loggedUserId, page = 1) => async dispatch => {
+export const getVideosByUser = (userId, loggedUserId, page = 1, type = 'general') => async dispatch => {
 	const response = await apiServices.getVideosByUser(userId, loggedUserId, undefined, undefined, page);
 
 	let videos = getVideosWithUrlField(response.data);
 	const merge = page > 1;
-	dispatch({ type: types.GET_USER_VIDEOS, payload: { videos, merge } });
+	console.log(userId, loggedUserId);
+	if (type == 'own') dispatch({ type: types.GET_LOGGED_USER_VIDEOS, payload: { videos, merge } });
+	else dispatch({ type: types.GET_GENERAL_USER_VIDEOS, payload: { videos, merge } });
 };
 
 export const videoLaughed = (videoId, userId) => async dispatch => {

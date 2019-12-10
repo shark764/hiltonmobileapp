@@ -3,7 +3,8 @@ import * as types from '../types';
 const INITIAL_STATE = {
 	homeVideos: [],
 	trendingVideos: [],
-	userVideos: [],
+	generalUserVideos: [],
+	loggedUserVideos: [],
 	singleVideoToPlay: {},
 	videoComments: {}
 };
@@ -26,10 +27,12 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 		case types.GET_TRANDING_VIDEOS:
 			if (payload.merge) return { ...state, trendingVideos: [...state.trendingVideos, ...payload.videos] };
 			else return { ...state, trendingVideos: payload.videos };
-		case types.GET_USER_VIDEOS:
-			if (payload.merge) return { ...state, userVideos: [...state.userVideos, ...payload.videos] };
-			else return { ...state, userVideos: payload.videos };
-
+		case types.GET_GENERAL_USER_VIDEOS:
+			if (payload.merge) return { ...state, generalUserVideos: [...state.generalUserVideos, ...payload.videos] };
+			else return { ...state, generalUserVideos: payload.videos };
+		case types.GET_LOGGED_USER_VIDEOS:
+			if (payload.merge) return { ...state, loggedUserVideos: [...state.loggedUserVideos, ...payload.videos] };
+			else return { ...state, loggedUserVideos: payload.videos };
 		case types.SET_SINGLE_VIDEO_TO_PLAY:
 			return { ...state, singleVideoToPlay: payload };
 		case types.VIDEO_LAUGHED_SUCCESS:
@@ -45,11 +48,6 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			returnObj.trendingVideos = state.trendingVideos.map(v => {
 				return v.id === payload.videoId ? { ...v, ...propsToUpdate } : v;
 			});
-
-			//GENERAL PROFILE VIDEOS
-			// returnObj.userVideos = state.userVideos.map(v => {
-			// 	return v.id === payload.videoId ? { ...v, ...propsToUpdate } : v;
-			// });
 
 			//SINGLE VIDEO TO PLAY
 			returnObj.singleVideoToPlay = { ...state.singleVideoToPlay, ...propsToUpdate };
@@ -72,7 +70,12 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			});
 
 			//GENERAL PROFILE VIDEOS
-			returnObj.userVideos = state.userVideos.map(v => {
+			returnObj.generalUserVideos = state.generalUserVideos.map(v => {
+				return v.id === payload.videoId ? { ...v, ...propsToUpdate } : v;
+			});
+
+			//GENERAL PROFILE VIDEOS
+			returnObj.loggedUserVideos = state.loggedUserVideos.map(v => {
 				return v.id === payload.videoId ? { ...v, ...propsToUpdate } : v;
 			});
 
@@ -100,7 +103,12 @@ export default videoReducer = (state = INITIAL_STATE, { type, payload }) => {
 			});
 
 			//GENERAL PROFILE
-			returnObj.userVideos = state.userVideos.map(v => {
+			returnObj.generalUserVideos = state.generalUserVideos.map(v => {
+				return v.id === payload.id_video ? { ...v, comments: v.comments + 1 } : v;
+			});
+
+			//GENERAL PROFILE
+			returnObj.loggedUserVideos = state.loggedUserVideos.map(v => {
 				return v.id === payload.id_video ? { ...v, comments: v.comments + 1 } : v;
 			});
 

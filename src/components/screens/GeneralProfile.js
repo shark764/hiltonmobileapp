@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { View, Text, Image, Dimensions, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { Content } from 'native-base';
 import { Button } from 'react-native-elements';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import { fonts, colors, globals } from '../../config/constants';
 import { profileStyle } from '../../assets/styles/profileStyle';
 import { connect } from 'react-redux';
-import { numberAbbreviate } from '../../utils/helpers';
+import { numberAbbreviate, getShowHideStyle } from '../../utils/helpers';
 import { getVideosByUser, setSingleVideoToPlay } from '../../redux/actions/videoActions';
 import Loader from '../commons/Loader';
 
@@ -48,7 +47,7 @@ class GeneralProfile extends Component {
 
 	getNewData = async page => {
 		const { loggedUser, getVideosByUser, videos } = this.props;
-		const { flatListAlreadyLoaded } = this.state;
+		const { flatListAlreadyLoaded, user } = this.state;
 
 		if (page !== 1) {
 			//FlatList has an issue, it executes onEndReached when loading. To avoid it, we use a flag
@@ -58,8 +57,8 @@ class GeneralProfile extends Component {
 			}
 			page = Math.ceil(videos.length / globals.VIDEOS_TO_FETCH_PER_PAGE) + 1;
 		}
-
-		await getVideosByUser(loggedUser && loggedUser.id, page);
+		console.log('getting', user.id, loggedUser && loggedUser.id, page);
+		await getVideosByUser(user.id, loggedUser && loggedUser.id, page);
 	};
 
 	onThumbnailPress = async video => {
@@ -149,14 +148,14 @@ class GeneralProfile extends Component {
 						<FeatherIcon name="video" size={26} color={colors.MAIN} />
 					</View>
 					<Loader show={loading} />
-					<View style={{ flex: 1 }}>
+					<View style={[{ flex: 1 }, getShowHideStyle(!loading)]}>
 						<FlatList
 							data={videos}
 							renderItem={this.renderItem}
 							keyExtractor={item => item.id}
 							numColumns={3}
 							columnWrapperStyle={{
-								justifyContent: 'space-between',
+								justifyContent: 'space-evenly',
 								alignContent: 'space-between',
 								marginBottom: 1.5
 							}}
@@ -185,6 +184,6 @@ class GeneralProfile extends Component {
 	);
 }
 
-const mapStateToProps = ({ user, videos }) => ({ loggedUser: user.loggedUser, videos: videos.userVideos });
+const mapStateToProps = ({ user, videos }) => ({ loggedUser: user.loggedUser, videos: videos.generalUserVideos });
 
 export default connect(mapStateToProps, { getVideosByUser, setSingleVideoToPlay })(GeneralProfile);
